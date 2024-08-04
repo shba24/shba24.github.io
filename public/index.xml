@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>My New Hugo Site</title>
+    <title>Shubham Bansal Technical Blog</title>
     <link>http://localhost:1313/</link>
-    <description>Recent content on My New Hugo Site</description>
+    <description>Recent content on Shubham Bansal Technical Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
+    <lastBuildDate>Sat, 03 Aug 2024 22:30:36 -0700</lastBuildDate>
     <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>About</title>
+      <link>http://localhost:1313/about/about/</link>
+      <pubDate>Sat, 03 Aug 2024 22:30:36 -0700</pubDate>
+      <guid>http://localhost:1313/about/about/</guid>
+      <description>Simple can be harder than complex: You have to work hard to get your thinking clean to make it simple. But it’s worth it in the end because once you get there, you can move mountains.&#xA;&amp;mdash; Steve Jobs&#xA;Welcome to my technical blog!&#xA;I&amp;rsquo;m a Senior Software Engineer at Amazon AWS, where I work on the Lake Formation team. With a background in Cloud Storage, Data Analytics, Distributed Systems, Security, and Database Internals.</description>
+    </item>
   </channel>
 </rss>
