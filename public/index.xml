@@ -6,8 +6,15 @@
     <description>Recent content on Shubham Bansal Technical Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 03 Aug 2024 22:30:36 -0700</lastBuildDate>
+    <lastBuildDate>Sun, 04 Aug 2024 00:30:28 -0700</lastBuildDate>
     <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Introduction</title>
+      <link>http://localhost:1313/posts/introduction/</link>
+      <pubDate>Sun, 04 Aug 2024 00:30:28 -0700</pubDate>
+      <guid>http://localhost:1313/posts/introduction/</guid>
+      <description></description>
+    </item>
     <item>
       <title>About</title>
       <link>http://localhost:1313/about/about/</link>
