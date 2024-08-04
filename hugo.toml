@@ -1,4 +1,4 @@
-baseURL = 'https://shba24.github.io/'
+baseURL = 'https://localhost:1313/'
 languageCode = 'en-us'
 title = 'Shubham Bansal Technical Blog'
 paginate = 10
