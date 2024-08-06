@@ -9,7 +9,7 @@ pluralizelisttitles = false
     brand_image = "/images/icon.png"
     # og_image = ""                             # path to social icon - front matter: image takes precedent, then og_image, then brand_url
     # publisher_icon = ""                       # path to publisher icon - defaults to favicon, used in schema
-    # favicon = ""                              # path to favicon
+    favicon = "/icons/favicon.ico"                                # path to favicon
     description = 'Technical Blog by <a href="https://x.com/ShubhamBansu" target="_blank">@ShubhamBansu</a>'
     dark_mode = true
     menu = [

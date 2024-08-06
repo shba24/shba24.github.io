@@ -79,3 +79,45 @@
        url('/fonts/abril-fatface-v19-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
        url('/fonts/abril-fatface-v19-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
 }
+
+@font-face {
+  font-family: 'Literata';
+  src: url('/fonts/Literata/Literata-Light.woff2') format('woff2');
+  font-weight: light;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Literata';
+  src: url('/fonts/Literata/Literata-LightItalic.woff2') format('woff2');
+  font-weight: light;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Literata';
+  src: url('/fonts/Literata/Literata-SemiBold.woff2') format('woff2');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Literata';
+  src: url('/fonts/Literata/Literata-SemiBoldItalic.woff2') format('woff2');
+  font-weight: bold;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Monaspace';
+  src: url('/fonts/Monaspace/MonaspaceArgon-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Monaspace';
+  src: url('/fonts/Monaspace/MonaspaceArgon-SemiBold.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+}
