@@ -26,6 +26,19 @@
     <loc>http://localhost:1313/about/about/</loc>
     <lastmod>2024-08-03T22:30:36-07:00</lastmod>
   </url><url>
+    <loc>http://localhost:1313/series/how-to-use-poison/</loc>
+    <lastmod>2022-11-23T13:43:53-06:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/hugo/</loc>
+    <lastmod>2022-11-23T13:43:53-06:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/testing/</loc>
+    <lastmod>2022-11-23T13:43:53-06:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/introduction/</loc>
+    <lastmod>2022-11-23T13:43:53-06:00</lastmod>
+  </url><url>
     <loc>http://localhost:1313/series/</loc>
+    <lastmod>2022-11-23T13:43:53-06:00</lastmod>
   </url>
 </urlset>
