@@ -469,6 +469,25 @@ You can override any setting in Poison's static CSS files by adding your own `/a
 }
 {{</highlight >}}
 
+{{< highlight c >}}
+#include <stdio.h>
+int main() {
+   // printf() displays the string inside quotation
+   printf("Hello, World!");
+   return 0;
+}
+{{</highlight >}}
+
+{{< highlight c >}}
+// Your First Program
+
+class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!"); 
+    }
+}
+{{</highlight >}}
+
 ## Suggestions / Contributions
 
 Please feel free to add suggestions for new features by opening a new issue in GitHub.  If you like the theme, let us know in the comments below!
