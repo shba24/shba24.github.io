@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+<script defer language="javascript" type="text/javascript" src="/js/bundle.min.145453261a7755f5042a854c4213501d215a8fbe34c08d181c40f803f1315e74.js"></script>
+
+
+
+
+
+
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+    <link rel="icon" href=/icons/favicon.ico>
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "fd0bbd0149124eeea3afab47dd84a12c"}'></script>
+    
+
+    
+    
+
+
+
+
+
+  
+
+
+
+
+
+  
+  
+  
+
+
+<!-- Open Graph image and Twitter Card metadata -->
+
+<title itemprop="name">Shubham Bansal - Distributed Cache Series - Part I - Redis</title>
+<meta property="og:title" content=Shubham&#32;Bansal&#32;-&#32;Distributed&#32;Cache&#32;Series&#32;-&#32;Part&#32;I&#32;-&#32;Redis />
+<meta name="twitter:title" content=Shubham&#32;Bansal&#32;-&#32;Distributed&#32;Cache&#32;Series&#32;-&#32;Part&#32;I&#32;-&#32;Redis />
+<meta itemprop="name" content=Shubham&#32;Bansal&#32;-&#32;Distributed&#32;Cache&#32;Series&#32;-&#32;Part&#32;I&#32;-&#32;Redis />
+<meta name="application-name" content=Shubham&#32;Bansal&#32;-&#32;Distributed&#32;Cache&#32;Series&#32;-&#32;Part&#32;I&#32;-&#32;Redis />
+<meta property="og:site_name" content="Shubham Bansal Technical Blog" />
+
+
+<meta name="description" content="First part of Distributed Cache Series, where we are looking inside Redis and how it works" />
+<meta itemprop="description" content="First part of Distributed Cache Series, where we are looking inside Redis and how it works" />
+<meta property="og:description" content="First part of Distributed Cache Series, where we are looking inside Redis and how it works" />
+<meta name="twitter:description" content="First part of Distributed Cache Series, where we are looking inside Redis and how it works" />
+
+
+<base href="http://localhost:1313/posts/distributed-cache-series-part-1-redis/" />
+<link rel="canonical" href="http://localhost:1313/posts/distributed-cache-series-part-1-redis/" itemprop="url" />
+<meta name="url" content="http://localhost:1313/posts/distributed-cache-series-part-1-redis/" />
+<meta name="twitter:url" content="http://localhost:1313/posts/distributed-cache-series-part-1-redis/" />
+<meta property="og:url" content="http://localhost:1313/posts/distributed-cache-series-part-1-redis/" />
+
+
+<meta property="og:updated_time" content="2024-08-09T19:36:09-07:00" />
+
+
+<link rel="sitemap" type="application/xml" title="Sitemap" href='http://localhost:1313/sitemap.xml' />
+
+<meta name="robots" content="index,follow" />
+<meta name="googlebot" content="index,follow" />
+
+
+<meta name="twitter:site" content="https://twitter.com/ShubhamBansu" />
+<meta name="twitter:creator" content="https://twitter.com/ShubhamBansu" />
+<meta property="fb:admins" content="" />
+
+
+<meta name="apple-mobile-web-app-title" content="Shubham Bansal Technical Blog" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.131.0">
+
+
+    
+    
+
+<link type="text/css" rel="stylesheet" href="/css/bundle.min.fe07ac9a52b38544c45881ba0255187f8f811a87c018e744777f660fe72bd817.css">
+
+
+    
+    <style>
+    body {
+        --sidebar-bg-color: #202020;
+        --sidebar-img-border-color: #515151;
+        --sidebar-p-color: #909090;
+        --sidebar-h1-color: #FFF;
+        --sidebar-a-color: #FFF;
+        --sidebar-socials-color: #FFF;
+        --text-color: #222;
+        --bkg-color: #FAF9F6;
+        --post-title-color: #303030;
+        --list-color: #5a5a5a;
+        --link-color: #268bd2;
+        --date-color: #515151;
+        --table-border-color: #E5E5E5;
+        --table-stripe-color: #F9F9F9;
+        --code-color: #000;
+        --code-background-color: #E5E5E5;
+        --code-block-color: #fff;
+        --code-block-background-color: #272822;
+        --moon-sun-color: #FFF;
+        --moon-sun-background-color: #515151;
+    }
+    body.dark-theme {
+        --text-color: #eee;
+        --bkg-color: #121212;
+        --post-title-color: #DBE2E9;
+        --list-color: #9d9d9d;
+        --link-color: #268bd2;
+        --date-color: #9a9a9a;
+        --table-border-color: #515151;
+        --table-stripe-color: #202020;
+        --code-color: #fff;
+        --code-background-color: #515151;
+        --code-block-color: #fff;
+        --code-block-background-color: #272822;
+    }
+    body {
+        background-color: var(--bkg-color);
+    }
+</style>
+
+</head>
+
+    <body class="dark-theme">
+        <div class="wrapper">
+            <aside class="sidebar">
+    <div class="container sidebar-sticky">
+        <div class="light-dark" align="right">
+    <button class="btn-light-dark" title="Toggle light/dark mode">
+        <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M6 .278a.768.768 0 0 1 .08.858a7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277c.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316a.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71C0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
+        </svg>
+        <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M8 12a4 4 0 1 0 0-8a4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+        </svg>
+    </button>
+</div>
+
+        <div class="sidebar-about">
+    <h1 class="brand">
+        
+            <a href="http://localhost:1313/">
+                <img src="/images/icon.png" alt="brand image">
+            </a>
+        
+        
+            <a href="http://localhost:1313/">
+                <h1>Shubham Bansal</h1>
+            </a>
+        
+    </h1>
+    <p class="lead">
+    Technical Blog by <a href="https://x.com/ShubhamBansu" target="_blank">@ShubhamBansu</a>
+    </p>
+</div>
+
+        <nav>
+    <ul class="sidebar-nav">
+
+        
+        
+        
+        
+            
+
+            
+                
+                
+                    <li class="heading">
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                
+            
+                
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+        
+            
+
+            
+                
+                
+            
+                
+                
+                    <li class="heading">
+                        <a href="/posts/">Posts</a>
+                    </li>
+                    
+                        <li class="sub-heading">
+                            Recent
+                        </li>
+                        
+                            <li class="bullet">
+                                <a href="http://localhost:1313/posts/distributed-cache-series-part-1-redis/">Distributed Cache Series - Part I - Redis</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="http://localhost:1313/posts/introduction/">Introduction</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="http://localhost:1313/posts/testing/">Introducing Poison</a>
+                            </li>
+                        
+                    
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+
+    </ul>
+</nav>
+
+        
+    <a target="_blank" class="social" title="GitHub" href="https://github.com/shba24">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="-2 -2 24 24">
+            <path fill="currentColor" d="M18.88 1.099C18.147.366 17.265 0 16.233 0H3.746C2.714 0 1.832.366 1.099 1.099C.366 1.832 0 2.714 0 3.746v12.487c0 1.032.366 1.914 1.099 2.647c.733.733 1.615 1.099 2.647 1.099H6.66c.19 0 .333-.007.429-.02a.504.504 0 0 0 .286-.169c.095-.1.143-.245.143-.435l-.007-.885c-.004-.564-.006-1.01-.006-1.34l-.3.052c-.19.035-.43.05-.721.046a5.555 5.555 0 0 1-.904-.091a2.026 2.026 0 0 1-.872-.39a1.651 1.651 0 0 1-.572-.8l-.13-.3a3.25 3.25 0 0 0-.41-.663c-.186-.243-.375-.407-.566-.494l-.09-.065a.956.956 0 0 1-.17-.156a.723.723 0 0 1-.117-.182c-.026-.061-.004-.111.065-.15c.07-.04.195-.059.378-.059l.26.04c.173.034.388.138.643.311a2.1 2.1 0 0 1 .631.677c.2.355.44.626.722.813c.282.186.566.28.852.28c.286 0 .533-.022.742-.065a2.59 2.59 0 0 0 .585-.196c.078-.58.29-1.028.637-1.34a8.907 8.907 0 0 1-1.333-.234a5.314 5.314 0 0 1-1.223-.507a3.5 3.5 0 0 1-1.047-.872c-.277-.347-.505-.802-.683-1.365c-.177-.564-.266-1.215-.266-1.952c0-1.049.342-1.942 1.027-2.68c-.32-.788-.29-1.673.091-2.652c.252-.079.625-.02 1.119.175c.494.195.856.362 1.086.5c.23.14.414.257.553.352a9.233 9.233 0 0 1 2.497-.338c.859 0 1.691.113 2.498.338l.494-.312a6.997 6.997 0 0 1 1.197-.572c.46-.174.81-.221 1.054-.143c.39.98.424 1.864.103 2.653c.685.737 1.028 1.63 1.028 2.68c0 .737-.089 1.39-.267 1.957c-.177.568-.407 1.023-.689 1.366a3.65 3.65 0 0 1-1.053.865c-.42.234-.828.403-1.223.507a8.9 8.9 0 0 1-1.333.235c.45.39.676 1.005.676 1.846v3.11c0 .147.021.266.065.357a.36.36 0 0 0 .208.189c.096.034.18.056.254.064c.074.01.18.013.318.013h2.914c1.032 0 1.914-.366 2.647-1.099c.732-.732 1.099-1.615 1.099-2.647V3.746c0-1.032-.367-1.914-1.1-2.647z"/>
+        </svg>
+    </a>
+
+
+
+    <a target="_blank" class="social" title="LinkedIn" href="https://www.linkedin.com/in/shba24/">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1.2em" viewBox="0 0 448 512">
+            <path fill="currentColor" d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5c0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7c-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5c67.2 0 79.7 44.3 79.7 101.9V416z"/>
+        </svg>
+    </a>
+
+
+    <a target="_blank" class="social" title="Twitter" href="https://twitter.com/ShubhamBansu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M5.032 14.286c6.037 0 9.34-4.837 9.34-9.032c0-.137 0-.274-.01-.41A6.56 6.56 0 0 0 16 3.2c-.6.256-1.235.425-1.885.5a3.207 3.207 0 0 0 1.443-1.757c-.645.37-1.35.63-2.085.77a3.322 3.322 0 0 0-1.862-.958a3.384 3.384 0 0 0-2.082.334a3.223 3.223 0 0 0-1.442 1.49a3.08 3.08 0 0 0-.208 2.03a9.57 9.57 0 0 1-3.747-.963a9.269 9.269 0 0 1-3.018-2.354a3.086 3.086 0 0 0-.36 2.314c.189.787.68 1.475 1.376 1.924a3.344 3.344 0 0 1-1.49-.398v.04c0 .734.263 1.444.743 2.01a3.3 3.3 0 0 0 1.89 1.102c-.483.128-.99.146-1.482.055a3.19 3.19 0 0 0 1.168 1.577a3.36 3.36 0 0 0 1.9.627A6.732 6.732 0 0 1 0 12.86a9.527 9.527 0 0 0 5.032 1.423"/>
+        </svg>
+    </a>
+
+
+
+
+
+    <a target="_blank" class="social" title="YouTube" href="https://www.youtube.com/@shubhambansal1145">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12.006 19.012h-.02c-.062 0-6.265-.012-7.83-.437a2.5 2.5 0 0 1-1.764-1.765A26.494 26.494 0 0 1 1.986 12a26.646 26.646 0 0 1 .417-4.817A2.564 2.564 0 0 1 4.169 5.4c1.522-.4 7.554-.4 7.81-.4H12c.063 0 6.282.012 7.831.437c.859.233 1.53.904 1.762 1.763c.29 1.594.427 3.211.407 4.831a26.568 26.568 0 0 1-.418 4.811a2.51 2.51 0 0 1-1.767 1.763c-1.52.403-7.553.407-7.809.407Zm-2-10.007l-.005 6l5.212-3l-5.207-3Z"/>
+        </svg>
+    </a>
+
+
+
+
+
+
+
+
+    <a target="_blank" class="social" title="RSS Feed" href="/posts/index.xml">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1.2em" viewBox="0 0 1280.000000 1280.000000">
+            <g transform="translate(0.000000,1280.000000) scale(0.100000,-0.100000)" fill="currentColor">
+                <path d="M2295 11929 c-284 -12 -642 -45 -707 -65 -17 -5 -18 -63 -18 -1039 0 -569 4 -1036 8 -1039 5 -3 74 6 153 19 510 86 1168 95 1789 25 1348 -153 2602 -677 3670 -1531 385 -308 820 -744 1126 -1129 842 -1060 1362 -2313 1514 -3650 70 -621 61 -1279 -25 -1789 -13 -79 -22 -148 -19 -153 3 -4 471 -8 1039 -8 l1035 0 5 23 c51 225 85 942 67 1419 -23 605 -77 1044 -198 1617 -294 1400 -927 2734 -1823 3846 -1043 1295 -2364 2259 -3909 2854 -1158 447 -2451 656 -3707 600z"/>
+                <path d="M2255 7845 c-269 -25 -620 -81 -667 -106 -17 -9 -18 -55 -18 -899 0 -706 3 -890 13 -890 6 0 66 18 132 41 130 44 288 79 467 105 154 21 577 30 749 15 1207 -107 2267 -823 2814 -1902 166 -327 268 -637 330 -1001 38 -227 48 -384 42 -662 -8 -348 -44 -590 -126 -831 -23 -66 -41 -126 -41 -132 0 -10 184 -13 890 -13 844 0 890 1 899 18 27 50 88 452 110 725 14 162 14 624 1 782 -59 703 -233 1323 -545 1945 -481 956 -1313 1788 -2270 2268 -620 310 -1239 483 -1940 542 -165 14 -669 10 -840 -5z"/>
+                <path d="M2519 3815 c-391 -66 -725 -336 -868 -703 -79 -201 -96 -462 -45 -677 83 -344 338 -641 666 -774 116 -47 205 -69 330 -80 412 -39 811 153 1040 500 193 292 240 648 128 981 -135 403 -492 699 -914 757 -100 14 -241 12 -337 -4z"/>
+            </g>
+        </svg>
+    </a>
+
+
+
+        <p class="footnote">
+powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a target="_blank" href="https://github.com/lukeorth/poison">poison</a>
+    <br>
+    &copy; 2024 Shubham Bansal Technical Blog. All rights reserved.
+</p>
+
+  </div>
+</aside>
+
+            <main class="content container">
+                <div class="post">
+  <div class="info">
+  <h1 class="post-title">
+    <a href="http://localhost:1313/posts/distributed-cache-series-part-1-redis/">Distributed Cache Series - Part I - Redis</a>
+  </h1>
+
+  <div class="headline">
+    <div>
+      
+      <time datetime=" 2024-08-09T19:36:09-0700" class="post-date">
+        August 9, 2024
+      </time>
+      
+      <span> - </span>
+      <span class="reading-time">
+        
+          
+        
+
+        <span>19 mins read</span>
+      </span>
+    </div>
+
+    
+    <ul class="tags">
+      
+      <li class="tag-cache">
+        <a href="http://localhost:1313/tags/cache">cache</a>
+      </li>
+      
+      <li class="tag-redis">
+        <a href="http://localhost:1313/tags/redis">redis</a>
+      </li>
+      
+      <li class="tag-split brain">
+        <a href="http://localhost:1313/tags/split-brain">split brain</a>
+      </li>
+      
+      <li class="tag-distributed systems">
+        <a href="http://localhost:1313/tags/distributed-systems">distributed systems</a>
+      </li>
+      
+      <li class="tag-time skew">
+        <a href="http://localhost:1313/tags/time-skew">time skew</a>
+      </li>
+      
+      <li class="tag-thundering herd">
+        <a href="http://localhost:1313/tags/thundering-herd">thundering herd</a>
+      </li>
+      
+    </ul>
+    
+  </div>
+
+  
+  
+  <p class="seriesname">
+    Series: <a href="http://localhost:1313/series/distributed-cache">Distributed Cache</a>
+  </p>
+  
+
+  
+</div>
+
+  <h2 id="introduction">Introduction</h2>
+<p>For the last couple of weeks, I have been discussing with my colleagues about</p>
+<blockquote>
+<p><em>How can we improve the performance of some of our data access?</em></p>
+</blockquote>
+<p>I will give you some background about the system so that we know our base <strong>tenets</strong> throughout this blog.</p>
+<p>Let’s say the system stores the <strong>structured data</strong> in a database (<strong><a href="https://aws.amazon.com/dynamodb/" target="_blank">Amazon DynamoDB</a>)</strong> and <strong>unstructured data</strong> blob in some blobstore <strong>(<a href="https://aws.amazon.com/s3/" target="_blank">Amazon S3</a>)</strong>. And, we want to <strong>improve the data access latency</strong> for both data stores as they provide <em>sub-10ms</em> latency for <code>GET</code> operations. What we are looking for is to <strong>reduce the</strong> <code>GET</code> <strong>operation latency to microseconds</strong>. But, as we all know, <em>distributed systems always have trade-offs</em>, so what are we willing to let go? Let’s say our <strong>system is read-heavy</strong> so we can probably <strong>compromise on the PUT operation latency</strong>. Now, what about the consistency model we want to follow? Let’s say we have both types of data, one that needs <strong><a href="https://aws.amazon.com/s3/consistency/" target="_blank">strong consistency</a></strong> and one that is fine with <strong><a href="https://www.allthingsdistributed.com/2008/12/eventually_consistent.html" target="_blank">eventual consistency</a></strong>. We need to figure out the solution for both.</p>
+<p>The first thing that pops into my mind when I look at the above requirements is</p>
+<blockquote>
+<p><em>Can we use any Distributed Cache to cache the data?</em>.</p>
+</blockquote>
+<p><em><strong>Distributed caching</strong></em> provides a way to store and retrieve frequently accessed data in a manner that drastically reduces access time and minimizes load on your backend databases.</p>
+<p>In this blog of our <a href="http://localhost:1313/series/distributed-cache" target="_blank"><em>Distributed Cache Series</em></a>, we’ll explore <code>Redis</code>, one of the most popular and powerful distributed caching solutions available today. <code>Redis</code> isn’t just a simple cache; it&rsquo;s a <strong>versatile in-memory data structure store that offers rich features, including support for various data types, <em>persistence</em>, and high availability</strong>. We’ll dive into how <code>Redis</code> works, how to leverage it for <strong>optimal caching strategies</strong>, and some best practices to ensure your caching layer scales with your application. We will also discuss various <strong>trade-offs</strong> it brings to the equation and its limitations. And answer the most important question, what problem it can and can’t solve.</p>
+<p>We are <strong>not gonna discuss its security model</strong> and features in this blog as those are not relevant to this conversation. For security information, you can follow the reference [1].</p>
+<h2 id="high-level-architecture">High-Level Architecture</h2>
+<h3 id="redis-sentinel">Redis Sentinel</h3>
+<p><code>Redis Sentinel</code> [2] is a distributed system in itself, running as a separate process in parallel to the <code>Redis</code> server. It provides node <strong>monitoring</strong>, <strong>notification</strong>, <strong>automatic failover</strong>, <strong>master discovery</strong>, and <strong>election</strong>, and acts as a <strong>client configuration provider</strong> or <strong>service discovery</strong>. Multiple <code>sentinel</code> processes cooperate to detect and agree on failures, which lowers the probability of false positives but <em>doesn’t completely eliminate the possibility</em>. Also, having multiple processes running in parallel helps reduce the possibility of sentinel becoming an <a href="https://en.wikipedia.org/wiki/Single_point_of_failure" target="_blank">SPOF (Single Point of Failure)</a>. In short, it works as an <strong>Orchestrator</strong> to provide high availability to Redis.</p>
+<p><code>Sentinel</code> uses the concept of <a href="https://en.wikipedia.org/wiki/Quorum_%28distributed_computing%29" target="_blank"><code>Quorum</code></a>, which is a fixed set of sentinels that need to agree about the fact that the master is not reachable, to really mark the master as failing, and eventually start a <strong>failover</strong> procedure if possible. However, to perform the <strong>failover</strong>, one of the <code>sentinel</code> will be elected leader and authorized to proceed with the <strong>failover</strong>. And, this <strong>election</strong> and <strong>authorization</strong> is done by the voting among <code>sentinels</code> where majority (⌈n/2⌉, where <code>n</code> is the total number of <code>sentinels</code>) have to agree. Having at least the <strong>majority</strong> makes sure that <strong>failover</strong> is not done when the <strong>majority</strong> of sentinels are not reachable, making it impossible to <strong>failover</strong> in a <em><strong>split-brain partition</strong></em> situation where partition doesn&rsquo;t have <strong>majority</strong>.</p>
+<h4 id="quorum-election---case-i---master-down">Quorum Election - Case I - Master Down</h4>
+<p>Let’s take a simple case where we have <strong>3 Redis instances</strong>, running <strong>3 sentinels</strong>, <strong>1 master</strong>, and <strong>2 replicas</strong>, with a <strong>quorum</strong> configuration set to <em>2</em>.</p>
+<p><img src="/images/Election_Case1_Part1.png" alt=""></p>
+<p>Let’s say <code>Master 1</code> fails or is not reachable. Then, <code>Sentinel 1/2/3</code> will discover that <code>Master 1</code> is down and agree on its failure. As the <strong>quorum config</strong> is set to 2 only, we only need 2 sentinel nodes to agree on the <code>Master 1</code> being down and mark it as failing.</p>
+<p><img src="/images/Election_Case1_Part2.png" alt=""></p>
+<p>After that, one of the three <code>sentinels</code> will be elected as <strong>leader</strong> by running an <code>election</code> among all reachable <code>sentinels</code>. A <code>sentinel</code> will be elected as <strong>leader</strong> only when the <strong>majority</strong> of the total <code>sentinels</code> in the cluster agree on it. After that, the <code>elected sentinel</code> will flip one of the replicas with the <em>most recent commit</em> (the <code>sentinel</code> tries its best to identify this replica, not always possible) to a new master and update the <strong>sentinel configuration</strong>.</p>
+<p><img src="/images/Election_Case1_Part3.png" alt=""></p>
+<p>And, when the old master (<code>Master 1</code>) comes back online, <code>sentinels</code> sends the old master the new <strong>sentinel configuration</strong>. Then, the old master syncs the data from the new master (<code>Master 2</code>)and marks itself as a replica of the new master.</p>
+<p><img src="/images/Election_Case1_Part4.png" alt=""></p>
+<h4 id="quorum-election---case-ii---network-partition">Quorum Election - Case II - Network Partition</h4>
+<p>Let’s take a simple case where we have <strong>3 Redis instances</strong>, running <strong>3 sentinels</strong>, <strong>1 master</strong>, and <strong>2 replicas</strong>, with a <strong>quorum configuration</strong> set to 2.</p>
+<p><img src="/images/Election_Case2_Part1.png" alt=""></p>
+<p>Let’s say we have a network partition where <code>Master 1</code>, <code>Client</code> as well as <code>Sentinel 1</code> are partitioned from the rest of the topology. <code>Sentinel 2 / 3</code> will discover that <code>Master 1</code> is down and agree on its failure. As the <strong>quorum config</strong> is set to 2 only, we only need <em>2 sentinel nodes</em> to agree on the <code>Master 1</code> being down and mark it as failing.</p>
+<p><img src="/images/Election_Case2_Part2.png" alt=""></p>
+<p>As <code>Master 1</code> is missing from <code>Partition 2</code> only, election and failover will be triggered in only <code>Partition 2</code>. After that, one of the two sentinels (<code>Sentinel 2</code> and <code>Sentinel 3</code>) will be elected as leader by running an <code>election</code> among all reachable <code>sentinels</code>. A <code>sentinel</code> will be elected as <strong>leader</strong> only when the <strong>majority</strong> of the total sentinels in the cluster agree on it, which is 2 in this case, as both <code>Sentinel 2</code> and <code>Sentinel 3</code> will agree on <code>Master 1</code> being down. After that, the <strong>elected sentinel</strong> will flip one of the replicas with the most recent commit (the sentinel tries its best to identify this replica, not always possible) to a new master and update the <strong>sentinel configuration</strong>. However, during this time, the <code>Client</code> might (depending on the configuration) continue to send <code>WRITE</code> traffic to <code>Master 1</code> only, as it is doing the <strong>service discovery</strong> from <code>Sentinel 1</code> only and <code>Sentinel 1</code> only sees <code>Master 1</code>.</p>
+<p><img src="/images/Election_Case2_Part3.png" alt=""></p>
+<p>And, when the <strong>network partition</strong> is finished, <code>sentinels</code> send the old master (<code>Master 1</code>) with the new <strong>sentinel configuration</strong>. Then, the old master (<code>Master 1</code>) syncs the data from the new master (<code>Master 2</code>) and marks itself as a replica of the new master. As the <code>Client</code> now does the <strong>service discovery</strong> from <code>Sentinel 1</code> which sees the new master (<code>Master 2</code>), it will start throwing the traffic to the new master. But, the <code>WRITE</code> operations that went to <code>Master 1</code> while the network was in the partition will forever be lost.</p>
+<p>That’s one of the reasons why <strong>Redis doesn’t provide any durability guarantees</strong>.</p>
+<p><img src="/images/Election_Case2_Part4.png" alt=""></p>
+<h3 id="redis-cluster">Redis Cluster</h3>
+<p><code>Redis</code> scales <strong>horizontally</strong> with a deployment topology called <code>Redis Cluster</code>. <code>Redis Cluster</code> provides a way to automatically shard across multiple <code>Redis</code> nodes. It also helps with availability by flipping the replicas to master when the master is down.</p>
+<p><code>Redis</code> doesn’t use <code>consistent hashing</code>, but a different form of sharding where every key is conceptually part of what is called a <code>hash slot</code>.</p>
+<pre tabindex="0"><code>Total Hash Slot = 16384
+
+Hash (Key) = CRC16 (Key) % 16384
+</code></pre><p>Let’s take an example of how it works end to end.</p>
+<p>Here is the topology of <strong>three shards</strong> covering the total <code>hash slot</code> space. Each key belongs to one of the shards and one of the <code>hash slot</code> allocated to that shard.</p>
+<p><img src="/images/Redis_Cluster_Part1.png" alt=""></p>
+<p>Adding a new shard <code>Shard D</code> will look like this, where the <code>hash slots</code> allocated to this new shard are assigned with a subset of each existing shard <code>hash slot</code>. There is also a config where you can choose how many <code>hash slots</code> one wants to transfer from a specific shard.</p>
+<p><img src="/images/Redis_Cluster_Part2.png" alt=""></p>
+<p>Similarly, for scaling down. If we have to remove <code>Shard B</code>, <code>hash slots</code> from <code>Shard B</code> will be split between <code>Shard A</code> and <code>Shard B</code>.</p>
+<p><img src="/images/Redis_Cluster_Part3.png" alt=""></p>
+<h2 id="caching-strategy">Caching Strategy</h2>
+<h2 id="trade-offs">Trade-Offs</h2>
+<h3 id="availability">Availability</h3>
+<p>Redis uses the <code>Master-Replica topology</code> where a <code>Replica</code> can become <code>Master</code> if the <code>Master</code> is down or failed. This is automated in both <code>Redis Sentinel</code> and <code>Redis Cluster</code>.</p>
+<h3 id="replication">Replication</h3>
+<p>Most of the use cases for <code>Redis</code> only need <strong>asynchronous replication</strong> to deliver the <strong>high availability</strong> that it promises. Although there are ways to make the replication <strong>synchronous</strong> by using the <code>WAIT</code> command. Although, the <code>WAIT</code> command <strong>doesn’t turn the system into a durable and/or strong consistent system</strong>, that depends on what <strong>persistence configuration</strong> is used in <code>Redis</code> and various other things as discussed in the <code>Consistency</code> section below.</p>
+<p>Let’s take an example, to explain how the replication works. Each node has two data.</p>
+<pre tabindex="0"><code>Replication ID, offset
+</code></pre><p><code>Replication ID</code> is composed of two things, <code>Main ID</code> and <code>Secondary ID</code>. Each of these IDs is a <strong>unique pseudo-random string</strong>. Every time an instance restarts from scratch as a master or a replica is promoted to master, a new <code>Replication ID</code> is generated for this instance. The replicas connected to a master will inherit its <code>Replication ID</code> after the handshake. So two instances with the same ID are related by the fact that they hold the same data, but potentially at a different time. It is the <code>offset</code> that works as a logical time to understand, for a given history (<code>Replication Id</code>), who holds the most updated data set.</p>
+<p>As instance starts from scratch as master, the <code>Secondary ID</code> is null and the <code>Main ID</code> is assigned some pseudo-random string. Offset might be different at different replicas as replication is asynchronous.</p>
+<p><img src="/images/Replication_Part1.png" alt=""></p>
+<p>If the master goes down, one of the replicas will become the new master and do the following</p>
+<pre tabindex="0"><code>Secondary Id = Main Id
+Main Id = new unique pseudo-random string
+</code></pre><p>And then <code>Replica 1</code> tries to <code>PSYNC</code> from the new master <code>Master 2</code>, sending its last state as</p>
+<pre tabindex="0"><code>Replication ID = M1
+Offset = x-100
+</code></pre><p>This will tell the <code>Master 2</code> node to check if the <code>Replication ID</code> is either equal to the <code>Secondary ID</code> or <code>Main ID</code>, it has to do <strong>partial data sync</strong>, and if it&rsquo;s not equal to either of them, then it sends the <strong>full data sync</strong> to the <code>Replica 1</code>. <code>Replica 1</code> will also inherit the <code>Replication ID</code> and <code>offset</code> from the new master.</p>
+<p><img src="/images/Replication_Part2.png" alt=""></p>
+<p>After the <code>Master 1</code> comes back online, it syncs with the <code>Master 2</code> sending its last state as</p>
+<pre tabindex="0"><code>Replication ID = M1
+Offset = x
+</code></pre><p>As <code>M1</code> is equal to the <code>Secondary ID</code> at <code>Master 2</code>, it will do <strong>partial data sync</strong> to the old master as well as mark the old master as <code>Replica 2</code> and inherit the <code>Replication ID</code> and <code>offset</code> from the new master.</p>
+<p><img src="/images/Replication_Part3.png" alt=""></p>
+<p><strong>Note</strong>: <em>We will ignore <code>WRITABLE REPLICAS</code> for this blog, as that is a deprecated feature and only exists for a historical reason and backward compatibility.</em></p>
+<h3 id="scalability">Scalability</h3>
+<p><code>Redis Sentinel</code> is <strong>linearly scalable for reads but not for writes</strong> as it follows <code>Single Master Multiple Replica</code> topology.</p>
+<p><code>Redis Cluster</code> is <strong>linearly scalable for reads as well as writes</strong> as it follows the <code>automatic sharding</code> topology, where it can scale up and down according to the traffic for reads and writes independently.</p>
+<h3 id="consistency">Consistency</h3>
+<h4 id="redis-sentinel-1">Redis Sentinel</h4>
+<p><code>Redis sentinel</code> configurations are <code>eventually consistent</code>, so every partition will converge to the higher configuration available. Here, <strong>eventual consistency</strong> doesn’t mean it will not lose the data, eventual consistency means, <strong>all nodes will see the same commits in the same order to reach the same state</strong>. It <strong>does not guarantee to have all the commits</strong> that clients got ack’ed for, but <a href="https://en.wikipedia.org/wiki/State_machine_replication" target="_blank">RSM (Replicated State Machine)</a> will be consistent across the nodes.</p>
+<p>Few major reasons for the <strong>eventual consistency</strong> here :-</p>
+<ol>
+<li><strong>Asynchronous replication</strong></li>
+<li><strong>Missing consensus on total order</strong></li>
+</ol>
+<p>Let’s take an example to explain the issue here. Consider the following setup, <code>3 masters</code>, <code>3 sentinels</code>. As the <strong>replication is asynchronous</strong>, the <code>Client</code> will get the <code>Ack</code> for the commit <code>C+1</code> before the replication is done.</p>
+<p><img src="/images/Consistency_Case1_Part1.png" alt=""></p>
+<p>Let’s say a <strong>network partition</strong> happens and <code>Partition 2</code> has the <strong>majority</strong> but the old commit <code>C</code>. Here, the client is still seeing the last commit as <code>C+1</code>.</p>
+<p><img src="/images/Consistency_Case1_Part2.png" alt=""></p>
+<p>After the <code>elections</code> conducted by <code>sentinels</code> in <code>Partition 2</code>, <code>Replica 1</code> will be converted to <code>Master 2</code> which only has commit <code>C</code>, this means the state of the system has reverted to commit <code>C</code> and we have lost the commit <code>C+1</code>, making the system <strong>non-durable</strong>.</p>
+<p><img src="/images/Consistency_Case1_Part3.png" alt=""></p>
+<p>And, when the <strong>network partition</strong> is finished, <code>sentinels</code> send the old master (<code>Master 1</code>) with the new <strong>sentinel configuration</strong>. Then, the old master (<code>Master 1</code>) syncs the data from the new master (<code>Master 2</code>) and marks itself as a replica of the new master, completely losing commit <code>C+1</code> from the system.</p>
+<p><img src="/images/Consistency_Case1_Part4.png" alt=""></p>
+<h4 id="redis-cluster-1">Redis Cluster</h4>
+<p><code>Redis cluster</code> <strong>doesn’t guarantee strong consistency</strong>. The reasons are very similar to <code>Redis Sentinel</code> as mentioned above.</p>
+<p>Few major reasons for the <strong>eventual consistency</strong> here -</p>
+<ol>
+<li><strong>Asynchronous replication</strong></li>
+<li><strong>Missing consensus on total order</strong></li>
+</ol>
+<p>We can overcome [1] with <strong>synchronous replication</strong> which is available with <code>WAIT</code> command but not [2].</p>
+<p>A new master node with no assigned <code>hash slot</code> can’t participate in the <code>election</code> process when a replica wants to become a master.</p>
+<h3 id="persistence">Persistence</h3>
+<p>There are three types of <em>persistence</em> that <code>Redis</code> supports.</p>
+<ol>
+<li><strong>RDB</strong> - Redis Database</li>
+<li><strong>AOF</strong> - Append Only File</li>
+<li><em><strong>RDB + AOF</strong></em></li>
+</ol>
+<p>Each has its advantages and disadvantages which can be found <a href="https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/" target="_blank">here</a>.</p>
+<p>Generally, it is recommended to use option 3, both persistence methods, as it gives both <strong>data safety</strong> and <strong>recoverability</strong>.</p>
+<p><code>Redis</code> also supports AOF file <strong><a href="https://docs.cloudera.com/cdw-runtime/cloud/managing-hive/topics/hive_hive_data_compaction.html" target="_blank">data compaction</a></strong> using the <code>BGREWRITEAOF</code> command.</p>
+<h2 id="limitations">Limitations</h2>
+<h3 id="thundering-herd-problem">Thundering Herd Problem</h3>
+<p>One of the major problems in <code>distributed cache</code> is the <code>Thundering Herd Problem</code>. When multiple clients try to get the cached value corresponding to a key and get <code>cache-miss</code>, all of them will rush to get the value from the main source (service or database). This can cause a <code>thundering herd problem</code> as the main source (service or database) could get overwhelmed with so many requests. The same situation can occur when we hit <code>cache-expire</code>.</p>
+<h4 id="strategy-i---never-invalidate-cache">Strategy I - Never Invalidate Cache</h4>
+<p>One solution is to <strong>never invalidate the cache</strong> as some data are always valid. We can also use some eviction algorithms like <a href="https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU" target="_blank"><code>LRU (Least Recently Used)</code></a> to clean up memory if/when required. But this solution <strong>only works for a subset of the cases</strong> and doesn’t work when data is invalid/old or when we hit <code>cache-miss</code>.</p>
+<h4 id="strategy-ii---mediator-bw-cache-and-service">Strategy II - Mediator b/w Cache and Service</h4>
+<p>Another solution is to have a <code>mediator</code> sitting in the middle of the <code>cache</code> and <code>service</code> so that the <code>mediator</code> can <strong>de-duplicate</strong> the requests or act as a <strong>request queue</strong> and send only one request per key to the backend <code>service</code>. This solution is <em>quite expensive</em> to implement with engineering resources. Also, we will have to figure out how to group the queues so that we don’t cause <code>Resource Starvation Problems</code>, handle the <strong>request timeouts</strong>, and handle the <code>back-pressure problem</code> with queuing the requests.</p>
+<h4 id="strategy-iii---use-pessimistic-locking-on-cache">Strategy III - Use Pessimistic Locking On Cache</h4>
+<p>Another solution is to use a <code>pessimistic locking</code> mechanism on the key at the cache. Whoever gets the lock, will see that the cache is not present or expired, fetch the value and update it in the cache, and then release the lock. While this is happening, the rest of the clients are waiting on the lock for the key, and when they get the key, they will see the new value. One major disadvantage is, that pessimistic locking is <strong>very slow</strong> for cache defeating the purpose of using cache in many cases. The best <code>pessimistic distributed locking</code> implementation suggested by Redis is <code>Redlock</code> discussed below has its <strong>problem with correctness</strong>.</p>
+<h4 id="strategy-iv---update-on-write">Strategy IV - Update-on-Write</h4>
+<p>Another solution is to always update the cache when we do <code>update</code>, <code>insert</code>, and <code>delete</code> operations along with writing to the backend service. But this solution <strong>only works for a subset</strong> of the cases and doesn’t work when we hit <code>cache-miss</code>.</p>
+<h4 id="strategy-v---use-optimistic-locking-on-cache">Strategy V - Use Optimistic Locking On Cache</h4>
+<p>As Redis is a <strong>single-threaded service</strong>, multiple requests can do <code>GET</code> on a key, but the request will be processed one by one on the cache. So the first request which gets executed can put a <code>lock</code> on the key by just updating the value as <code>processing</code> with some <code>TTL</code>. And rest of the clients will see that it&rsquo;s marked as processing and will try again to get the lock and will only succeed after the <code>TTL expiry</code>. On the other hand, the original thread with go ahead and get the value from the backend and will update the cache.</p>
+<p>Here is the sequence diagram to show the locking mechanism.</p>
+<p><img src="/images/Redis_Optimistic_Lock_Part1.png" alt="">
+<img src="/images/Redis_Optimistic_Lock_Part2.png" alt=""></p>
+<p>It&rsquo;s a modification of <code>MemoLock</code> on the Redis <a href="https://redis.io/blog/caches-promises-locks/" target="_blank">blog</a>. Modification is done to avoid the <code>Starvation</code> condition in the <code>MemoLock</code> as explained in the blog.</p>
+<p>To avoid confusion, let me explain when the <code>Starvation</code> can occur.</p>
+<p><img src="/images/MemoLock_Issue_Part1.png" alt="">
+<img src="/images/MemoLock_Issue_Part2.png" alt=""></p>
+<p>At <code>t=0</code>, <code>Client I</code> notifies the channel <code>notif:key</code></p>
+<p>At <code>t=1</code>, <code>Client II</code> subscribes to the channel <code>notif:key</code></p>
+<p>Here, at <code>t=0</code> when the notification was sent <code>Client II</code> has not started listening to the channel. So, at <code>t=1</code> when <code>Client II</code> starts listening to the channel, it will not see any message and will be blocked forever waiting for the message on the channel.</p>
+<p>Another way to fix the problem with <code>MemoLock</code> is to have a timeout when listening to the channel and retry from the start after that.</p>
+<h3 id="time-skew-problem">Time Skew Problem</h3>
+<p><code>Redis Sentinel</code> is heavily dependent on the <em>instance time</em>. It uses the <em>time</em> to calculate the various timeouts. But as we all know, in distributed systems, time is subjective and <strong>time skews</strong> are a constant thing. This might lead to <code>sentinels</code> behaving in unexpected ways.</p>
+<p>This problem is nothing new in distributed systems and is very hard to solve. But, what we can do is identify such a situation with more probability. The way Redis does this is to use a timer that runs 10 times every 1 second and notes the timestamp. Redis goes into <code>TILT mode</code> if it sees that the delta between two consecutive timestamps is unexpectedly big or negative. Here are the conditions when <code>Redis</code> goes into <code>TILT mode</code>.</p>
+<pre tabindex="0"><code>1. Tn - Tn-1 &lt; 0
+2. Tn - Tn-1 &gt; 2000ms
+</code></pre><p>When, in <code>TILT mode</code> the node marks itself as down, still continuing to monitor itself in case it gets out of the <strong>time skew</strong> to come back to a <strong>healthy state</strong> and self-heal.</p>
+<h3 id="split-brain-problem">Split Brain Problem</h3>
+<h4 id="problem-1---sentinel-scale-up">Problem 1 - Sentinel Scale Up</h4>
+<blockquote>
+<p><em>If you need to add multiple Sentinels at once, it is suggested to add it one after the other, waiting for all the other Sentinels to already know about the first one before adding the next. This is useful in order to still guarantee that the majority can be achieved only on one side of a partition, in the chance failures should happen in the process of adding new Sentinels. <br>
+This can be easily achieved by adding every new Sentinel with a 30-second delay and during the absence of network partitions.</em></p>
+</blockquote>
+<p>Let’s take a look at a specific case where the wrong scale-up deployment of <code>sentinel</code> can cause <code>Split Brain</code> problems.</p>
+<p>We have <code>Sentinels</code> all agreed on the total visible sentinels in the cluster to be 5.</p>
+<p><img src="/images/Sentinel_Scale_Up_Split_Brain_Part1.png" alt=""></p>
+<p>Now, let’s say 2 <code>Sentinels</code>, <code>S6</code> and <code>S7</code> want to join the clusters and are brought up at the same time.</p>
+<p><img src="/images/Sentinel_Scale_Up_Split_Brain_Part2.png" alt=""></p>
+<p>What this can cause is a <code>split-brain</code> situation like this, if the <code>network partition</code> happens during the scale-up. Let’s say a network partition happens and two partitions are created, <code>Partition 1</code> and <code>Partition 2</code>.</p>
+<pre tabindex="0"><code>
+`Partition 1` = {`S1`, `S5`, `S6`, `S7`}
+
+`Partition 2` = {`S2`, `S3`, `S4`}
+</code></pre><p>Here, the nodes in <code>Partition 1</code> will see the <code>total discovered sentinels</code> to be 7, which makes the <strong>majority</strong> to be 4, which this partition can achieve. If a particular partition can achieve a <strong>majority</strong> then it can take decisions on its own for <code>Redis</code>.</p>
+<p>Similarly, <code>Partition 2</code> will see the <code>total discovered sentinels</code> to be 5, which makes the <strong>majority</strong> to be 3, which this partition can achieve. If a particular partition can achieve a majority then it can take decisions on its own for redis.</p>
+<p>Now, in a cluster, if two <code>subclusters</code> can make their own decision for <code>Redis</code>, it will result in a <code>split-brain</code> situation.</p>
+<p><img src="/images/Sentinel_Scale_Up_Split_Brain_Part3.png" alt=""></p>
+<p>As a solution to this problem, <code>Redis</code> suggests scaling up <code>sentinels</code> one by one. Make sure to run <code>SENTINEL MASTER</code> after every <code>sentinel</code> addition to make sure all nodes agree on the same number of <code>sentinels</code>.</p>
+<h4 id="problem-2---sentinel-scale-down">Problem 2 - Sentinel Scale Down</h4>
+<p>Removal of <code>sentinel nodes</code> is also recommended to be done one by one to avoid the same situation of <code>Split Brain</code> as scaling up, mentioned above.</p>
+<p>The protocol that <code>Redis</code> has does not handle the <code>Split Brain</code> situation very well.</p>
+<h2 id="distributed-lock">Distributed Lock</h2>
+<h3 id="redlock">Redlock</h3>
+<p><a href="https://martin.kleppmann.com/" target="_blank">Dr. Martin Kleppmann</a> wrote a very nice <a href="https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html" target="_blank">blog</a>[11] in 2016 where he analyzes the validity of the <code>Redlock</code> algorithm and concludes this.</p>
+<pre><code>I think the Redlock algorithm is a poor choice because it is “neither fish nor fowl”: it is unnecessarily heavyweight and expensive for efficiency-optimization locks, but it is not sufficiently safe for situations in which correctness depends on the lock._
+
+
+In particular, the algorithm makes dangerous assumptions about timing and system clocks (essentially assuming a synchronous system with bounded network delay and bounded execution time for operations), and it violates safety properties if those assumptions are not met. Moreover, it lacks a facility for generating fencing tokens (which protect a system against long delays in the network or in paused processes)._
+
+
+On the other hand, if you need locks for correctness, please don’t use Redlock. Instead, please use a proper consensus system such as ZooKeeper, probably via one of the Curator recipes that implements a lock. (At the very least, use a database with reasonable transactional guarantees.) And please enforce the use of fencing tokens on all resource accesses under the lock._”
+</code></pre>
+<p>He instead suggests to use other solutions like:-</p>
+<ol>
+<li><a href="http://redis.io/commands/set" target="_blank">Straightforward single-node locking algorithm</a> for Redis.</li>
+<li>Zookeeper with <a href="http://curator.apache.org/curator-recipes/index.html" target="_blank">curator recipes</a>.</li>
+</ol>
+<p>The bottom line is that <code>Redlock</code> doesn&rsquo;t work for the guarantee this system needs.</p>
+<h2 id="best-practices">Best Practices</h2>
+<p><strong>[BP.1]</strong> You need <strong>at least three Sentinel instances</strong> for a robust deployment.</p>
+<p><strong>[BP.2]</strong>  Deploy at least <strong>three Sentinels in three different boxes</strong>.</p>
+<p><strong>[BP.3]</strong>  Add/Remove <code>sentinels</code> <strong>one by one</strong> to not reach <code>split-brain</code> situation.</p>
+<p><strong>[BP.4]</strong>  Have <strong>persistence turned ON</strong> for the master and replicas to avoid complete data loss in case of auto-restart enabled for master nodes.</p>
+<h2 id="summary">Summary</h2>
+<p>To conclude this blog, we need to answer the problem statement mentioned in the <code>Introduction</code>.</p>
+<blockquote>
+<p><em>Can we use any Distributed Cache to cache the data?</em></p>
+</blockquote>
+<p>Yes, we can. But, there are trade-offs. <code>Redis</code> is inherently a <strong>highly available</strong> and <strong>partition-tolerant</strong> system and is designed specifically for <em>read-heavy</em> systems. It provides no guarantee of the <strong><em>durability</em></strong> of data as <strong>data losses are highly possible</strong>. <code>Redis</code> in its raw form is not the right system to use if you are looking for <strong>strict consistency</strong> for the data, although it works incredibly well for <strong>eventually consistent</strong> data.</p>
+<p>Also, be wary of its limitations like <strong>time skew</strong>, <strong>split brain</strong>, and <strong>thundering herd</strong>.</p>
+<h2 id="references">References</h2>
+<p>[1] Redis Security Management - <a href="https://redis.io/docs/latest/operate/oss_and_stack/management/security/" target="_blank">https://redis.io/docs/latest/operate/oss_and_stack/management/security/</a></p>
+<p>[2] Redis Sentinal - <a href="https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel" target="_blank">https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel</a></p>
+<p>[3] Redis Replication - <a href="https://redis.io/docs/latest/operate/oss_and_stack/management/replication/" target="_blank">https://redis.io/docs/latest/operate/oss_and_stack/management/replication/</a></p>
+<p>[4] Redis Cluster Scalability - <a href="https://redis.io/docs/latest/operate/oss_and_stack/management/scaling/" target="_blank">https://redis.io/docs/latest/operate/oss_and_stack/management/scaling/</a></p>
+<p>[5] Excalidraw Diagram - <a href="https://excalidraw.com/#json=EdnzpnTa-7-vxhqS8Wcbk,42SWf1ZoHLTS_y5QmlykPQ" target="_blank">https://excalidraw.com/#json=EdnzpnTa-7-vxhqS8Wcbk,42SWf1ZoHLTS_y5QmlykPQ</a></p>
+<p>[6] Redis Persistence - <a href="https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/" target="_blank">https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/</a></p>
+<p>[7] Data Compaction - <a href="https://docs.cloudera.com/cdw-runtime/cloud/managing-hive/topics/hive_hive_data_compaction.html" target="_blank">https://docs.cloudera.com/cdw-runtime/cloud/managing-hive/topics/hive_hive_data_compaction.html</a></p>
+<p>[8] Instagram Engineering - Thundering Herd - <a href="https://instagram-engineering.com/thundering-herds-promises-82191c8af57d" target="_blank">https://instagram-engineering.com/thundering-herds-promises-82191c8af57d</a></p>
+<p>[9] TTL Hell - <a href="https://calpaterson.com/ttl-hell.html" target="_blank">https://calpaterson.com/ttl-hell.html</a></p>
+<p>[10] MemoLock - <a href="https://redis.io/blog/caches-promises-locks/" target="_blank">https://redis.io/blog/caches-promises-locks/</a></p>
+<p>[11] How to do distributed locking - <a href="https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html" target="_blank">https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html</a></p>
+<p>[12] Eventual Consistency - <a href="https://www.allthingsdistributed.com/2008/12/eventually_consistent.html" target="_blank">https://www.allthingsdistributed.com/2008/12/eventually_consistent.html</a></p>
+
+  
+  <hr>
+<div class="footer">
+    
+    
+    
+    <p>
+    This is a post in the <b><a href="http://localhost:1313/series/distributed-cache">Distributed Cache</a></b> series.
+        <br>Other posts in this series:
+        <ul class="series">
+            
+            
+            
+            <li>
+                August 9, 2024 -
+                
+                    Distributed Cache Series - Part I - Redis
+                
+            </li>
+            
+        </ul>
+    </p>
+    
+</div>
+
+  
+</div>
+            </main>
+            
+  
+    <div class="article-toc ">
+    <div class="toc-wrapper">
+      <h4 id="contents"></h4>
+      <nav id="TableOfContents">
+  <ul>
+    <li><a href="#introduction">Introduction</a></li>
+    <li><a href="#high-level-architecture">High-Level Architecture</a>
+      <ul>
+        <li><a href="#redis-sentinel">Redis Sentinel</a></li>
+        <li><a href="#redis-cluster">Redis Cluster</a></li>
+      </ul>
+    </li>
+    <li><a href="#caching-strategy">Caching Strategy</a></li>
+    <li><a href="#trade-offs">Trade-Offs</a>
+      <ul>
+        <li><a href="#availability">Availability</a></li>
+        <li><a href="#replication">Replication</a></li>
+        <li><a href="#scalability">Scalability</a></li>
+        <li><a href="#consistency">Consistency</a></li>
+        <li><a href="#persistence">Persistence</a></li>
+      </ul>
+    </li>
+    <li><a href="#limitations">Limitations</a>
+      <ul>
+        <li><a href="#thundering-herd-problem">Thundering Herd Problem</a></li>
+        <li><a href="#time-skew-problem">Time Skew Problem</a></li>
+        <li><a href="#split-brain-problem">Split Brain Problem</a></li>
+      </ul>
+    </li>
+    <li><a href="#distributed-lock">Distributed Lock</a>
+      <ul>
+        <li><a href="#redlock">Redlock</a></li>
+      </ul>
+    </li>
+    <li><a href="#best-practices">Best Practices</a></li>
+    <li><a href="#summary">Summary</a></li>
+    <li><a href="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+
+  
+
+        </div>
+    </body>
+</html>

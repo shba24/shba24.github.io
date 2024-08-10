@@ -44,6 +44,10 @@
     <script>hljs.highlightAll();</script>
 
     
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "fd0bbd0149124eeea3afab47dd84a12c"}'></script>
+    
+
+    
     
 
 
@@ -81,7 +85,7 @@
 <meta property="og:url" content="http://localhost:1313/" />
 
 
-<meta property="og:updated_time" content="2024-08-04T00:30:28-07:00" />
+<meta property="og:updated_time" content="2024-08-09T19:36:09-07:00" />
 
 
 <link rel="sitemap" type="application/xml" title="Sitemap" href='http://localhost:1313/sitemap.xml' />
@@ -218,8 +222,12 @@
                 
                         
                 
+                        
+                
             
                 
+                
+                        
                 
                         
                 
@@ -249,6 +257,10 @@
                         </li>
                         
                             <li class="bullet">
+                                <a href="http://localhost:1313/posts/distributed-cache-series-part-1-redis/">Distributed Cache Series - Part I - Redis</a>
+                            </li>
+                        
+                            <li class="bullet">
                                 <a href="http://localhost:1313/posts/introduction/">Introduction</a>
                             </li>
                         
@@ -264,8 +276,12 @@
                 
                         
                 
+                        
+                
             
                 
+                
+                        
                 
                         
                 
@@ -345,6 +361,66 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
                 <div class="posts">
     
     
+    <article class="post">
+        <div class="info">
+  <h1 class="post-title">
+    <a href="http://localhost:1313/posts/distributed-cache-series-part-1-redis/">Distributed Cache Series - Part I - Redis</a>
+  </h1>
+
+  <div class="headline">
+    <div>
+      
+      <time datetime=" 2024-08-09T19:36:09-0700" class="post-date">
+        August 9, 2024
+      </time>
+      
+      <span> - </span>
+      <span class="reading-time">
+        
+          
+        
+
+        <span>19 mins read</span>
+      </span>
+    </div>
+
+    
+    <ul class="tags">
+      
+      <li class="tag-cache">
+        <a href="http://localhost:1313/tags/cache">cache</a>
+      </li>
+      
+      <li class="tag-golang">
+        <a href="http://localhost:1313/tags/golang">golang</a>
+      </li>
+      
+    </ul>
+    
+  </div>
+
+  
+  
+  <p class="seriesname">
+    Series: <a href="http://localhost:1313/series/distributed-cache">Distributed Cache</a>
+  </p>
+  
+
+  
+</div>
+
+        
+        Introduction For the last couple of weeks, I have been discussing with my colleagues about
+How can we improve the performance of some of our data access?
+I will give you some background about the system so that we know our base tenets throughout this blog.
+Let’s say the system stores the structured data in a database (Amazon DynamoDB) and unstructured data blob in some blobstore (Amazon S3). And, we want to improve the data access latency for both data stores as they provide sub-10ms latency for GET operations.
+        
+        <div class="read-more-link">
+            <a href="/posts/distributed-cache-series-part-1-redis/">Read More…</a>
+        </div>
+        
+        
+    </article>
     <article class="post">
         <div class="info">
   <h1 class="post-title">
