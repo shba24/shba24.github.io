@@ -665,14 +665,11 @@ This can be easily achieved by adding every new Sentinel with a 30-second delay 
 <h2 id="distributed-lock">Distributed Lock</h2>
 <h3 id="redlock">Redlock</h3>
 <p><a href="https://martin.kleppmann.com/" target="_blank">Dr. Martin Kleppmann</a> wrote a very nice <a href="https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html" target="_blank">blog</a>[11] in 2016 where he analyzes the validity of the <code>Redlock</code> algorithm and concludes this.</p>
-<pre><code>I think the Redlock algorithm is a poor choice because it is “neither fish nor fowl”: it is unnecessarily heavyweight and expensive for efficiency-optimization locks, but it is not sufficiently safe for situations in which correctness depends on the lock._
-
-
-In particular, the algorithm makes dangerous assumptions about timing and system clocks (essentially assuming a synchronous system with bounded network delay and bounded execution time for operations), and it violates safety properties if those assumptions are not met. Moreover, it lacks a facility for generating fencing tokens (which protect a system against long delays in the network or in paused processes)._
-
-
-On the other hand, if you need locks for correctness, please don’t use Redlock. Instead, please use a proper consensus system such as ZooKeeper, probably via one of the Curator recipes that implements a lock. (At the very least, use a database with reasonable transactional guarantees.) And please enforce the use of fencing tokens on all resource accesses under the lock._”
-</code></pre>
+<blockquote>
+<p>I think the Redlock algorithm is a poor choice because it is “neither fish nor fowl”: it is unnecessarily heavyweight and expensive for efficiency-optimization locks, but it is not sufficiently safe for situations in which correctness depends on the lock.<br>
+In particular, the algorithm makes dangerous assumptions about timing and system clocks (essentially assuming a synchronous system with bounded network delay and bounded execution time for operations), and it violates safety properties if those assumptions are not met. Moreover, it lacks a facility for generating fencing tokens (which protect a system against long delays in the network or in paused processes).<br>
+On the other hand, if you need locks for correctness, please don’t use Redlock. Instead, please use a proper consensus system such as ZooKeeper, probably via one of the Curator recipes that implements a lock. (At the very least, use a database with reasonable transactional guarantees.) And please enforce the use of fencing tokens on all resource accesses under the lock._”</p>
+</blockquote>
 <p>He instead suggests to use other solutions like:-</p>
 <ol>
 <li><a href="http://redis.io/commands/set" target="_blank">Straightforward single-node locking algorithm</a> for Redis.</li>
