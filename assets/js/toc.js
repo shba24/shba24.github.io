@@ -27,6 +27,7 @@ window.addEventListener('DOMContentLoaded', () => {
             }
             if (activeElement) {
                 document.querySelector(`nav[id='TableOfContents'] li a[href="#${activeElement}"]`).parentElement.classList.replace('inactive', 'active');
+                document.querySelector(`nav[id='TableOfContents'] li a[href="#${activeElement}"]`).scrollIntoView(false);
             }
         });
     });

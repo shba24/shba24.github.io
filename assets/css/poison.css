@@ -118,6 +118,9 @@ body > .wrapper {
     padding-right: 0;
     padding-left: 2rem;
 }
+.article-toc::-webkit-scrollbar {
+    width: 0px;
+}
 .container.content::-webkit-scrollbar {
    width: 3px;
 }
@@ -287,7 +290,6 @@ tbody tr:nth-child(odd) th {
     max-height: 85%;
 }
 .article-toc .toc-wrapper{
-    position: fixed;
 }
 .article-toc nav {
     margin-left: 1em;

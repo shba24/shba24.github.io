@@ -65,3 +65,9 @@ pluralizelisttitles = false
 [module]
   [module.hugoVersion]
     min = "0.41.0"
+
+[markup]
+  [markup.tableOfContents]
+    endLevel = 4
+    ordered = false
+    startLevel = 2
