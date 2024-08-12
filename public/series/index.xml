@@ -15,12 +15,5 @@
       <guid>http://localhost:1313/series/distributed-cache/</guid>
       <description></description>
     </item>
-    <item>
-      <title>How to Use Poison</title>
-      <link>http://localhost:1313/series/how-to-use-poison/</link>
-      <pubDate>Wed, 23 Nov 2022 13:43:53 -0600</pubDate>
-      <guid>http://localhost:1313/series/how-to-use-poison/</guid>
-      <description></description>
-    </item>
   </channel>
 </rss>

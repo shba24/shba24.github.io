@@ -66,7 +66,7 @@ Let’s say we have a network partition where `Master 1`, `Client` as well as `S
 
 ![](/images/Election_Case2_Part2.png)
 
-As `Master 1` is missing from `Partition 2` only, election and failover will be triggered in only `Partition 2`. After that, one of the two sentinels (`Sentinel 2` and `Sentinel 3`) will be elected as leader by running an `election` among all reachable `sentinels`. A `sentinel` will be elected as **leader** only when the **majority** of the total sentinels in the cluster agree on it, which is 2 in this case, as both `Sentinel 2` and `Sentinel 3` will agree on `Master 1` being down. After that, the **elected sentinel** will flip one of the replicas with the most recent commit (the sentinel tries its best to identify this replica, not always possible) to a new master and update the **sentinel configuration**. However, during this time, the `Client` might (depending on the configuration) continue to send `WRITE` traffic to `Master 1` only, as it is doing the **service discovery** from `Sentinel 1` only and `Sentinel 1` only sees `Master 1`.
+As `Master 1` is missing from `Partition 2` only, **election** and **failover** will be triggered in only `Partition 2`. After that, one of the two sentinels (`Sentinel 2` and `Sentinel 3`) will be elected as leader by running an `election` among all reachable `sentinels`. A `sentinel` will be elected as **leader** only when the **majority** of the total sentinels in the cluster agree on it, which is 2 in this case, as both `Sentinel 2` and `Sentinel 3` will agree on `Master 1` being down. After that, the **elected sentinel** will flip one of the replicas with the most recent commit (the sentinel tries its best to identify this replica, not always possible) to a new master and update the **sentinel configuration**. However, during this time, the `Client` might (depending on the configuration) continue to send `WRITE` traffic to `Master 1` only, as it is doing the **service discovery** from `Sentinel 1` only and `Sentinel 1` only sees `Master 1`.
 
 ![](/images/Election_Case2_Part3.png)
 
@@ -384,26 +384,26 @@ Also, be wary of its limitations like **time skew**, **split brain**, and **thun
 
 ## References
 
-[1] Redis Security Management - [https://redis.io/docs/latest/operate/oss_and_stack/management/security/](https://redis.io/docs/latest/operate/oss_and_stack/management/security/)
+1. Redis Security Management - [https://redis.io/docs/latest/operate/oss_and_stack/management/security/](https://redis.io/docs/latest/operate/oss_and_stack/management/security/)
 
-[2] Redis Sentinal - [https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel](https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel)
+2. Redis Sentinal - [https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel](https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel)
 
-[3] Redis Replication - [https://redis.io/docs/latest/operate/oss_and_stack/management/replication/](https://redis.io/docs/latest/operate/oss_and_stack/management/replication/)
+3. Redis Replication - [https://redis.io/docs/latest/operate/oss_and_stack/management/replication/](https://redis.io/docs/latest/operate/oss_and_stack/management/replication/)
 
-[4] Redis Cluster Scalability - [https://redis.io/docs/latest/operate/oss_and_stack/management/scaling/](https://redis.io/docs/latest/operate/oss_and_stack/management/scaling/)
+4. Redis Cluster Scalability - [https://redis.io/docs/latest/operate/oss_and_stack/management/scaling/](https://redis.io/docs/latest/operate/oss_and_stack/management/scaling/)
 
-[5] Excalidraw Diagram - [https://excalidraw.com/#json=EdnzpnTa-7-vxhqS8Wcbk,42SWf1ZoHLTS_y5QmlykPQ](https://excalidraw.com/#json=EdnzpnTa-7-vxhqS8Wcbk,42SWf1ZoHLTS_y5QmlykPQ)
+5. Excalidraw Diagram - [https://excalidraw.com/#json=EdnzpnTa-7-vxhqS8Wcbk,42SWf1ZoHLTS_y5QmlykPQ](https://excalidraw.com/#json=EdnzpnTa-7-vxhqS8Wcbk,42SWf1ZoHLTS_y5QmlykPQ)
 
-[6] Redis Persistence - [https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/](https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/)
+6. Redis Persistence - [https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/](https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/)
 
-[7] Data Compaction - [https://docs.cloudera.com/cdw-runtime/cloud/managing-hive/topics/hive_hive_data_compaction.html](https://docs.cloudera.com/cdw-runtime/cloud/managing-hive/topics/hive_hive_data_compaction.html)
+7. Data Compaction - [https://docs.cloudera.com/cdw-runtime/cloud/managing-hive/topics/hive_hive_data_compaction.html](https://docs.cloudera.com/cdw-runtime/cloud/managing-hive/topics/hive_hive_data_compaction.html)
 
-[8] Instagram Engineering - Thundering Herd - [https://instagram-engineering.com/thundering-herds-promises-82191c8af57d](https://instagram-engineering.com/thundering-herds-promises-82191c8af57d)
+8. Instagram Engineering - Thundering Herd - [https://instagram-engineering.com/thundering-herds-promises-82191c8af57d](https://instagram-engineering.com/thundering-herds-promises-82191c8af57d)
 
-[9] TTL Hell - [https://calpaterson.com/ttl-hell.html](https://calpaterson.com/ttl-hell.html)
+9. TTL Hell - [https://calpaterson.com/ttl-hell.html](https://calpaterson.com/ttl-hell.html)
 
-[10] MemoLock - [https://redis.io/blog/caches-promises-locks/](https://redis.io/blog/caches-promises-locks/)
+10. MemoLock - [https://redis.io/blog/caches-promises-locks/](https://redis.io/blog/caches-promises-locks/)
 
-[11] How to do distributed locking - [https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html](https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html)
+11. How to do distributed locking - [https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html](https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html)
 
-[12] Eventual Consistency - [https://www.allthingsdistributed.com/2008/12/eventually_consistent.html](https://www.allthingsdistributed.com/2008/12/eventually_consistent.html)
+12. Eventual Consistency - [https://www.allthingsdistributed.com/2008/12/eventually_consistent.html](https://www.allthingsdistributed.com/2008/12/eventually_consistent.html)

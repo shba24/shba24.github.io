@@ -6,8 +6,36 @@
     <description>Recent content in Tags on Shubham Bansal Technical Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 09 Aug 2024 19:36:09 -0700</lastBuildDate>
+    <lastBuildDate>Sun, 11 Aug 2024 17:33:01 -0700</lastBuildDate>
     <atom:link href="http://localhost:1313/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Blog</title>
+      <link>http://localhost:1313/tags/blog/</link>
+      <pubDate>Sun, 11 Aug 2024 17:33:01 -0700</pubDate>
+      <guid>http://localhost:1313/tags/blog/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Database</title>
+      <link>http://localhost:1313/tags/database/</link>
+      <pubDate>Sun, 11 Aug 2024 17:33:01 -0700</pubDate>
+      <guid>http://localhost:1313/tags/database/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Distributed System</title>
+      <link>http://localhost:1313/tags/distributed-system/</link>
+      <pubDate>Sun, 11 Aug 2024 17:33:01 -0700</pubDate>
+      <guid>http://localhost:1313/tags/distributed-system/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Language</title>
+      <link>http://localhost:1313/tags/language/</link>
+      <pubDate>Sun, 11 Aug 2024 17:33:01 -0700</pubDate>
+      <guid>http://localhost:1313/tags/language/</guid>
+      <description></description>
+    </item>
     <item>
       <title>Cache</title>
       <link>http://localhost:1313/tags/cache/</link>
@@ -16,31 +44,38 @@
       <description></description>
     </item>
     <item>
-      <title>Golang</title>
-      <link>http://localhost:1313/tags/golang/</link>
+      <title>Distributed Systems</title>
+      <link>http://localhost:1313/tags/distributed-systems/</link>
       <pubDate>Fri, 09 Aug 2024 19:36:09 -0700</pubDate>
-      <guid>http://localhost:1313/tags/golang/</guid>
+      <guid>http://localhost:1313/tags/distributed-systems/</guid>
       <description></description>
     </item>
     <item>
-      <title>Development</title>
-      <link>http://localhost:1313/tags/development/</link>
-      <pubDate>Sun, 04 Aug 2024 00:30:28 -0700</pubDate>
-      <guid>http://localhost:1313/tags/development/</guid>
+      <title>Redis</title>
+      <link>http://localhost:1313/tags/redis/</link>
+      <pubDate>Fri, 09 Aug 2024 19:36:09 -0700</pubDate>
+      <guid>http://localhost:1313/tags/redis/</guid>
       <description></description>
     </item>
     <item>
-      <title>Hugo</title>
-      <link>http://localhost:1313/tags/hugo/</link>
-      <pubDate>Wed, 23 Nov 2022 13:43:53 -0600</pubDate>
-      <guid>http://localhost:1313/tags/hugo/</guid>
+      <title>Split Brain</title>
+      <link>http://localhost:1313/tags/split-brain/</link>
+      <pubDate>Fri, 09 Aug 2024 19:36:09 -0700</pubDate>
+      <guid>http://localhost:1313/tags/split-brain/</guid>
       <description></description>
     </item>
     <item>
-      <title>Introduction</title>
-      <link>http://localhost:1313/tags/introduction/</link>
-      <pubDate>Wed, 23 Nov 2022 13:43:53 -0600</pubDate>
-      <guid>http://localhost:1313/tags/introduction/</guid>
+      <title>Thundering Herd</title>
+      <link>http://localhost:1313/tags/thundering-herd/</link>
+      <pubDate>Fri, 09 Aug 2024 19:36:09 -0700</pubDate>
+      <guid>http://localhost:1313/tags/thundering-herd/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Time Skew</title>
+      <link>http://localhost:1313/tags/time-skew/</link>
+      <pubDate>Fri, 09 Aug 2024 19:36:09 -0700</pubDate>
+      <guid>http://localhost:1313/tags/time-skew/</guid>
       <description></description>
     </item>
   </channel>

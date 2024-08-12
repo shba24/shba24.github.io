@@ -219,10 +219,68 @@
                 
                 
             
+                
+                
+            
             
                 
                 
                         
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+        
+            
+
+            
+                
+                
+            
+                
+                
+            
+                
+                
+                    <li class="heading">
+                        <a href="/references/">References</a>
+                    </li>
+                    
+                        <li class="sub-heading">
+                            
+                        </li>
+                        
+                            <li class="bullet">
+                                <a href="http://localhost:1313/references/useful-technical-blogs/">Useful Technical Blogs</a>
+                            </li>
+                        
+                    
+                
+            
+            
+                
                 
                         
                 
@@ -272,21 +330,14 @@
                                 <a href="http://localhost:1313/posts/distributed-cache-series-part-1-redis/">Distributed Cache Series - Part I - Redis</a>
                             </li>
                         
-                            <li class="bullet">
-                                <a href="http://localhost:1313/posts/introduction/">Introduction</a>
-                            </li>
-                        
-                            <li class="bullet">
-                                <a href="http://localhost:1313/posts/testing/">Introducing Poison</a>
-                            </li>
-                        
                     
                 
             
+                
+                
+            
             
                 
-                
-                        
                 
                         
                 
@@ -476,7 +527,7 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 <p><img src="/images/Election_Case2_Part1.png" alt=""></p>
 <p>Let’s say we have a network partition where <code>Master 1</code>, <code>Client</code> as well as <code>Sentinel 1</code> are partitioned from the rest of the topology. <code>Sentinel 2 / 3</code> will discover that <code>Master 1</code> is down and agree on its failure. As the <strong>quorum config</strong> is set to 2 only, we only need <em>2 sentinel nodes</em> to agree on the <code>Master 1</code> being down and mark it as failing.</p>
 <p><img src="/images/Election_Case2_Part2.png" alt=""></p>
-<p>As <code>Master 1</code> is missing from <code>Partition 2</code> only, election and failover will be triggered in only <code>Partition 2</code>. After that, one of the two sentinels (<code>Sentinel 2</code> and <code>Sentinel 3</code>) will be elected as leader by running an <code>election</code> among all reachable <code>sentinels</code>. A <code>sentinel</code> will be elected as <strong>leader</strong> only when the <strong>majority</strong> of the total sentinels in the cluster agree on it, which is 2 in this case, as both <code>Sentinel 2</code> and <code>Sentinel 3</code> will agree on <code>Master 1</code> being down. After that, the <strong>elected sentinel</strong> will flip one of the replicas with the most recent commit (the sentinel tries its best to identify this replica, not always possible) to a new master and update the <strong>sentinel configuration</strong>. However, during this time, the <code>Client</code> might (depending on the configuration) continue to send <code>WRITE</code> traffic to <code>Master 1</code> only, as it is doing the <strong>service discovery</strong> from <code>Sentinel 1</code> only and <code>Sentinel 1</code> only sees <code>Master 1</code>.</p>
+<p>As <code>Master 1</code> is missing from <code>Partition 2</code> only, <strong>election</strong> and <strong>failover</strong> will be triggered in only <code>Partition 2</code>. After that, one of the two sentinels (<code>Sentinel 2</code> and <code>Sentinel 3</code>) will be elected as leader by running an <code>election</code> among all reachable <code>sentinels</code>. A <code>sentinel</code> will be elected as <strong>leader</strong> only when the <strong>majority</strong> of the total sentinels in the cluster agree on it, which is 2 in this case, as both <code>Sentinel 2</code> and <code>Sentinel 3</code> will agree on <code>Master 1</code> being down. After that, the <strong>elected sentinel</strong> will flip one of the replicas with the most recent commit (the sentinel tries its best to identify this replica, not always possible) to a new master and update the <strong>sentinel configuration</strong>. However, during this time, the <code>Client</code> might (depending on the configuration) continue to send <code>WRITE</code> traffic to <code>Master 1</code> only, as it is doing the <strong>service discovery</strong> from <code>Sentinel 1</code> only and <code>Sentinel 1</code> only sees <code>Master 1</code>.</p>
 <p><img src="/images/Election_Case2_Part3.png" alt=""></p>
 <p>And, when the <strong>network partition</strong> is finished, <code>sentinels</code> send the old master (<code>Master 1</code>) with the new <strong>sentinel configuration</strong>. Then, the old master (<code>Master 1</code>) syncs the data from the new master (<code>Master 2</code>) and marks itself as a replica of the new master. As the <code>Client</code> now does the <strong>service discovery</strong> from <code>Sentinel 1</code> which sees the new master (<code>Master 2</code>), it will start throwing the traffic to the new master. But, the <code>WRITE</code> operations that went to <code>Master 1</code> while the network was in the partition will forever be lost.</p>
 <p>That’s one of the reasons why <strong>Redis doesn’t provide any durability guarantees</strong>.</p>
@@ -641,18 +692,44 @@ On the other hand, if you need locks for correctness, please don’t use Redlock
 <p>Yes, we can. But, there are trade-offs. <code>Redis</code> is inherently a <strong>highly available</strong> and <strong>partition-tolerant</strong> system and is designed specifically for <em>read-heavy</em> systems. It provides no guarantee of the <strong><em>durability</em></strong> of data as <strong>data losses are highly possible</strong>. <code>Redis</code> in its raw form is not the right system to use if you are looking for <strong>strict consistency</strong> for the data, although it works incredibly well for <strong>eventually consistent</strong> data.</p>
 <p>Also, be wary of its limitations like <strong>time skew</strong>, <strong>split brain</strong>, and <strong>thundering herd</strong>.</p>
 <h2 id="references">References</h2>
-<p>[1] Redis Security Management - <a href="https://redis.io/docs/latest/operate/oss_and_stack/management/security/" target="_blank">https://redis.io/docs/latest/operate/oss_and_stack/management/security/</a></p>
-<p>[2] Redis Sentinal - <a href="https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel" target="_blank">https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel</a></p>
-<p>[3] Redis Replication - <a href="https://redis.io/docs/latest/operate/oss_and_stack/management/replication/" target="_blank">https://redis.io/docs/latest/operate/oss_and_stack/management/replication/</a></p>
-<p>[4] Redis Cluster Scalability - <a href="https://redis.io/docs/latest/operate/oss_and_stack/management/scaling/" target="_blank">https://redis.io/docs/latest/operate/oss_and_stack/management/scaling/</a></p>
-<p>[5] Excalidraw Diagram - <a href="https://excalidraw.com/#json=EdnzpnTa-7-vxhqS8Wcbk,42SWf1ZoHLTS_y5QmlykPQ" target="_blank">https://excalidraw.com/#json=EdnzpnTa-7-vxhqS8Wcbk,42SWf1ZoHLTS_y5QmlykPQ</a></p>
-<p>[6] Redis Persistence - <a href="https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/" target="_blank">https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/</a></p>
-<p>[7] Data Compaction - <a href="https://docs.cloudera.com/cdw-runtime/cloud/managing-hive/topics/hive_hive_data_compaction.html" target="_blank">https://docs.cloudera.com/cdw-runtime/cloud/managing-hive/topics/hive_hive_data_compaction.html</a></p>
-<p>[8] Instagram Engineering - Thundering Herd - <a href="https://instagram-engineering.com/thundering-herds-promises-82191c8af57d" target="_blank">https://instagram-engineering.com/thundering-herds-promises-82191c8af57d</a></p>
-<p>[9] TTL Hell - <a href="https://calpaterson.com/ttl-hell.html" target="_blank">https://calpaterson.com/ttl-hell.html</a></p>
-<p>[10] MemoLock - <a href="https://redis.io/blog/caches-promises-locks/" target="_blank">https://redis.io/blog/caches-promises-locks/</a></p>
-<p>[11] How to do distributed locking - <a href="https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html" target="_blank">https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html</a></p>
-<p>[12] Eventual Consistency - <a href="https://www.allthingsdistributed.com/2008/12/eventually_consistent.html" target="_blank">https://www.allthingsdistributed.com/2008/12/eventually_consistent.html</a></p>
+<ol>
+<li>
+<p>Redis Security Management - <a href="https://redis.io/docs/latest/operate/oss_and_stack/management/security/" target="_blank">https://redis.io/docs/latest/operate/oss_and_stack/management/security/</a></p>
+</li>
+<li>
+<p>Redis Sentinal - <a href="https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel" target="_blank">https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel</a></p>
+</li>
+<li>
+<p>Redis Replication - <a href="https://redis.io/docs/latest/operate/oss_and_stack/management/replication/" target="_blank">https://redis.io/docs/latest/operate/oss_and_stack/management/replication/</a></p>
+</li>
+<li>
+<p>Redis Cluster Scalability - <a href="https://redis.io/docs/latest/operate/oss_and_stack/management/scaling/" target="_blank">https://redis.io/docs/latest/operate/oss_and_stack/management/scaling/</a></p>
+</li>
+<li>
+<p>Excalidraw Diagram - <a href="https://excalidraw.com/#json=EdnzpnTa-7-vxhqS8Wcbk,42SWf1ZoHLTS_y5QmlykPQ" target="_blank">https://excalidraw.com/#json=EdnzpnTa-7-vxhqS8Wcbk,42SWf1ZoHLTS_y5QmlykPQ</a></p>
+</li>
+<li>
+<p>Redis Persistence - <a href="https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/" target="_blank">https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/</a></p>
+</li>
+<li>
+<p>Data Compaction - <a href="https://docs.cloudera.com/cdw-runtime/cloud/managing-hive/topics/hive_hive_data_compaction.html" target="_blank">https://docs.cloudera.com/cdw-runtime/cloud/managing-hive/topics/hive_hive_data_compaction.html</a></p>
+</li>
+<li>
+<p>Instagram Engineering - Thundering Herd - <a href="https://instagram-engineering.com/thundering-herds-promises-82191c8af57d" target="_blank">https://instagram-engineering.com/thundering-herds-promises-82191c8af57d</a></p>
+</li>
+<li>
+<p>TTL Hell - <a href="https://calpaterson.com/ttl-hell.html" target="_blank">https://calpaterson.com/ttl-hell.html</a></p>
+</li>
+<li>
+<p>MemoLock - <a href="https://redis.io/blog/caches-promises-locks/" target="_blank">https://redis.io/blog/caches-promises-locks/</a></p>
+</li>
+<li>
+<p>How to do distributed locking - <a href="https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html" target="_blank">https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html</a></p>
+</li>
+<li>
+<p>Eventual Consistency - <a href="https://www.allthingsdistributed.com/2008/12/eventually_consistent.html" target="_blank">https://www.allthingsdistributed.com/2008/12/eventually_consistent.html</a></p>
+</li>
+</ol>
 
   
   <hr>

@@ -6,8 +6,15 @@
     <description>Recent content on Shubham Bansal Technical Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 09 Aug 2024 19:36:09 -0700</lastBuildDate>
+    <lastBuildDate>Sun, 11 Aug 2024 17:33:01 -0700</lastBuildDate>
     <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Useful Technical Blogs</title>
+      <link>http://localhost:1313/references/useful-technical-blogs/</link>
+      <pubDate>Sun, 11 Aug 2024 17:33:01 -0700</pubDate>
+      <guid>http://localhost:1313/references/useful-technical-blogs/</guid>
+      <description>Useful Technical Blogs Programming Languages Tyler Neely&amp;rsquo;s blog Richard Startin&amp;rsquo;s Blog Databases Justin Jaffray&amp;rsquo;s blog Oren Eini&amp;rsquo;s blog, CEO of RavenDB Mark Callaghan&amp;rsquo;s blog Alex Miller&amp;rsquo;s blog Jamie Brandon&amp;rsquo;s blog Andy Grove&amp;rsquo;s blog Distributed System Murat Demirbas&amp;rsquo;s blog Jack Vanlightly&amp;rsquo;s blog Varun Upadhyay&amp;rsquo;s blog Marc Brooker&amp;rsquo;s blog Aleksey Charapko&amp;rsquo;s paper notes Daniel Abadi&amp;rsquo;s blog </description>
+    </item>
     <item>
       <title>Distributed Cache Series - Part I - Redis</title>
       <link>http://localhost:1313/posts/distributed-cache-series-part-1-redis/</link>
@@ -16,25 +23,11 @@
       <description>Introduction For the last couple of weeks, I have been discussing with my colleagues about&#xA;How can we improve the performance of some of our data access?&#xA;I will give you some background about the system so that we know our base tenets throughout this blog.&#xA;Let’s say the system stores the structured data in a database (Amazon DynamoDB) and unstructured data blob in some blobstore (Amazon S3). And, we want to improve the data access latency for both data stores as they provide sub-10ms latency for GET operations.</description>
     </item>
     <item>
-      <title>Introduction</title>
-      <link>http://localhost:1313/posts/introduction/</link>
-      <pubDate>Sun, 04 Aug 2024 00:30:28 -0700</pubDate>
-      <guid>http://localhost:1313/posts/introduction/</guid>
-      <description>Introduction Post&#xA;Hello World</description>
-    </item>
-    <item>
       <title>About</title>
       <link>http://localhost:1313/about/about/</link>
       <pubDate>Sat, 03 Aug 2024 22:30:36 -0700</pubDate>
       <guid>http://localhost:1313/about/about/</guid>
       <description>Simple can be harder than complex: You have to work hard to get your thinking clean to make it simple. But it’s worth it in the end because once you get there, you can move mountains.&#xA;&amp;mdash; Steve Jobs&#xA;Welcome to my technical blog!&#xA;I&amp;rsquo;m a Senior Software Engineer at Amazon AWS, where I work on the Lake Formation team. With a background in Cloud Storage, Data Analytics, Distributed Systems, Security, and Database Internals.</description>
-    </item>
-    <item>
-      <title>Introducing Poison</title>
-      <link>http://localhost:1313/posts/testing/</link>
-      <pubDate>Wed, 23 Nov 2022 13:43:53 -0600</pubDate>
-      <guid>http://localhost:1313/posts/testing/</guid>
-      <description>&lt;p&gt;&lt;em&gt;Poison&lt;/em&gt; is a &lt;strong&gt;clean&lt;/strong&gt;, &lt;strong&gt;professional&lt;/strong&gt; Hugo theme designed to &lt;strong&gt;captivate&lt;/strong&gt; your readers.&lt;/p&gt;&#xA;&lt;p&gt;It&amp;rsquo;s also &lt;strong&gt;tiny&lt;/strong&gt; and &lt;strong&gt;privacy conscious&lt;/strong&gt;.  No JavaScript frameworks, icon packs, or Google fonts.  No ads or trackers polluting your console window.  &lt;strong&gt;We kept things simple&lt;/strong&gt;.  A little vanilla JavaScript, a dash of CSS, and the power of Hugo.&lt;/p&gt;&#xA;&lt;p&gt;All the static assets for the site (JS files, CSS, and fonts) are located within the theme&amp;rsquo;s &lt;em&gt;/assets/&lt;/em&gt; directory.  &lt;strong&gt;That way you know &lt;em&gt;exactly&lt;/em&gt; what&amp;rsquo;s going onto your site&lt;/strong&gt;.&lt;/p&gt;&#xA;&lt;p&gt;Check out our demo site&amp;rsquo;s analytics &lt;a href=&#34;https://plausible.lukeorth.com/poison.lukeorth.com&#34; target=&#34;_blank&#34;&gt;here&lt;/a&gt; to gauge community interest in the theme.&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

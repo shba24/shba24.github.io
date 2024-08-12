@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Database on Shubham Bansal Technical Blog</title>
+    <link>http://localhost:1313/tags/database/</link>
+    <description>Recent content in Database on Shubham Bansal Technical Blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 11 Aug 2024 17:33:01 -0700</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/database/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Useful Technical Blogs</title>
+      <link>http://localhost:1313/references/useful-technical-blogs/</link>
+      <pubDate>Sun, 11 Aug 2024 17:33:01 -0700</pubDate>
+      <guid>http://localhost:1313/references/useful-technical-blogs/</guid>
+      <description>Useful Technical Blogs Programming Languages Tyler Neely&amp;rsquo;s blog Richard Startin&amp;rsquo;s Blog Databases Justin Jaffray&amp;rsquo;s blog Oren Eini&amp;rsquo;s blog, CEO of RavenDB Mark Callaghan&amp;rsquo;s blog Alex Miller&amp;rsquo;s blog Jamie Brandon&amp;rsquo;s blog Andy Grove&amp;rsquo;s blog Distributed System Murat Demirbas&amp;rsquo;s blog Jack Vanlightly&amp;rsquo;s blog Varun Upadhyay&amp;rsquo;s blog Marc Brooker&amp;rsquo;s blog Aleksey Charapko&amp;rsquo;s paper notes Daniel Abadi&amp;rsquo;s blog </description>
+    </item>
+  </channel>
+</rss>

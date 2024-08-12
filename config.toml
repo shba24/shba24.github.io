@@ -14,6 +14,7 @@ pluralizelisttitles = false
     dark_mode = true
     menu = [
         {Name = "About", URL = "/about/", HasChildren = false},
+        {Name = "References", URL = "/references/", HasChildren = true, Limit = 2},
         {Name = "Posts", URL = "/posts/", Pre = "Recent", HasChildren = true, Limit = 5},
     ]
     github_url = "https://github.com/shba24"
