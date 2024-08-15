@@ -3,6 +3,7 @@ Description = ""
 Tags = ["blog", "language", "database", "distributed system"]
 Categories = ["Reference"]
 menu = "main"
+hideToc = true
 title = "Useful Technical Blogs"
 date = 2024-08-11T17:33:01-07:00
 draft = false

@@ -246,9 +246,9 @@ One solution is to **never invalidate the cache** as some data are always valid.
 Another solution is to have a `mediator` sitting in the middle of the `cache` and `service` so that the `mediator` can **de-duplicate** the requests or act as a **request queue** and send only one request per key to the backend `service`. This solution is *quite expensive* to implement with engineering resources. Also, we will have to figure out how to group the queues so that we don’t cause `Resource Starvation Problems`, handle the **request timeouts**, and handle the `back-pressure problem` with queuing the requests.
 
 
-#### Strategy III - Use Pessimistic Locking On Cache
+#### Strategy III - Use Distributed Locking On Multi-Master Cache
 
-Another solution is to use a `pessimistic locking` mechanism on the key at the cache. Whoever gets the lock, will see that the cache is not present or expired, fetch the value and update it in the cache, and then release the lock. While this is happening, the rest of the clients are waiting on the lock for the key, and when they get the key, they will see the new value. One major disadvantage is, that pessimistic locking is **very slow** for cache defeating the purpose of using cache in many cases. The best `pessimistic distributed locking` implementation suggested by Redis is `Redlock` discussed below has its **problem with correctness**.
+Another solution is to use a `distributed locking` mechanism on the key at the cache. Whoever gets the lock, will see that the cache is not present or expired, fetch the value and update it in the cache, and then release the lock. While this is happening, the rest of the clients are waiting on the lock for the key, and when they get the key, they will see the new value. The best `distributed locking` implementation suggested by Redis is `Redlock` discussed below has its **problem with correctness**.
 
 
 #### Strategy IV - Update-on-Write
@@ -256,9 +256,9 @@ Another solution is to use a `pessimistic locking` mechanism on the key at the c
 Another solution is to always update the cache when we do `update`, `insert`, and `delete` operations along with writing to the backend service. But this solution **only works for a subset** of the cases and doesn’t work when we hit `cache-miss`.
 
 
-#### Strategy V - Use Optimistic Locking On Cache
+#### Strategy V - Use Distributed Locking On Single-Master Cache
 
-As Redis is a **single-threaded service**, multiple requests can do `GET` on a key, but the request will be processed one by one on the cache. So the first request which gets executed can put a `lock` on the key by just updating the value as `processing` with some `TTL`. And rest of the clients will see that it's marked as processing and will try again to get the lock and will only succeed after the `TTL expiry`. On the other hand, the original thread with go ahead and get the value from the backend and will update the cache.
+As Redis is a **single-threaded service**, multiple requests can do `GET` on a key, but the request will be processed one by one on the cache. So the first request which gets executed can try to put a any value corresponding to the key `lock::key`, if not already present using `SETNX` operation with some `TTL`. And rest of the clients will see that it's already present and will try again to get the lock and will only succeed after the `TTL expiry`. On the other hand, the original thread with go ahead and get the value from the backend and will update the cache and delete the key `lock::key`.
 
 Here is the sequence diagram to show the locking mechanism.
 
@@ -280,6 +280,10 @@ At `t=1`, `Client II` subscribes to the channel `notif:key`
 Here, at `t=0` when the notification was sent `Client II` has not started listening to the channel. So, at `t=1` when `Client II` starts listening to the channel, it will not see any message and will be blocked forever waiting for the message on the channel.
 
 Another way to fix the problem with `MemoLock` is to have a timeout when listening to the channel and retry from the start after that.
+
+#### Strategy VI - Use Distributed Consensus Framework
+
+Best solution, for a distributed topology is to use a consensus frameworks like `Zookeeper`, `ETCD` or `Consul`.
 
 ### Time Skew Problem
 
@@ -401,3 +405,9 @@ Also, be wary of its limitations like **time skew**, **split brain**, and **thun
 11. How to do distributed locking - [https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html](https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html)
 
 12. Eventual Consistency - [https://www.allthingsdistributed.com/2008/12/eventually_consistent.html](https://www.allthingsdistributed.com/2008/12/eventually_consistent.html)
+
+13. ETCD (RAFT) - [https://etcd.io/](https://etcd.io/)
+
+14. Apache Zookeeper (ZAB) - [https://zookeeper.apache.org/](https://zookeeper.apache.org/)
+
+15. Consul - [https://github.com/hashicorp/envconsul](https://github.com/hashicorp/envconsul)
