@@ -611,7 +611,7 @@ Adding a new field assigns a new ID for that field and for any nested fields. Re
 Apache Iceberg supports **time travel queries** on the table where users can mention the timestamp `time` and engines can execute the provided query against the table data as it existed at that timestamp `time`.  
 This is only possible because the Apache Iceberg table format can store the snapshot history in its metadata files and its data files are always append-only. So, the engines can use the snapshot which represents the table state at a certain timestamp, and execute the query against the data files corresponding to that snapshot.
 
-![Figure 1](/images/blog-iceberg-part-1/TimeTravel_Part1.png)  
+![Figure 1](/images/blog-iceberg-part-1/TimeTravel_Part1.png#large)  
 *Figure 1: When `User 1` passes a timestamp in its `SELECT` query, the table state used would correspond to that timestamp, i.e. Snapshot 0 `s0,` and  `User 2` will see the latest table state, i.e. Snapshot `s1`. Data of a particular row corresponding to different snapshots could be different, for customer `12345`, the rating in `s0` is `1` whereas in `s1` rating is `3`.*
 
 ## Summary
