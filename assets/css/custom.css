@@ -1,1 +1,68 @@
 /* Empty css file that users can override in their own /assets/css/custom.css file */
+
+.dark .img-light {
+    display: none !important;
+}
+
+.light .img-dark {
+    display: none !important;
+}
+
+.img-very-small div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.img-very-small img {
+    max-width: 35%;
+}
+
+@media only screen and (max-width: 600px) { 
+    .img-very-small img {
+        max-width: 80%;
+    }
+}
+
+.img-small div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.img-small img {
+    max-width: 45%;
+}
+
+@media only screen and (max-width: 600px) { 
+    .img-small img {
+        max-width: 85%;
+    }
+}
+
+.img-normal div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.img-normal img {
+    max-width: 60%;
+}
+
+@media only screen and (max-width: 600px) { 
+    .img-normal img {
+        max-width: 90%;
+    }
+}
+
+.img-large div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.img-large img {
+    width: 100vw !important;
+    max-width: 100vw !important;
+}

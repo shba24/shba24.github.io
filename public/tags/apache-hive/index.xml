@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Apache Hive on Shubham Bansal Technical Blog</title>
+    <link>http://localhost:1313/tags/apache-hive/</link>
+    <description>Recent content in Apache Hive on Shubham Bansal Technical Blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 02 Sep 2024 03:59:44 -0700</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/apache-hive/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Distributed Table Format Series - Apache Iceberg - Part 1</title>
+      <link>http://localhost:1313/posts/iceberg-table-format-part1/</link>
+      <pubDate>Mon, 02 Sep 2024 03:59:44 -0700</pubDate>
+      <guid>http://localhost:1313/posts/iceberg-table-format-part1/</guid>
+      <description>Introduction So, after a couple of years of debating whether to jump into the icy waters of Apache Iceberg Table format, I finally mustered up the courage (and the free time, thanks to a long weekend) to dive into understanding it. Spoiler alert: I didn’t freeze—well, maybe just a little, but it was worth it.&#xA;In this post, I’m going to tackle some burning questions that have been floating around my head</description>
+    </item>
+  </channel>
+</rss>

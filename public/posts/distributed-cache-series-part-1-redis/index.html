@@ -117,7 +117,7 @@
     
     
 
-<link type="text/css" rel="stylesheet" href="/css/bundle.min.e4624b6b8410b613e7863fb6489965eb8b6d1e9736d7e36cef9246df1514bf4b.css">
+<link type="text/css" rel="stylesheet" href="/css/bundle.min.9a4b0e1c19c6ff2e7ce48306bc72bdc17b1683f22d39c455590271a4d36e912a.css">
 
 
     
@@ -227,8 +227,24 @@
                 
                         
                 
+                        
+                
             
                 
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
                 
                         
                 
@@ -284,8 +300,24 @@
                 
                         
                 
+                        
+                
             
                 
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
                 
                         
                 
@@ -327,7 +359,15 @@
                         </li>
                         
                             <li class="bullet">
+                                <a href="http://localhost:1313/posts/iceberg-table-format-part1/">Distributed Table Format Series - Apache Iceberg - Part 1</a>
+                            </li>
+                        
+                            <li class="bullet">
                                 <a href="http://localhost:1313/posts/distributed-cache-series-part-1-redis/">Distributed Cache Series - Part I - Redis</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="http://localhost:1313/posts/testing/">Introducing Poison</a>
                             </li>
                         
                     
@@ -341,8 +381,24 @@
                 
                         
                 
+                        
+                
             
                 
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
                 
                         
                 
@@ -515,23 +571,143 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 <p><code>Sentinel</code> uses the concept of <a href="https://en.wikipedia.org/wiki/Quorum_%28distributed_computing%29" target="_blank"><code>Quorum</code></a>, which is a fixed set of sentinels that need to agree about the fact that the master is not reachable, to really mark the master as failing, and eventually start a <strong>failover</strong> procedure if possible. However, to perform the <strong>failover</strong>, one of the <code>sentinel</code> will be elected leader and authorized to proceed with the <strong>failover</strong>. And, this <strong>election</strong> and <strong>authorization</strong> is done by the voting among <code>sentinels</code> where majority (⌈n/2⌉, where <code>n</code> is the total number of <code>sentinels</code>) have to agree. Having at least the <strong>majority</strong> makes sure that <strong>failover</strong> is not done when the <strong>majority</strong> of sentinels are not reachable, making it impossible to <strong>failover</strong> in a <em><strong>split-brain partition</strong></em> situation where partition doesn&rsquo;t have <strong>majority</strong>.</p>
 <h4 id="quorum-election---case-i---master-down">Quorum Election - Case I - Master Down</h4>
 <p>Let’s take a simple case where we have <strong>3 Redis instances</strong>, running <strong>3 sentinels</strong>, <strong>1 master</strong>, and <strong>2 replicas</strong>, with a <strong>quorum</strong> configuration set to <em>2</em>.</p>
-<p><img src="/images/Election_Case1_Part1.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Election_Case1_Part1.png">
+    </div>
+</figure></p>
 <p>Let’s say <code>Master 1</code> fails or is not reachable. Then, <code>Sentinel 1/2/3</code> will discover that <code>Master 1</code> is down and agree on its failure. As the <strong>quorum config</strong> is set to 2 only, we only need 2 sentinel nodes to agree on the <code>Master 1</code> being down and mark it as failing.</p>
-<p><img src="/images/Election_Case1_Part2.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Election_Case1_Part2.png">
+    </div>
+</figure></p>
 <p>After that, one of the three <code>sentinels</code> will be elected as <strong>leader</strong> by running an <code>election</code> among all reachable <code>sentinels</code>. A <code>sentinel</code> will be elected as <strong>leader</strong> only when the <strong>majority</strong> of the total <code>sentinels</code> in the cluster agree on it. After that, the <code>elected sentinel</code> will flip one of the replicas with the <em>most recent commit</em> (the <code>sentinel</code> tries its best to identify this replica, not always possible) to a new master and update the <strong>sentinel configuration</strong>.</p>
-<p><img src="/images/Election_Case1_Part3.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Election_Case1_Part3.png">
+    </div>
+</figure></p>
 <p>And, when the old master (<code>Master 1</code>) comes back online, <code>sentinels</code> sends the old master the new <strong>sentinel configuration</strong>. Then, the old master syncs the data from the new master (<code>Master 2</code>)and marks itself as a replica of the new master.</p>
-<p><img src="/images/Election_Case1_Part4.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Election_Case1_Part4.png">
+    </div>
+</figure></p>
 <h4 id="quorum-election---case-ii---network-partition">Quorum Election - Case II - Network Partition</h4>
 <p>Let’s take a simple case where we have <strong>3 Redis instances</strong>, running <strong>3 sentinels</strong>, <strong>1 master</strong>, and <strong>2 replicas</strong>, with a <strong>quorum configuration</strong> set to 2.</p>
-<p><img src="/images/Election_Case2_Part1.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Election_Case2_Part1.png">
+    </div>
+</figure></p>
 <p>Let’s say we have a network partition where <code>Master 1</code>, <code>Client</code> as well as <code>Sentinel 1</code> are partitioned from the rest of the topology. <code>Sentinel 2 / 3</code> will discover that <code>Master 1</code> is down and agree on its failure. As the <strong>quorum config</strong> is set to 2 only, we only need <em>2 sentinel nodes</em> to agree on the <code>Master 1</code> being down and mark it as failing.</p>
-<p><img src="/images/Election_Case2_Part2.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Election_Case2_Part2.png">
+    </div>
+</figure></p>
 <p>As <code>Master 1</code> is missing from <code>Partition 2</code> only, <strong>election</strong> and <strong>failover</strong> will be triggered in only <code>Partition 2</code>. After that, one of the two sentinels (<code>Sentinel 2</code> and <code>Sentinel 3</code>) will be elected as leader by running an <code>election</code> among all reachable <code>sentinels</code>. A <code>sentinel</code> will be elected as <strong>leader</strong> only when the <strong>majority</strong> of the total sentinels in the cluster agree on it, which is 2 in this case, as both <code>Sentinel 2</code> and <code>Sentinel 3</code> will agree on <code>Master 1</code> being down. After that, the <strong>elected sentinel</strong> will flip one of the replicas with the most recent commit (the sentinel tries its best to identify this replica, not always possible) to a new master and update the <strong>sentinel configuration</strong>. However, during this time, the <code>Client</code> might (depending on the configuration) continue to send <code>WRITE</code> traffic to <code>Master 1</code> only, as it is doing the <strong>service discovery</strong> from <code>Sentinel 1</code> only and <code>Sentinel 1</code> only sees <code>Master 1</code>.</p>
-<p><img src="/images/Election_Case2_Part3.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Election_Case2_Part3.png">
+    </div>
+</figure></p>
 <p>And, when the <strong>network partition</strong> is finished, <code>sentinels</code> send the old master (<code>Master 1</code>) with the new <strong>sentinel configuration</strong>. Then, the old master (<code>Master 1</code>) syncs the data from the new master (<code>Master 2</code>) and marks itself as a replica of the new master. As the <code>Client</code> now does the <strong>service discovery</strong> from <code>Sentinel 1</code> which sees the new master (<code>Master 2</code>), it will start throwing the traffic to the new master. But, the <code>WRITE</code> operations that went to <code>Master 1</code> while the network was in the partition will forever be lost.</p>
 <p>That’s one of the reasons why <strong>Redis doesn’t provide any durability guarantees</strong>.</p>
-<p><img src="/images/Election_Case2_Part4.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Election_Case2_Part4.png">
+    </div>
+</figure></p>
 <h3 id="redis-cluster">Redis Cluster</h3>
 <p><code>Redis</code> scales <strong>horizontally</strong> with a deployment topology called <code>Redis Cluster</code>. <code>Redis Cluster</code> provides a way to automatically shard across multiple <code>Redis</code> nodes. It also helps with availability by flipping the replicas to master when the master is down.</p>
 <p><code>Redis</code> doesn’t use <code>consistent hashing</code>, but a different form of sharding where every key is conceptually part of what is called a <code>hash slot</code>.</p>
@@ -540,11 +716,56 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 Hash (Key) = CRC16 (Key) % 16384
 </code></pre><p>Let’s take an example of how it works end to end.</p>
 <p>Here is the topology of <strong>three shards</strong> covering the total <code>hash slot</code> space. Each key belongs to one of the shards and one of the <code>hash slot</code> allocated to that shard.</p>
-<p><img src="/images/Redis_Cluster_Part1.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Redis_Cluster_Part1.png">
+    </div>
+</figure></p>
 <p>Adding a new shard <code>Shard D</code> will look like this, where the <code>hash slots</code> allocated to this new shard are assigned with a subset of each existing shard <code>hash slot</code>. There is also a config where you can choose how many <code>hash slots</code> one wants to transfer from a specific shard.</p>
-<p><img src="/images/Redis_Cluster_Part2.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Redis_Cluster_Part2.png">
+    </div>
+</figure></p>
 <p>Similarly, for scaling down. If we have to remove <code>Shard B</code>, <code>hash slots</code> from <code>Shard B</code> will be split between <code>Shard A</code> and <code>Shard B</code>.</p>
-<p><img src="/images/Redis_Cluster_Part3.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Redis_Cluster_Part3.png">
+    </div>
+</figure></p>
 <h2 id="caching-strategy">Caching Strategy</h2>
 <h2 id="trade-offs">Trade-Offs</h2>
 <h3 id="availability">Availability</h3>
@@ -555,7 +776,22 @@ Hash (Key) = CRC16 (Key) % 16384
 <pre tabindex="0"><code>Replication ID, offset
 </code></pre><p><code>Replication ID</code> is composed of two things, <code>Main ID</code> and <code>Secondary ID</code>. Each of these IDs is a <strong>unique pseudo-random string</strong>. Every time an instance restarts from scratch as a master or a replica is promoted to master, a new <code>Replication ID</code> is generated for this instance. The replicas connected to a master will inherit its <code>Replication ID</code> after the handshake. So two instances with the same ID are related by the fact that they hold the same data, but potentially at a different time. It is the <code>offset</code> that works as a logical time to understand, for a given history (<code>Replication Id</code>), who holds the most updated data set.</p>
 <p>As instance starts from scratch as master, the <code>Secondary ID</code> is null and the <code>Main ID</code> is assigned some pseudo-random string. Offset might be different at different replicas as replication is asynchronous.</p>
-<p><img src="/images/Replication_Part1.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Replication_Part1.png">
+    </div>
+</figure></p>
 <p>If the master goes down, one of the replicas will become the new master and do the following</p>
 <pre tabindex="0"><code>Secondary Id = Main Id
 Main Id = new unique pseudo-random string
@@ -563,12 +799,42 @@ Main Id = new unique pseudo-random string
 <pre tabindex="0"><code>Replication ID = M1
 Offset = x-100
 </code></pre><p>This will tell the <code>Master 2</code> node to check if the <code>Replication ID</code> is either equal to the <code>Secondary ID</code> or <code>Main ID</code>, it has to do <strong>partial data sync</strong>, and if it&rsquo;s not equal to either of them, then it sends the <strong>full data sync</strong> to the <code>Replica 1</code>. <code>Replica 1</code> will also inherit the <code>Replication ID</code> and <code>offset</code> from the new master.</p>
-<p><img src="/images/Replication_Part2.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Replication_Part2.png">
+    </div>
+</figure></p>
 <p>After the <code>Master 1</code> comes back online, it syncs with the <code>Master 2</code> sending its last state as</p>
 <pre tabindex="0"><code>Replication ID = M1
 Offset = x
 </code></pre><p>As <code>M1</code> is equal to the <code>Secondary ID</code> at <code>Master 2</code>, it will do <strong>partial data sync</strong> to the old master as well as mark the old master as <code>Replica 2</code> and inherit the <code>Replication ID</code> and <code>offset</code> from the new master.</p>
-<p><img src="/images/Replication_Part3.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Replication_Part3.png">
+    </div>
+</figure></p>
 <p><strong>Note</strong>: <em>We will ignore <code>WRITABLE REPLICAS</code> for this blog, as that is a deprecated feature and only exists for a historical reason and backward compatibility.</em></p>
 <h3 id="scalability">Scalability</h3>
 <p><code>Redis Sentinel</code> is <strong>linearly scalable for reads but not for writes</strong> as it follows <code>Single Master Multiple Replica</code> topology.</p>
@@ -582,13 +848,73 @@ Offset = x
 <li><strong>Missing consensus on total order</strong></li>
 </ol>
 <p>Let’s take an example to explain the issue here. Consider the following setup, <code>3 masters</code>, <code>3 sentinels</code>. As the <strong>replication is asynchronous</strong>, the <code>Client</code> will get the <code>Ack</code> for the commit <code>C+1</code> before the replication is done.</p>
-<p><img src="/images/Consistency_Case1_Part1.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Consistency_Case1_Part1.png">
+    </div>
+</figure></p>
 <p>Let’s say a <strong>network partition</strong> happens and <code>Partition 2</code> has the <strong>majority</strong> but the old commit <code>C</code>. Here, the client is still seeing the last commit as <code>C+1</code>.</p>
-<p><img src="/images/Consistency_Case1_Part2.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Consistency_Case1_Part2.png">
+    </div>
+</figure></p>
 <p>After the <code>elections</code> conducted by <code>sentinels</code> in <code>Partition 2</code>, <code>Replica 1</code> will be converted to <code>Master 2</code> which only has commit <code>C</code>, this means the state of the system has reverted to commit <code>C</code> and we have lost the commit <code>C+1</code>, making the system <strong>non-durable</strong>.</p>
-<p><img src="/images/Consistency_Case1_Part3.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Consistency_Case1_Part3.png">
+    </div>
+</figure></p>
 <p>And, when the <strong>network partition</strong> is finished, <code>sentinels</code> send the old master (<code>Master 1</code>) with the new <strong>sentinel configuration</strong>. Then, the old master (<code>Master 1</code>) syncs the data from the new master (<code>Master 2</code>) and marks itself as a replica of the new master, completely losing commit <code>C+1</code> from the system.</p>
-<p><img src="/images/Consistency_Case1_Part4.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Consistency_Case1_Part4.png">
+    </div>
+</figure></p>
 <h4 id="redis-cluster-1">Redis Cluster</h4>
 <p><code>Redis cluster</code> <strong>doesn’t guarantee strong consistency</strong>. The reasons are very similar to <code>Redis Sentinel</code> as mentioned above.</p>
 <p>Few major reasons for the <strong>eventual consistency</strong> here -</p>
@@ -622,12 +948,72 @@ Offset = x
 <h4 id="strategy-v---use-distributed-locking-on-single-master-cache">Strategy V - Use Distributed Locking On Single-Master Cache</h4>
 <p>As Redis is a <strong>single-threaded service</strong>, multiple requests can do <code>GET</code> on a key, but the request will be processed one by one on the cache. So the first request which gets executed can try to put a any value corresponding to the key <code>lock::key</code>, if not already present using <code>SETNX</code> operation with some <code>TTL</code>. And rest of the clients will see that it&rsquo;s already present and will try again to get the lock and will only succeed after the <code>TTL expiry</code>. On the other hand, the original thread with go ahead and get the value from the backend and will update the cache and delete the key <code>lock::key</code>.</p>
 <p>Here is the sequence diagram to show the locking mechanism.</p>
-<p><img src="/images/Redis_Optimistic_Lock_Part1.png" alt="">
-<img src="/images/Redis_Optimistic_Lock_Part2.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Redis_Optimistic_Lock_Part1.png">
+    </div>
+</figure>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Redis_Optimistic_Lock_Part2.png">
+    </div>
+</figure></p>
 <p>It&rsquo;s a modification of <code>MemoLock</code> on the Redis <a href="https://redis.io/blog/caches-promises-locks/" target="_blank">blog</a>. Modification is done to avoid the <code>Starvation</code> condition in the <code>MemoLock</code> as explained in the blog.</p>
 <p>To avoid confusion, let me explain when the <code>Starvation</code> can occur.</p>
-<p><img src="/images/MemoLock_Issue_Part1.png" alt="">
-<img src="/images/MemoLock_Issue_Part2.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/MemoLock_Issue_Part1.png">
+    </div>
+</figure>
+
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/MemoLock_Issue_Part2.png">
+    </div>
+</figure></p>
 <p>At <code>t=0</code>, <code>Client I</code> notifies the channel <code>notif:key</code></p>
 <p>At <code>t=1</code>, <code>Client II</code> subscribes to the channel <code>notif:key</code></p>
 <p>Here, at <code>t=0</code> when the notification was sent <code>Client II</code> has not started listening to the channel. So, at <code>t=1</code> when <code>Client II</code> starts listening to the channel, it will not see any message and will be blocked forever waiting for the message on the channel.</p>
@@ -648,9 +1034,39 @@ This can be easily achieved by adding every new Sentinel with a 30-second delay 
 </blockquote>
 <p>Let’s take a look at a specific case where the wrong scale-up deployment of <code>sentinel</code> can cause <code>Split Brain</code> problems.</p>
 <p>We have <code>Sentinels</code> all agreed on the total visible sentinels in the cluster to be 5.</p>
-<p><img src="/images/Sentinel_Scale_Up_Split_Brain_Part1.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Sentinel_Scale_Up_Split_Brain_Part1.png">
+    </div>
+</figure></p>
 <p>Now, let’s say 2 <code>Sentinels</code>, <code>S6</code> and <code>S7</code> want to join the clusters and are brought up at the same time.</p>
-<p><img src="/images/Sentinel_Scale_Up_Split_Brain_Part2.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Sentinel_Scale_Up_Split_Brain_Part2.png">
+    </div>
+</figure></p>
 <p>What this can cause is a <code>split-brain</code> situation like this, if the <code>network partition</code> happens during the scale-up. Let’s say a network partition happens and two partitions are created, <code>Partition 1</code> and <code>Partition 2</code>.</p>
 <pre tabindex="0"><code>
 `Partition 1` = {`S1`, `S5`, `S6`, `S7`}
@@ -659,7 +1075,22 @@ This can be easily achieved by adding every new Sentinel with a 30-second delay 
 </code></pre><p>Here, the nodes in <code>Partition 1</code> will see the <code>total discovered sentinels</code> to be 7, which makes the <strong>majority</strong> to be 4, which this partition can achieve. If a particular partition can achieve a <strong>majority</strong> then it can take decisions on its own for <code>Redis</code>.</p>
 <p>Similarly, <code>Partition 2</code> will see the <code>total discovered sentinels</code> to be 5, which makes the <strong>majority</strong> to be 3, which this partition can achieve. If a particular partition can achieve a majority then it can take decisions on its own for redis.</p>
 <p>Now, in a cluster, if two <code>subclusters</code> can make their own decision for <code>Redis</code>, it will result in a <code>split-brain</code> situation.</p>
-<p><img src="/images/Sentinel_Scale_Up_Split_Brain_Part3.png" alt=""></p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div>
+        <img loading="lazy" alt="" src=" /images/Sentinel_Scale_Up_Split_Brain_Part3.png">
+    </div>
+</figure></p>
 <p>As a solution to this problem, <code>Redis</code> suggests scaling up <code>sentinels</code> one by one. Make sure to run <code>SENTINEL MASTER</code> after every <code>sentinel</code> addition to make sure all nodes agree on the same number of <code>sentinels</code>.</p>
 <h4 id="problem-2---sentinel-scale-down">Problem 2 - Sentinel Scale Down</h4>
 <p>Removal of <code>sentinel nodes</code> is also recommended to be done one by one to avoid the same situation of <code>Split Brain</code> as scaling up, mentioned above.</p>
