@@ -1,4 +1,4 @@
-baseURL = 'https://blog.shubham-bansal.com/'
+baseURL = 'https://shubham-bansal.com/'
 languageCode = 'en-us'
 title = 'Shubham Bansal Technical Blog'
 paginate = 10
