@@ -117,7 +117,7 @@
     
     
 
-<link type="text/css" rel="stylesheet" href="/css/bundle.min.9a4b0e1c19c6ff2e7ce48306bc72bdc17b1683f22d39c455590271a4d36e912a.css">
+<link type="text/css" rel="stylesheet" href="/css/bundle.min.6de10e797df76f9b89a691bb5d1f8f8cbb296c3bbc39528fe90fc9d7e80346e6.css">
 
 
     
@@ -506,7 +506,7 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
           
         
 
-        <span>27 mins read</span>
+        <span>28 mins read</span>
       </span>
     </div>
 
@@ -551,11 +551,11 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 <p><em>How does Apache Iceberg Table fit into the huge world of data analytics?</em></p>
 <p><em>What benefits does Apache Iceberg provide?</em></p>
 </blockquote>
-<p>Before we dive into it, I want to provide the motivation behind writing this post. Recently, I stumbled upon the brilliant blog series by <a href="https://jack-vanlightly.com/" target="_blank">Jack Vanlightly</a>, dissecting the <em>Apache Iceberg Table consistency model</em> (if you haven’t read it, go check out <a href="https://jack-vanlightly.com/analyses/2024/7/30/understanding-apache-icebergs-consistency-model-part1" target="_blank">part 1</a>, <a href="https://jack-vanlightly.com/analyses/2024/8/5/apache-icebergs-consistency-model-part-2" target="_blank">part 2</a>, <a href="https://jack-vanlightly.com/analyses/2024/8/6/apache-icebergs-consistency-model-part-3" target="_blank">part 3</a>). Jack has basically written the perfect blog series explaining the format, please go ahead and give it a read. In this post, I will try to bring something unique to the table and try to explain the puzzle as I look at it.</p>
-<p><strong>Note:</strong> For this post, all the testing is done with the stack of <code>Amazon Athena</code> engine, <code>Parquet</code> file format, <code>Amazon S3</code>, and <code>AWS Glue DataCatalog</code>.</p>
+<p>Before we dive into it, I want to provide the motivation behind writing this post. Recently, I stumbled upon the brilliant blog series by <a href="https://jack-vanlightly.com/" target="_blank"><em>Jack Vanlightly</em></a>, dissecting the <em>Apache Iceberg Table consistency model</em> (if you haven’t read it, go check out <a href="https://jack-vanlightly.com/analyses/2024/7/30/understanding-apache-icebergs-consistency-model-part1" target="_blank">part 1</a>, <a href="https://jack-vanlightly.com/analyses/2024/8/5/apache-icebergs-consistency-model-part-2" target="_blank">part 2</a>, <a href="https://jack-vanlightly.com/analyses/2024/8/6/apache-icebergs-consistency-model-part-3" target="_blank">part 3</a>). Jack has basically written the perfect blog series explaining the format, please go ahead and give it a read. In this post, I will try to bring something unique to the table and try to explain the puzzle as I look at it.</p>
+<p><strong>Note:</strong> For this post, all the testing is done with the stack of <em>Amazon Athena engine</em>, <em>Parquet file format</em>, <em>Amazon S3</em>, and <em>AWS Glue DataCatalog</em>.</p>
 <h2 id="glossary">Glossary</h2>
 <ul>
-<li><strong>Data Lake -</strong> A Data Lake[18] is a centralized repository that allows you to store all your structured (like databases), semi-structured (like <a href="https://parquet.apache.org/" target="_blank">Parquet</a>, <a href="https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=31818911" target="_blank">ORC</a>, or <a href="https://avro.apache.org/" target="_blank">Avro</a>), and unstructured data (like emails, documents, and images) at any scale. The important thing to note here, you can store your data as-is, without having to structure it first, and run different types of analytics - from dashboards and visualizations to big data processing, real-time analytics, and machine learning - to guide better decisions.</li>
+<li><strong>Data Lake -</strong> A Data Lake[18] is a centralized repository that allows you to store all your structured (like databases), semi-structured (like <a href="https://parquet.apache.org/" target="_blank"><em>Parquet</em></a>, <a href="https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=31818911" target="_blank"><em>ORC</em></a>, or <a href="https://avro.apache.org/" target="_blank"><em>Avro</em></a>), and unstructured data (like emails, documents, and images) at any scale. The important thing to note here, you can store your data as-is, without having to structure it first, and run different types of analytics - from dashboards and visualizations to big data processing, real-time analytics, and machine learning - to guide better decisions.</li>
 </ul>
 <p>
 
@@ -572,18 +572,20 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 
 
 <figure class=" img-small">
-    <div>
-        <img loading="lazy" alt="img" src=" /images/blog-iceberg-part-1/DataLake_Stack_Part1.png#small">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="Fig: General Data Lake Stack Layers" src=" /images/blog-iceberg-part-1/DataLake_Stack_Part1.png#small">
+        <figcaption style="font-size: small; font-style: italic;">
+            Fig: General Data Lake Stack Layers
+        </figcaption>
     </div>
-</figure>[A sample text]
-<em>Fig: General Data Lake Stack</em></p>
+</figure></p>
 <ul>
 <li><strong>Data Warehouse -</strong> A Data Warehouse[19] is a specialized type of database designed for the efficient storage, retrieval, and analysis of large volumes of structured data. It serves as a central repository where data from various sources is consolidated, transformed, and made available for complex queries and reporting.</li>
 <li><strong>Data Lake vs Data Warehouse -</strong> While a Data Lake stores raw data, a Data Warehouse stores processed, refined data that is typically organized into tables and optimized for querying and reporting. Data Warehouses are structured and schema-based, whereas Data Lakes are more flexible, allowing for the storage of unstructured data.</li>
 <li><strong>Table Format -</strong> A table format defines how data is organized and stored within a table, specifying the structure, schema, and relationships of the data. It is fundamental in relational databases, data warehouses, and big data systems, enabling efficient data management, querying, and analysis.</li>
 </ul>
 <h2 id="hive-table-format">Hive Table Format</h2>
-<p>Before Apache Iceberg came into the picture, the most commonly used table format was the Hive Table format through the Apache Hive[5] SQL engine. Apache Hive[5] was originally built to translate SQL statements into Hadoop MapReduce jobs which are used to perform some operations on table data stored on object storage like HDFS, S3, Azure Blob Storage, and others.</p>
+<p>Before Apache Iceberg came into the picture, the most commonly used table format was the <em>Hive Table Format</em> through the Apache Hive[5] SQL engine. Apache Hive[5] was originally built to translate SQL statements into Hadoop MapReduce jobs which are used to perform some operations on table data stored on object storage like HDFS, S3, Azure Blob Storage, and others.</p>
 <p>Here is what the structure of the Hive table format used to look like
 
 
@@ -596,57 +598,62 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 
 
 
-<figure class="">
-    <div>
-        <img loading="lazy" alt="" src=" /images/blog-iceberg-part-1/HiveTableFormat-Part1.png">
+
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="Fig: Represents generic Hive Table format directory structure with multi-layer partitions" src=" /images/blog-iceberg-part-1/HiveTableFormat-Part1.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            Fig: Represents generic Hive Table format directory structure with multi-layer partitions
+        </figcaption>
     </div>
 </figure>
-<em><!-- raw HTML omitted -->Fig: <!-- raw HTML omitted --></em>
 Hive Table format came into the picture to remove the necessity to provide a data file path (e.g. <em>/usr/hive/warehouse/db/table/data=2024-01-01/country=US/file1</em>) on which a particular Hive SQL query is used to do the processing. Instead, Apache Hive[5] talks to Apache Hive Metastore[6] to find the specific files corresponding to a table and partition(if specified) and do the MapReduce operation on those files.</p>
 <h3 id="benefits">Benefits</h3>
 <ol>
-<li>Worked with every engine as Hive Table Format was a default table format for Data Lake for a long time because of its easy pluggability with existing data storage.</li>
-<li>Partitioning the data provided an efficient access pattern instead of scanning all the data to find the relevant data.</li>
-<li>File format agnostic. Different file formats can be used for more performance of certain types of query.</li>
-<li>Atomically update a whole partition by swapping the new partition with the old partition. Atomicity comes from filesystem atomicity.</li>
+<li>Worked with every engine as Hive Table Format was a default table format for Data Lake for a long time because of its <strong>easy pluggability</strong> with existing data storage.</li>
+<li><strong>Partitioning</strong> the data provided an efficient access pattern instead of scanning all the data to find the relevant data.</li>
+<li><strong>File format agnostic</strong>. Different file formats can be used for more performance of certain types of query.</li>
+<li>Atomically update a whole partition by swapping the new partition with the old partition. <strong>Atomicity</strong> comes from filesystem atomicity.</li>
 </ol>
 <p>But, over time as more requirements came, Hive Table Format became highly inefficient for certain types of query or data, although many of these are solved in the current version of Apache Hive[5]</p>
 <h3 id="drawbacks">Drawbacks</h3>
 <ol>
-<li>Small updates were very inefficient as the whole partition folder had to be rewritten with the new data.</li>
-<li>Multi-partition change was not safe as Hive only supported ACID transactions at the partition level, not across multiple partitions so in case of failures, it used to create an inconsistent view of the partition.</li>
-<li>Multiple queries could modify the same data in parallel, overwriting each other&rsquo;s data and causing durability/isolation issues.</li>
-<li>Listing all the files in a partition takes a huge amount of time as the <code>ListFiles</code> operation was not efficient for a large set of files.</li>
-<li>Users had to know how the data was partitioned to make a query.</li>
-<li>Hive Metastore[6] stores statistics of a table, to make the query execution efficient, but most of the time these statistics are stale as they are created in the background asynchronously.</li>
-<li>Changing the partitioning schema of data was costly as the whole data across multiple partitions had to be re-written and was not safe because of missing multi-partition ACID transactions support in Hive.</li>
+<li>Small updates were very <strong>inefficient</strong> as the whole partition folder had to be rewritten with the new data.</li>
+<li>Multi-partition change was <strong>not safe</strong> as Hive only supported ACID transactions at the partition level, not across multiple partitions so in case of failures, it used to create an inconsistent view of the partition.</li>
+<li>Multiple queries could modify the same data in parallel, overwriting each other&rsquo;s data and causing <strong>durability/isolation issues</strong>.</li>
+<li>Listing all the files in a partition takes a huge amount of time as the <code>ListFiles</code> operation was <strong>not efficient</strong> for a large set of files.</li>
+<li>Users had to know how the data was partitioned or layed out to make a query. <strong>Partition filter was required for all queries</strong>.</li>
+<li>Hive Metastore[6] stores statistics of a table, to make the query execution efficient, but most of the time these <strong>statistics are stale</strong> as they are created in the background asynchronously.</li>
+<li><strong>Changing the partitioning schema of data was costly</strong> as the whole data across multiple partitions had to be re-written and was not safe because of missing multi-partition ACID transactions support in Hive.</li>
 </ol>
 <p>So, there was a need for a new table format which resolves these issues.</p>
 <h2 id="apache-iceberg">Apache Iceberg</h2>
-<p>Apache Iceberg was released on Dec 18, 2017 [7] by <a href="https://www.linkedin.com/in/rdblue" target="_blank">Ryan Blue</a> &amp; <a href="https://www.linkedin.com/in/daniel-weeks-a1946860/" target="_blank">Daniel Weeks</a> when they built it at Netflix. Hive was used by many different services and engines in the Netflix infrastructure. However, Hive was never able to guarantee the correctness of the data and didn’t provide stable atomic transactions.</p>
+<p>Apache Iceberg was released on <code>Dec 18, 2017</code> [7] by <a href="https://www.linkedin.com/in/rdblue" target="_blank"><em>Ryan Blue</em></a> &amp; <a href="https://www.linkedin.com/in/daniel-weeks-a1946860/" target="_blank"><em>Daniel Weeks</em></a> when they built it at Netflix. Hive was used by many different services and engines in the Netflix infrastructure. However, Hive was never able to guarantee the correctness of the data and didn’t provide stable atomic transactions.</p>
 <p>Apache Iceberg was created majorly to solve the following requirements from a Table Format for Data Lake:-</p>
 <ol>
-<li>Ensure the correctness of the table data and support ACID transactions basically at the table level.</li>
-<li>Performance improvements for the small writes with support for file level changes instead of only at the partition level.</li>
-<li>Simplify and abstract away how the data is physically laid out on the file system, so the user doesn’t have to know about how the data is partitioned.</li>
-<li>Support quick and performant schema evolution of the table. Including partition schema change and table scheme change.</li>
+<li>Ensure the <strong>correctness</strong> of the table data and support <strong>ACID transactions</strong> basically at the table level.</li>
+<li><strong>Performance improvements</strong> for the small writes with support for file level changes instead of only at the partition level.</li>
+<li><strong>Simplify and abstract</strong> away how the data is physically laid out on the file system, so the user doesn’t have to know about how the data is partitioned.</li>
+<li>Support quick and performant <strong>schema evolution</strong> of the table. Including <strong>partition schema change</strong> and <strong>table schema change</strong>.</li>
 </ol>
-<p>So what Ryan and Daniel did was very intelligent. Instead of forcing an implementation like Apache Hive did and making the system strongly coupled between Hadoop, Apache Hive Engine, Hive Table Format and Hive Metastore, <strong>Apache Iceberg dismantled what Data Lake table format</strong> consists of and provided the following:-</p>
+<p>So what <em>Ryan</em> and <em>Daniel</em> did was very intelligent. Instead of forcing an implementation like Apache Hive did and making the system strongly coupled between <strong>Hadoop</strong>, <strong>Apache Hive Engine</strong>, <strong>Hive Table Format</strong> and <strong>Hive Metastore</strong>, <code>Apache Iceberg dismantled what Data Lake table format consists</code> of and provided the following:-</p>
 <ol>
-<li>Table format specification [9]</li>
-<li>APIs [10] and Libraries [11],[12] for interacting with that specification
+<li>Table format <strong>specification</strong> [9]</li>
+<li><strong>APIs</strong> [10] and <strong>Libraries</strong> [11],[12] for interacting with that specification
 <ul>
 <li>These libraries are leveraged in other engines and tools that allow them to interact with Iceberg Tables.</li>
 </ul>
 </li>
 </ol>
-<p>Because of this very important decision, Apache Iceberg started a standard for Open Table Format (OTF) where if any Data Lake solution supports Iceberg spec, that Data Lake solution can be plugged with any engine that has an integration with Iceberg APIs. Removing the requirement to transform the data or its metadata between different table formats, so the same table data can be used across different iceberg-compatible engines, reducing the huge cost of transformation, storage, and time. Also, providing flexibility in using different engines for different uses, for example, a customer can use the same Iceberg table with Amazon EMR[20] for training their machine learning algorithm as well as Amazon Athena[2] for data visualization in Amazon Quicksight[21].</p>
+<p>Because of this very important decision, Apache Iceberg started a standard for <strong>Open Table Format (OTF)</strong> where if any Data Lake solution supports Iceberg Tables, that Data Lake solution can be plugged with any engine that has an integration with <em>Iceberg APIs</em>. Removing the requirement to transform the data or its metadata between different table formats, so the same table data can be used across different iceberg-compatible engines, reducing the huge cost of <em>transformation</em>, <em>storage</em>, and <em>time</em>. Also, providing flexibility in using different engines for different uses, for example, a customer can use the same Iceberg table with Amazon EMR[20] for training their machine learning algorithm as well as Amazon Athena[2] for data visualization in Amazon Quicksight[21].</p>
 <p>For this blog, we will focus only on the V2 spec of Apache Iceberg as it also has the support for the V1 spec.</p>
 <h2 id="apache-iceberg-table-v2-format">Apache Iceberg Table (v2) Format</h2>
-<p>Apache Iceberg table format is designed to manage a large, <strong>slow-changing</strong> collection of files in a distributed file system. Here are the major goals it&rsquo;s trying to hit:-</p>
+<p>Apache Iceberg table format is designed to manage a <strong>large</strong>, <strong>slow-changing</strong> collection of files in a distributed file system. Here are the major goals it&rsquo;s trying to hit:-</p>
 <ol>
 <li><strong>Serializable Isolation</strong> – Reads will be isolated from concurrent writes and always use a committed snapshot of a table’s data. Writes will support removing and adding files in a single operation and are never partially visible. Readers will not acquire locks.</li>
-<li><strong>Speed</strong> – Operations will use O(1) remote calls to plan the files for a scan and not O(n) where n grows with the size of the table, like the number of partitions or files.</li>
+<li><strong>Speed</strong> – Operations will use <em>O(1)</em> remote calls to plan the files for a scan and not <em>O(n)</em> where n grows with the size of the table, like the number of partitions or files.</li>
 <li><strong>Scale –</strong> Job planning will be handled primarily by clients (engines) and will not be a bottleneck on a central metadata store. Metadata will include information needed for cost-based optimization.</li>
 <li><strong>Evolution</strong> – Tables will support full schema and partition spec evolution. Schema evolution supports safe column add, drop, reorder, and rename, including in nested structures.</li>
 <li><strong>Dependable types</strong> – Tables will provide well-defined and dependable support for a core set of types.</li>
@@ -671,12 +678,18 @@ Hive Table format came into the picture to remove the necessity to provide a dat
 
 
 
-<figure class="">
-    <div>
-        <img loading="lazy" alt="" src=" /images/blog-iceberg-part-1/Iceberg_Base_Table_Spec_Part1.png">
+
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="Fig: Generic Apache Iceberg Specification Layout" src=" /images/blog-iceberg-part-1/Iceberg_Base_Table_Spec_Part1.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            Fig: Generic Apache Iceberg Specification Layout
+        </figcaption>
     </div>
 </figure></p>
-<p>For every transaction in the table, a new metadata file (<code>metadata file v2</code>) is created which basically represents the state of the table after the transaction is finished. The major difference the Apache Iceberg Table format brings as compared to the Hive Table format is tracking of files in a table through metadata files as compared to directories. This helps majorly with supporting ACID transactions on the table, which I will explain later in the post, but in short, this allows writers to create data files, manifest files, and metadata files in place and only adds to the table in an explicit atomic swap commit to the catalog where <code>db.table</code> starts pointing to the new metadata files.</p>
+<p>For every transaction in the table, a new metadata file (<code>metadata file v2</code>) is created which basically represents the state of the table after the transaction is finished. The major difference the Apache Iceberg Table format brings as compared to the Hive Table format is <em>tracking of files in a table through metadata files as compared to directories</em>. This helps majorly with supporting <strong>ACID transactions</strong> on the table, which I will explain later in the post, but in short, this allows writers to create data files, manifest files, and metadata files in place and only adds to the table in an explicit atomic swap commit to the catalog where <code>db.table</code> starts pointing to the new metadata files.</p>
 <h3 id="metadata-file">Metadata File</h3>
 <p>The table metadata file tracks the table schema, partitioning config, custom properties, and snapshots of the table contents. A snapshot represents the state of a table at some time and is used to access the complete set of data files in the table.</p>
 <p>Metadata files server majorly following purpose in Apache Iceberg Table format:</p>
@@ -687,135 +700,135 @@ Hive Table format came into the picture to remove the necessity to provide a dat
 <li><strong>Sort Order Evolution</strong>: The metadata.json file defines how data is sorted in the data files, playing a key role in optimizing storage and query performance. It also tracks updates to sort order.</li>
 <li><strong>Snapshot Management</strong>: Iceberg supports snapshots, which capture different versions of the table at various points in time. The metadata file tracks these snapshots, allowing for time travel queries that let users access and query the table as it existed in the past.</li>
 </ol>
-<pre tabindex="0"><code>{
-  // Represents Iceberg Spec Version
-  &#34;format-version&#34; : 2,
-
-  // Unique Table Id
-  &#34;table-uuid&#34; : &#34;aa39ff75-1fff-4130-a732-4306e7a79242&#34;,
-
-  // Default location of the table
-  &#34;location&#34; : &#34;s3://athena-iceberg-test-csbansal/amazon_reviews_partitioned_iceberg&#34;,
-
-  // ??
-  &#34;last-sequence-number&#34; : 1,
-  &#34;last-updated-ms&#34; : 1725209795556,
-  &#34;last-column-id&#34; : 16,
-
-  // Represents the current scheme-id of the table, referring to the
-  // scheme-ids present in the `schemas` array below.
-  &#34;current-schema-id&#34; : 0,
-
-  // Represents all the schemes with scheme-id starting from 0
-  &#34;schemas&#34; : [ {
-    &#34;type&#34; : &#34;struct&#34;,
-    &#34;schema-id&#34; : 0,
-    &#34;fields&#34; : [ {
-      &#34;id&#34; : 1,
-      &#34;name&#34; : &#34;marketplace&#34;,
-      &#34;required&#34; : false,
-      &#34;type&#34; : &#34;string&#34;
-    }, ... ]
-  } ],
-
-  // Represents the current spec-id of the table, referring to the
-  // spec-ids present in `partition-specs` array below.
-  &#34;default-spec-id&#34; : 0,
-
-  // Represents all the partition specs with spec-id starting for 0
-  &#34;partition-specs&#34; : [ {
-    &#34;spec-id&#34; : 0,
-    &#34;fields&#34; : [ {
-      &#34;name&#34; : &#34;region&#34;,
-      &#34;transform&#34; : &#34;identity&#34;,
-      &#34;source-id&#34; : 16,
-      &#34;field-id&#34; : 1000
-    } ]
-  } ],
-
-  // ??
-  &#34;last-partition-id&#34; : 1000,
-
-  // Represents the current sort order-id of the table, referring to the
-  // order-ids present in `sort-orders` array below.
-  &#34;default-sort-order-id&#34; : 0,
-
-  // Represents all the sort orders with order-id starting for 0
-  &#34;sort-orders&#34; : [ {
-    &#34;order-id&#34; : 0,
-    &#34;fields&#34; : [ ]
-  } ],
-
-  // All the table properties passing during the creation of
-  // the table from the Athena console.
-  &#34;properties&#34; : {
-    // This represents the maximum file size of each data file
-    &#34;write.target-file-size-bytes&#34; : &#34;536870912&#34;,
-
-    // This represents the file format of the data files
-    &#34;write.format.default&#34; : &#34;parquet&#34;,
-
-    // As the data is stored in S3, this is marked as true
-    &#34;write.object-storage.enabled&#34; : &#34;true&#34;,
-
-    // This represents the path of the data files folder
-    &#34;write.object-storage.path&#34; : &#34;s3://athena-iceberg-test-csbansal/amazon_reviews_partitioned_iceberg/data&#34;,
-    &#34;write.parquet.compression-codec&#34; : &#34;zstd&#34;
-  },
-
-  // This represents the current snapshot id of the table, referring
-  // to the snapshot-id present in `snapshot` array below 
-  // Just after the creation of the table, without any data committed
-  // and no data files, snapshot id is marked as -1
-  &#34;current-snapshot-id&#34; : 3309457910536306846,
-  &#34;refs&#34; : {
-    &#34;main&#34; : {
-      &#34;snapshot-id&#34; : 3309457910536306846,
-      &#34;type&#34; : &#34;branch&#34;
-    }
-  },
-
-  // Represents the list of all snapshots with snapshot-id
-  &#34;snapshots&#34; : [ {
-    &#34;sequence-number&#34; : 1,
-    &#34;snapshot-id&#34; : 3309457910536306846,
-    &#34;timestamp-ms&#34; : 1725209795556,
-    &#34;summary&#34; : {
-      &#34;operation&#34; : &#34;append&#34;,
-      &#34;trino_query_id&#34; : &#34;20240901_165630_00018_zy64f&#34;,
-      &#34;added-data-files&#34; : &#34;2&#34;,
-      &#34;added-records&#34; : &#34;600000&#34;,
-      &#34;added-files-size&#34; : &#34;26196599&#34;,
-      &#34;changed-partition-count&#34; : &#34;2&#34;,
-      &#34;total-records&#34; : &#34;600000&#34;,
-      &#34;total-files-size&#34; : &#34;26196599&#34;,
-      &#34;total-data-files&#34; : &#34;2&#34;,
-      &#34;total-delete-files&#34; : &#34;0&#34;,
-      &#34;total-position-deletes&#34; : &#34;0&#34;,
-      &#34;total-equality-deletes&#34; : &#34;0&#34;
-    },
-    &#34;manifest-list&#34; : &#34;s3://athena-iceberg-test-csbansal/amazon_reviews_partitioned_iceberg/metadata/snap-3309457910536306846-1-18e32bf4-b518-4ad4-a98c-a4608f4a0352.avro&#34;,
-    &#34;schema-id&#34; : 0
-  } ],
-
-  // Maintains statistics about the table
-  &#34;statistics&#34; : [ ],
-
-  // Records changes in the current snapshot.
-  // Useful for auditing, tracing table evolution, and/or rollback.
-  &#34;snapshot-log&#34; : [ {
-    &#34;timestamp-ms&#34; : 1725209795556,
-    &#34;snapshot-id&#34; : 3309457910536306846
-  } ],
-
-  // Records changes in the metadata files.
-  // Useful for auditing, tracing table evolution, and/or rollback.
-  &#34;metadata-log&#34; : [ {
-    &#34;timestamp-ms&#34; : 1725209734625,
-    &#34;metadata-file&#34; : &#34;s3://athena-iceberg-test-csbansal/amazon_reviews_partitioned_iceberg/metadata/00000-2daaf519-baa9-488e-b62a-dca0ff275c56.metadata.json&#34;
-  } ]
-}
-</code></pre><table>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Represents Iceberg Spec Version
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;format-version&#34;</span> : <span style="color:#ae81ff">2</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Unique Table Id
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;table-uuid&#34;</span> : <span style="color:#e6db74">&#34;aa39ff75-1fff-4130-a732-4306e7a79242&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Default location of the table
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;location&#34;</span> : <span style="color:#e6db74">&#34;s3://athena-iceberg-test-csbansal/amazon_reviews_partitioned_iceberg&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// ??
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;last-sequence-number&#34;</span> : <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;last-updated-ms&#34;</span> : <span style="color:#ae81ff">1725209795556</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;last-column-id&#34;</span> : <span style="color:#ae81ff">16</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Represents the current scheme-id of the table, referring to the
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// scheme-ids present in the `schemas` array below.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;current-schema-id&#34;</span> : <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Represents all the schemes with scheme-id starting from 0
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;schemas&#34;</span> : [ {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;type&#34;</span> : <span style="color:#e6db74">&#34;struct&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;schema-id&#34;</span> : <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;fields&#34;</span> : [ {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;id&#34;</span> : <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;name&#34;</span> : <span style="color:#e6db74">&#34;marketplace&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;required&#34;</span> : <span style="color:#66d9ef">false</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;type&#34;</span> : <span style="color:#e6db74">&#34;string&#34;</span>
+</span></span><span style="display:flex;"><span>    }, <span style="color:#960050;background-color:#1e0010">...</span> ]
+</span></span><span style="display:flex;"><span>  } ],
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Represents the current spec-id of the table, referring to the
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// spec-ids present in `partition-specs` array below.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;default-spec-id&#34;</span> : <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Represents all the partition specs with spec-id starting for 0
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;partition-specs&#34;</span> : [ {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;spec-id&#34;</span> : <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;fields&#34;</span> : [ {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;name&#34;</span> : <span style="color:#e6db74">&#34;region&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;transform&#34;</span> : <span style="color:#e6db74">&#34;identity&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;source-id&#34;</span> : <span style="color:#ae81ff">16</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;field-id&#34;</span> : <span style="color:#ae81ff">1000</span>
+</span></span><span style="display:flex;"><span>    } ]
+</span></span><span style="display:flex;"><span>  } ],
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// ??
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;last-partition-id&#34;</span> : <span style="color:#ae81ff">1000</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Represents the current sort order-id of the table, referring to the
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// order-ids present in `sort-orders` array below.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;default-sort-order-id&#34;</span> : <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Represents all the sort orders with order-id starting for 0
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;sort-orders&#34;</span> : [ {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;order-id&#34;</span> : <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;fields&#34;</span> : [ ]
+</span></span><span style="display:flex;"><span>  } ],
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// All the table properties passing during the creation of
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// the table from the Athena console.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;properties&#34;</span> : {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// This represents the maximum file size of each data file
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">&#34;write.target-file-size-bytes&#34;</span> : <span style="color:#e6db74">&#34;536870912&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// This represents the file format of the data files
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">&#34;write.format.default&#34;</span> : <span style="color:#e6db74">&#34;parquet&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// As the data is stored in S3, this is marked as true
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">&#34;write.object-storage.enabled&#34;</span> : <span style="color:#e6db74">&#34;true&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// This represents the path of the data files folder
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">&#34;write.object-storage.path&#34;</span> : <span style="color:#e6db74">&#34;s3://athena-iceberg-test-csbansal/amazon_reviews_partitioned_iceberg/data&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;write.parquet.compression-codec&#34;</span> : <span style="color:#e6db74">&#34;zstd&#34;</span>
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// This represents the current snapshot id of the table, referring
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// to the snapshot-id present in `snapshot` array below 
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// Just after the creation of the table, without any data committed
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// and no data files, snapshot id is marked as -1
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;current-snapshot-id&#34;</span> : <span style="color:#ae81ff">3309457910536306846</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;refs&#34;</span> : {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;main&#34;</span> : {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;snapshot-id&#34;</span> : <span style="color:#ae81ff">3309457910536306846</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;type&#34;</span> : <span style="color:#e6db74">&#34;branch&#34;</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Represents the list of all snapshots with snapshot-id
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;snapshots&#34;</span> : [ {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;sequence-number&#34;</span> : <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;snapshot-id&#34;</span> : <span style="color:#ae81ff">3309457910536306846</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;timestamp-ms&#34;</span> : <span style="color:#ae81ff">1725209795556</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;summary&#34;</span> : {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;operation&#34;</span> : <span style="color:#e6db74">&#34;append&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;trino_query_id&#34;</span> : <span style="color:#e6db74">&#34;20240901_165630_00018_zy64f&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;added-data-files&#34;</span> : <span style="color:#e6db74">&#34;2&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;added-records&#34;</span> : <span style="color:#e6db74">&#34;600000&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;added-files-size&#34;</span> : <span style="color:#e6db74">&#34;26196599&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;changed-partition-count&#34;</span> : <span style="color:#e6db74">&#34;2&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;total-records&#34;</span> : <span style="color:#e6db74">&#34;600000&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;total-files-size&#34;</span> : <span style="color:#e6db74">&#34;26196599&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;total-data-files&#34;</span> : <span style="color:#e6db74">&#34;2&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;total-delete-files&#34;</span> : <span style="color:#e6db74">&#34;0&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;total-position-deletes&#34;</span> : <span style="color:#e6db74">&#34;0&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;total-equality-deletes&#34;</span> : <span style="color:#e6db74">&#34;0&#34;</span>
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;manifest-list&#34;</span> : <span style="color:#e6db74">&#34;s3://athena-iceberg-test-csbansal/amazon_reviews_partitioned_iceberg/metadata/snap-3309457910536306846-1-18e32bf4-b518-4ad4-a98c-a4608f4a0352.avro&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;schema-id&#34;</span> : <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>  } ],
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Maintains statistics about the table
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;statistics&#34;</span> : [ ],
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Records changes in the current snapshot.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// Useful for auditing, tracing table evolution, and/or rollback.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;snapshot-log&#34;</span> : [ {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;timestamp-ms&#34;</span> : <span style="color:#ae81ff">1725209795556</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;snapshot-id&#34;</span> : <span style="color:#ae81ff">3309457910536306846</span>
+</span></span><span style="display:flex;"><span>  } ],
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Records changes in the metadata files.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// Useful for auditing, tracing table evolution, and/or rollback.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;metadata-log&#34;</span> : [ {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;timestamp-ms&#34;</span> : <span style="color:#ae81ff">1725209734625</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;metadata-file&#34;</span> : <span style="color:#e6db74">&#34;s3://athena-iceberg-test-csbansal/amazon_reviews_partitioned_iceberg/metadata/00000-2daaf519-baa9-488e-b62a-dca0ff275c56.metadata.json&#34;</span>
+</span></span><span style="display:flex;"><span>  } ]
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div>
+<table>
 <thead>
 <tr>
 <th style="text-align:center">Field</th>
@@ -824,105 +837,105 @@ Hive Table format came into the picture to remove the necessity to provide a dat
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center">format-version</td>
+<td style="text-align:center"><code>format-version</code></td>
 <td style="text-align:center">Represents Iceberg spec version, if the engine sees a version higher than it supports, it should throw an exception to avoid data corruption.</td>
 </tr>
 <tr>
-<td style="text-align:center">table-uuid</td>
+<td style="text-align:center"><code>table-uuid</code></td>
 <td style="text-align:center">Unique Table Id</td>
 </tr>
 <tr>
-<td style="text-align:center">location</td>
+<td style="text-align:center"><code>location</code></td>
 <td style="text-align:center">The default location of the table, where metadata files, manifest files, and data files are stored.</td>
 </tr>
 <tr>
-<td style="text-align:center">last-sequence-number</td>
-<td style="text-align:center">Represents monotonically increasing long.</td>
+<td style="text-align:center"><code>last-sequence-number</code></td>
+<td style="text-align:center">The table&rsquo;s highest assigned sequence number, a monotonically increasing long that tracks the order of snapshots in a table.</td>
 </tr>
 <tr>
-<td style="text-align:center">current-schema-id</td>
-<td style="text-align:center">Represents the current scheme-id of the table, referring to the scheme-ids present in the `schemas` array below</td>
+<td style="text-align:center"><code>current-schema-id</code></td>
+<td style="text-align:center">Represents the current <code>scheme-id</code> of the table, referring to the scheme-ids present in the <code>schemas</code> array below</td>
 </tr>
 <tr>
-<td style="text-align:center">schemas</td>
-<td style="text-align:center">Represents all the schema objects with unique scheme-id starting from 0</td>
+<td style="text-align:center"><code>schemas</code></td>
+<td style="text-align:center">Represents all the schema objects with unique <code>scheme-id</code> starting from 0</td>
 </tr>
 <tr>
-<td style="text-align:center">default-spec-id</td>
-<td style="text-align:center">Represents the current spec-id of the table, referring to the spec-ids present in the `partition-specs` array below.</td>
+<td style="text-align:center"><code>default-spec-id</code></td>
+<td style="text-align:center">Represents the current spec-id of the table, referring to the spec-ids present in the <code>partition-specs</code> array below.</td>
 </tr>
 <tr>
-<td style="text-align:center">partition-specs</td>
-<td style="text-align:center">Represents all the partition specs with unique spec-id starting for 0</td>
+<td style="text-align:center"><code>partition-specs</code></td>
+<td style="text-align:center">Represents all the partition specs with unique <code>spec-id</code> starting for 0</td>
 </tr>
 <tr>
-<td style="text-align:center">field-id</td>
+<td style="text-align:center"><code>field-id</code></td>
 <td style="text-align:center">Used to identify a partition field and is unique across all partition specs.</td>
 </tr>
 <tr>
-<td style="text-align:center">last-partition-id</td>
-<td style="text-align:center"></td>
+<td style="text-align:center"><code>last-partition-id</code></td>
+<td style="text-align:center">An integer; the highest assigned partition field ID across all partition specs for the table. This is used to ensure partition fields are always assigned an unused ID when evolving specs.</td>
 </tr>
 <tr>
-<td style="text-align:center">default-sort-order-id</td>
-<td style="text-align:center">Represents the current sort order-id of the table, referring to the order-ids present in the `sort-orders` array below.</td>
+<td style="text-align:center"><code>default-sort-order-id</code></td>
+<td style="text-align:center">Represents the current sort <code>order-id</code> of the table, referring to the order-ids present in the <code>sort-orders</code> array below.</td>
 </tr>
 <tr>
-<td style="text-align:center">sort-orders</td>
-<td style="text-align:center">Represents all the sort orders with order-id starting for 0</td>
+<td style="text-align:center"><code>sort-orders</code></td>
+<td style="text-align:center">Represents all the sort orders with <code>order-id</code> starting for 0</td>
 </tr>
 <tr>
-<td style="text-align:center">current-snapshot-id</td>
-<td style="text-align:center">This represents the current snapshot ID of the table, referring to the snapshot-id present in the `snapshot` array below. Just after the creation of the table, without any data committed and no data files, the snapshot id is marked as -1</td>
+<td style="text-align:center"><code>current-snapshot-id</code></td>
+<td style="text-align:center">This represents the current snapshot ID of the table, referring to the <code>snapshot-id</code> present in the <code>snapshot</code> array below. Just after the creation of the table, without any data committed and no data files, the snapshot id is marked as <code>-1</code></td>
 </tr>
 <tr>
-<td style="text-align:center">snapshots</td>
-<td style="text-align:center">Represents the list of all snapshots with snapshot-id</td>
+<td style="text-align:center"><code>snapshots</code></td>
+<td style="text-align:center">Represents the list of all snapshots with <code>snapshot-id</code></td>
 </tr>
 <tr>
-<td style="text-align:center">statistics</td>
+<td style="text-align:center"><code>statistics</code></td>
 <td style="text-align:center">Maintains statistics about the table</td>
 </tr>
 <tr>
-<td style="text-align:center">snapshot-log</td>
+<td style="text-align:center"><code>snapshot-log</code></td>
 <td style="text-align:center">Records change in the current snapshot. Useful for auditing, tracing table evolution, and/or rollback.</td>
 </tr>
 <tr>
-<td style="text-align:center">metadata-log</td>
+<td style="text-align:center"><code>metadata-log</code></td>
 <td style="text-align:center">Records change in the metadata files. Useful for auditing, tracing table evolution, and/or rollback.</td>
 </tr>
 </tbody>
 </table>
 <h3 id="manifest-list">Manifest List</h3>
 <p>A snapshot represents the state of a table at some time and is used to access the complete set of data files in the table. Each snapshot has a manifest list which lists all the manifest files for that snapshot.  The data in a snapshot is the union of all files in its manifest files. Each manifest list stores metadata about manifests, including partition stats and data file counts. These stats are used to avoid reading manifests that are not required for an operation.</p>
-<pre tabindex="0"><code>{
-  &#34;data&#34;: [
-    {
-      &#34;manifest_path&#34;: &#34;s3://athena-iceberg-test-csbansal/amazon_reviews_partitioned_iceberg/metadata/18e32bf4-b518-4ad4-a98c-a4608f4a0352-m0.avro&#34;,
-      &#34;manifest_length&#34;: 8291,
-      &#34;partition_spec_id&#34;: 0,
-      &#34;content&#34;: 0,
-      &#34;sequence_number&#34;: 1,
-      &#34;min_sequence_number&#34;: 1,
-      &#34;added_snapshot_id&#34;: 3309457910536306846,
-      &#34;added_data_files_count&#34;: 2,
-      &#34;existing_data_files_count&#34;: 0,
-      &#34;deleted_data_files_count&#34;: 0,
-      &#34;added_rows_count&#34;: 600000,
-      &#34;existing_rows_count&#34;: 0,
-      &#34;deleted_rows_count&#34;: 0,
-      &#34;partitions&#34;: [
-        {
-          &#34;contains_null&#34;: false,
-          &#34;contains_nan&#34;: false,
-          &#34;lower_bound&#34;: &#34;dXMtZWFzdC0x&#34;,
-          &#34;upper_bound&#34;: &#34;dXMtd2VzdC0y&#34;
-        }
-      ]
-    }
-  ]
-}
-</code></pre><table>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;data&#34;</span>: [
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;manifest_path&#34;</span>: <span style="color:#e6db74">&#34;s3://athena-iceberg-test-csbansal/amazon_reviews_partitioned_iceberg/metadata/18e32bf4-b518-4ad4-a98c-a4608f4a0352-m0.avro&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;manifest_length&#34;</span>: <span style="color:#ae81ff">8291</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;partition_spec_id&#34;</span>: <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;content&#34;</span>: <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;sequence_number&#34;</span>: <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;min_sequence_number&#34;</span>: <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;added_snapshot_id&#34;</span>: <span style="color:#ae81ff">3309457910536306846</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;added_data_files_count&#34;</span>: <span style="color:#ae81ff">2</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;existing_data_files_count&#34;</span>: <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;deleted_data_files_count&#34;</span>: <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;added_rows_count&#34;</span>: <span style="color:#ae81ff">600000</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;existing_rows_count&#34;</span>: <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;deleted_rows_count&#34;</span>: <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;partitions&#34;</span>: [
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">&#34;contains_null&#34;</span>: <span style="color:#66d9ef">false</span>,
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">&#34;contains_nan&#34;</span>: <span style="color:#66d9ef">false</span>,
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">&#34;lower_bound&#34;</span>: <span style="color:#e6db74">&#34;dXMtZWFzdC0x&#34;</span>,
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">&#34;upper_bound&#34;</span>: <span style="color:#e6db74">&#34;dXMtd2VzdC0y&#34;</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      ]
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  ]
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div>
+<table>
 <thead>
 <tr>
 <th>Field</th>
@@ -931,89 +944,89 @@ Hive Table format came into the picture to remove the necessity to provide a dat
 </thead>
 <tbody>
 <tr>
-<td>manifest_path</td>
+<td><code>manifest_path</code></td>
 <td style="text-align:center">Points to the manifest file path</td>
 </tr>
 <tr>
-<td>partition_spec_id</td>
+<td><code>partition_spec_id</code></td>
 <td style="text-align:center">Id of the partition spec for this manifest file</td>
 </tr>
 <tr>
-<td>sequence_number</td>
+<td><code>sequence_number</code></td>
 <td style="text-align:center">Represent the sequence number when this manifest file was added</td>
 </tr>
 <tr>
-<td>min_sequence_number</td>
-<td style="text-align:center"></td>
+<td><code>min_sequence_number</code></td>
+<td style="text-align:center">The minimum data sequence number of all live data or delete files in the manifest</td>
 </tr>
 <tr>
-<td>added_snapshot_id</td>
+<td><code>added_snapshot_id</code></td>
 <td style="text-align:center">Represents the snapshot ID when this manifest file was added</td>
 </tr>
 <tr>
-<td>partitions</td>
+<td><code>partitions</code></td>
 <td style="text-align:center">Represents partition stats about the data file for the query processing</td>
 </tr>
 </tbody>
 </table>
 <h3 id="manifest-file">Manifest File</h3>
 <p>Data files in snapshots are tracked by one or more manifest files that contain a row for each data file in the table, the file&rsquo;s partition data, and its metrics. Manifest files are reused across snapshots to avoid rewriting metadata that is slow-changing. Manifests can track data files with any subset of a table and are not associated with partitions. So, even after partition change, there is no need to change the data files, all it needs is changing the metadata, we will discuss this further in the <code>Schema Evolution</code> section below.</p>
-<pre tabindex="0"><code>{
-  &#34;data&#34;: [
-    {
-      &#34;status&#34;: 1,
-      &#34;snapshot_id&#34;: 3309457910536306846,
-      &#34;sequence_number&#34;: null,
-      &#34;file_sequence_number&#34;: null,
-      &#34;data_file&#34;: {
-        &#34;content&#34;: 0,
-        &#34;file_path&#34;: &#34;s3://athena-iceberg-test-csbansal/amazon_reviews_partitioned_iceberg/data/ztoQ1A/region=us-east-1/20240901_165630_00018_zy64f-4a50ddf4-9596-41cb-8d68-7b2b40b0b549.parquet&#34;,
-        &#34;file_format&#34;: &#34;PARQUET&#34;,
-        &#34;partition&#34;: {
-          &#34;region&#34;: &#34;us-east-1&#34;
-        },
-        &#34;record_count&#34;: 300000,
-        &#34;file_size_in_bytes&#34;: 13097723,
-        &#34;column_sizes&#34;: [
-          {
-            &#34;key&#34;: 1,
-            &#34;value&#34;: 22002
-          }, ... 
-        ],
-        &#34;value_counts&#34;: [
-          {
-            &#34;key&#34;: 1,
-            &#34;value&#34;: 300000
-          }, ...
-        ],
-        &#34;null_value_counts&#34;: [
-          {
-            &#34;key&#34;: 1,
-            &#34;value&#34;: 0
-          }, ...
-        ],
-        &#34;nan_value_counts&#34;: [],
-        &#34;lower_bounds&#34;: [
-          {
-            &#34;key&#34;: 1,
-            &#34;value&#34;: &#34;SlA=&#34;
-          }, ...
-        ],
-        &#34;upper_bounds&#34;: [
-          {
-            &#34;key&#34;: 1,
-            &#34;value&#34;: &#34;dW5kZWZpbmVk&#34;
-          }, ...
-        ],
-        &#34;key_metadata&#34;: null,
-        &#34;split_offsets&#34;: null,
-        &#34;equality_ids&#34;: null,
-        &#34;sort_order_id&#34;: 0
-      }
-    }, ...
-  ]
-}
-</code></pre><table>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;data&#34;</span>: [
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;status&#34;</span>: <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;snapshot_id&#34;</span>: <span style="color:#ae81ff">3309457910536306846</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;sequence_number&#34;</span>: <span style="color:#66d9ef">null</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;file_sequence_number&#34;</span>: <span style="color:#66d9ef">null</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;data_file&#34;</span>: {
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;content&#34;</span>: <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;file_path&#34;</span>: <span style="color:#e6db74">&#34;s3://athena-iceberg-test-csbansal/amazon_reviews_partitioned_iceberg/data/ztoQ1A/region=us-east-1/20240901_165630_00018_zy64f-4a50ddf4-9596-41cb-8d68-7b2b40b0b549.parquet&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;file_format&#34;</span>: <span style="color:#e6db74">&#34;PARQUET&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;partition&#34;</span>: {
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">&#34;region&#34;</span>: <span style="color:#e6db74">&#34;us-east-1&#34;</span>
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;record_count&#34;</span>: <span style="color:#ae81ff">300000</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;file_size_in_bytes&#34;</span>: <span style="color:#ae81ff">13097723</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;column_sizes&#34;</span>: [
+</span></span><span style="display:flex;"><span>          {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;key&#34;</span>: <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#ae81ff">22002</span>
+</span></span><span style="display:flex;"><span>          }, <span style="color:#960050;background-color:#1e0010">...</span> 
+</span></span><span style="display:flex;"><span>        ],
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;value_counts&#34;</span>: [
+</span></span><span style="display:flex;"><span>          {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;key&#34;</span>: <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#ae81ff">300000</span>
+</span></span><span style="display:flex;"><span>          }, <span style="color:#960050;background-color:#1e0010">...</span>
+</span></span><span style="display:flex;"><span>        ],
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;null_value_counts&#34;</span>: [
+</span></span><span style="display:flex;"><span>          {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;key&#34;</span>: <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>          }, <span style="color:#960050;background-color:#1e0010">...</span>
+</span></span><span style="display:flex;"><span>        ],
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;nan_value_counts&#34;</span>: [],
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;lower_bounds&#34;</span>: [
+</span></span><span style="display:flex;"><span>          {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;key&#34;</span>: <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#e6db74">&#34;SlA=&#34;</span>
+</span></span><span style="display:flex;"><span>          }, <span style="color:#960050;background-color:#1e0010">...</span>
+</span></span><span style="display:flex;"><span>        ],
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;upper_bounds&#34;</span>: [
+</span></span><span style="display:flex;"><span>          {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;key&#34;</span>: <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#e6db74">&#34;dW5kZWZpbmVk&#34;</span>
+</span></span><span style="display:flex;"><span>          }, <span style="color:#960050;background-color:#1e0010">...</span>
+</span></span><span style="display:flex;"><span>        ],
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;key_metadata&#34;</span>: <span style="color:#66d9ef">null</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;split_offsets&#34;</span>: <span style="color:#66d9ef">null</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;equality_ids&#34;</span>: <span style="color:#66d9ef">null</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;sort_order_id&#34;</span>: <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }, <span style="color:#960050;background-color:#1e0010">...</span>
+</span></span><span style="display:flex;"><span>  ]
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div>
+<table>
 <thead>
 <tr>
 <th style="text-align:center">Field</th>
@@ -1022,49 +1035,49 @@ Hive Table format came into the picture to remove the necessity to provide a dat
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center">snapshot_id</td>
+<td style="text-align:center"><code>snapshot_id</code></td>
 <td style="text-align:center">Represents the snapshot id when this data file was added</td>
 </tr>
 <tr>
-<td style="text-align:center">sequence_number</td>
-<td style="text-align:center"></td>
+<td style="text-align:center"><code>sequence_number</code></td>
+<td style="text-align:center">Data sequence number of the file.</td>
 </tr>
 <tr>
-<td style="text-align:center">file_sequence_number</td>
-<td style="text-align:center"></td>
+<td style="text-align:center"><code>file_sequence_number</code></td>
+<td style="text-align:center">File sequence number indicating when the file was added.</td>
 </tr>
 <tr>
-<td style="text-align:center">file_path</td>
+<td style="text-align:center"><code>file_path</code></td>
 <td style="text-align:center">Points to the data file</td>
 </tr>
 <tr>
-<td style="text-align:center">upper_bounds</td>
+<td style="text-align:center"><code>upper_bounds</code></td>
 <td style="text-align:center">Lists the upper bound corresponding to each column.</td>
 </tr>
 <tr>
-<td style="text-align:center">lower_bounds</td>
+<td style="text-align:center"><code>lower_bounds</code></td>
 <td style="text-align:center">Lists the lower bound corresponding to each column.</td>
 </tr>
 <tr>
-<td style="text-align:center">null_value_counts</td>
+<td style="text-align:center"><code>null_value_counts</code></td>
 <td style="text-align:center">Lists the count of null values corresponding to each column.</td>
 </tr>
 <tr>
-<td style="text-align:center">value_counts</td>
+<td style="text-align:center"><code>value_counts</code></td>
 <td style="text-align:center">Lists the total count of values corresponding to each column.</td>
 </tr>
 <tr>
-<td style="text-align:center">column_sizes</td>
+<td style="text-align:center"><code>column_sizes</code></td>
 <td style="text-align:center">Lists the size of values corresponding to each column.</td>
 </tr>
 </tbody>
 </table>
 <h3 id="data-file">Data File</h3>
-<p>Standard parquet format data file, containing raw data stored in columnar format.</p>
+<p>Data file formats are configurable through engines and can be set when creating a table with <code>CREATE TABLE</code> as table properties or afterwards using <code>ALTER TABLE</code> command.</p>
 <h2 id="apache-iceberg-benefits">Apache Iceberg Benefits</h2>
 <h3 id="snapshot-isolation-for-acid-transactions">Snapshot Isolation For ACID Transactions</h3>
-<p>As I mentioned above, Netflix saw a huge problem with multiple team’s concurrent operations conflicting with each other leading to issues with correctness of the data, making each operation unstable. One of the ways to solve this problem was to add support for ACID transactions in Table Format. With ACID transactions, we had the guarantee that operations will not conflict with each other causing durability or consistency issues.</p>
-<p>To provide the ACID transactions support, Apache Iceberg went with Optimistic Concurrency protocol[22]. An atomic swap of one table metadata file for another provides the basis for serializable isolation. Readers use the snapshot that was current when they load the table metadata and are not affected by changes until they do metadata refresh and pick up a new metadata location.</p>
+<p>As I mentioned above, Netflix saw a huge problem with multiple team’s <strong>concurrent operations conflicting</strong> with each other leading to issues with correctness of the data, making each operation unstable. One of the ways to solve this problem was to add support for <strong>ACID transactions</strong> in Table Format. With ACID transactions, we had the guarantee that operations will not conflict with each other causing <strong>durability or consistency issues</strong>.</p>
+<p>To provide the ACID transactions support, Apache Iceberg went with <strong>Optimistic Concurrency protocol</strong>[22]. An atomic swap of one table metadata file for another provides the basis for serializable isolation. Readers use the snapshot that was current when they load the table metadata and are not affected by changes until they do metadata refresh and pick up a new metadata location.</p>
 <h4 id="read---write-isolation">Read - Write Isolation</h4>
 <p>
 
@@ -1077,12 +1090,18 @@ Hive Table format came into the picture to remove the necessity to provide a dat
 
 
 
-<figure class="">
-    <div>
-        <img loading="lazy" alt="" src=" /images/blog-iceberg-part-1/Isolation_Read_Write_Part1.png">
+
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="Figure 1" src=" /images/blog-iceberg-part-1/Isolation_Read_Write_Part1.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            Figure 1
+        </figcaption>
     </div>
 </figure>
-<em>Fig: <code>User 1</code> sees the <code>db.table</code> state as <code>Metadata file v1</code> and uses the snapshot <code>s0</code></em><br>
+<em>Figure 1: <code>User 1</code> sees the <code>db.table</code> state as <code>Metadata file v1</code> and uses the snapshot <code>s0</code></em><br>
 
 
 
@@ -1094,20 +1113,26 @@ Hive Table format came into the picture to remove the necessity to provide a dat
 
 
 
-<figure class="">
-    <div>
-        <img loading="lazy" alt="" src=" /images/blog-iceberg-part-1/Isolation_Read_Wrote_Part2.png">
+
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="Figure 2" src=" /images/blog-iceberg-part-1/Isolation_Read_Wrote_Part2.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            Figure 2
+        </figcaption>
     </div>
 </figure><br>
-<em>Fig: <code>User 2</code> sees the <code>db.table</code> state as <code>Metadata file v2</code> and tries to commit against the snapshot <code>s1</code> which is completely isolated from <code>s0</code> used in the <code>Read</code> operation above</em></p>
+<em>Figure 2: <code>User 2</code> sees the <code>db.table</code> state as <code>Metadata file v2</code> and tries to commit against the snapshot <code>s1</code> which is completely isolated from <code>s0</code> used in the <code>Read</code> operation above</em></p>
 <p>Both operations above succeed without conflicting with each other but with a different view of the table, depending on when the operation started.</p>
 <h4 id="write---write-isolation">Write - Write Isolation</h4>
-<p>Writers create the changes in a bottom-up manner, starting with writing a new data file, then creating a new manifest file, then a new manifest file list, and then at last metadata file, optimistically, assuming the current version will not be changed before the writer’s commit to catalog. Once a writer has created an update, it commits by swapping the table’s metadata file pointer from the base version to the new version. But, if the snapshot on which the update is based is no longer the latest snapshot at the time of commit/swap operation, then the writer will have to retry the operation again against the latest snapshot. Now, at this point, there are two types of changes that the writer has already done</p>
+<p>Writers create the changes in a <em>bottom-up manner</em>, starting with writing a new data file, then creating a new manifest file, then a new manifest file list, and then at last metadata file, optimistically, assuming the current version will not be changed before the writer’s commit to catalog. Once a writer has created an update, it commits by swapping the table’s metadata file pointer from the base version to the new version. But, if the snapshot on which the update is based is no longer the latest snapshot at the time of commit/swap operation, then the writer will have to retry the operation again against the latest snapshot. Now, at this point, there are two types of changes that the writer has already done</p>
 <ol>
-<li>Data changes</li>
-<li>Metadata changes</li>
+<li><strong>Data changes</strong></li>
+<li><strong>Metadata changes</strong></li>
 </ol>
-<p>For some operations[<a href="https://iceberg.apache.org/spec/%5c#commit-conflict-resolution-and-retry" target="_blank">16</a>], there is retry support by re-applying just the metadata changes[2] against the new snapshot metadata and committing, under well-defined conditions. For example, if a file that was rewritten is still present in the new snapshot then the same rewritten file can be used against the new snapshot, without rewriting the whole file again, basically, Apache Iceberg re-uses new rewritten files if it can.</p>
+<p>For some operations[<a href="https://iceberg.apache.org/spec/#commit-conflict-resolution-and-retry" target="_blank">16</a>], there is retry support by re-applying just the metadata changes[2] against the new snapshot metadata and committing, under well-defined conditions. For example, if a file that was rewritten is still present in the new snapshot then the same rewritten file can be used against the new snapshot, without rewriting the whole file again, basically, Apache Iceberg re-uses new rewritten files if it can.</p>
 <p>
 
 
@@ -1119,12 +1144,18 @@ Hive Table format came into the picture to remove the necessity to provide a dat
 
 
 
-<figure class="">
-    <div>
-        <img loading="lazy" alt="" src=" /images/blog-iceberg-part-1/Write_Write_Isolation_Part1.png">
+
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="Figure 1" src=" /images/blog-iceberg-part-1/Write_Write_Isolation_Part1.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            Figure 1
+        </figcaption>
     </div>
 </figure><br>
-<em>Fig: Initially, both users will try to do the <code>Get</code> operation to get the current table state which is <code>Metadata file v2,</code> and use that to do further write operations against</em></p>
+<em>Figure 1: Initially, both users will try to do the <code>Get</code> operation to get the current table state which is <code>Metadata file v2,</code> and use that to do further write operations against</em></p>
 <p>
 
 
@@ -1136,12 +1167,18 @@ Hive Table format came into the picture to remove the necessity to provide a dat
 
 
 
-<figure class="">
-    <div>
-        <img loading="lazy" alt="" src=" /images/blog-iceberg-part-1/Write_Write_Isolation_Part2.png">
+
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="Figure 2" src=" /images/blog-iceberg-part-1/Write_Write_Isolation_Part2.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            Figure 2
+        </figcaption>
     </div>
 </figure><br>
-<em>Fig: In the second stage, both users try to write files in a bottom-up manner in parallel against the <code>Metadata file v2</code> creating <code>Metadata file v3’</code> and <code>Metadata file v3’’</code></em></p>
+<em>Figure 2: In the second stage, both users try to write files in a bottom-up manner in parallel against the <code>Metadata file v2</code> creating <code>Metadata file v3’</code> and <code>Metadata file v3’’</code></em></p>
 <p>
 
 
@@ -1153,17 +1190,23 @@ Hive Table format came into the picture to remove the necessity to provide a dat
 
 
 
-<figure class="">
-    <div>
-        <img loading="lazy" alt="" src=" /images/blog-iceberg-part-1/Write_Write_Isolation_Part3.png">
+
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="Figure 3" src=" /images/blog-iceberg-part-1/Write_Write_Isolation_Part3.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            Figure 3
+        </figcaption>
     </div>
 </figure>
-<em>Fig: In the final stage, during the commit operation of swap (CAS[23]) only one user will see success, here that is <code>User 1</code> and <code>User 2</code> will retry against the latest metadata file, i.e. <code>Metadata file v3’</code></em> <em>and might reuse the re-written files</em></p>
+<em>Figure 3: In the final stage, during the commit operation of swap (CAS[23]) only one user will see success, here that is <code>User 1</code> and <code>User 2</code> will retry against the latest metadata file, i.e. <code>Metadata file v3’</code></em> <em>and might reuse the re-written files</em></p>
 <h3 id="partition-evolution">Partition Evolution</h3>
 <p><strong>Note:</strong> <code>Amazon Athena</code> at this moment (10/1/2024) doesn’t support altering the table partition schema[<a href="https://docs.aws.amazon.com/athena/latest/ug/querying-iceberg-additional-operations.html%5c#querying-iceberg-additional-operations-partition-related-operations" target="_blank">15</a>].</p>
-<p>Data files are stored in manifests with a tuple of partition values that are used in scans to filter out files that cannot contain records that match the scan’s filter predicate. Partition values for a data file must be the same for all records stored in the data file. Manifest file stores data files from any partition as long as the partition spec is the same for all the data files in that manifest, so the partition abstraction is maintained at each manifest file level.</p>
-<p>Partitioning can change and the correct partition filters are always derived from column predicates, which makes it defined and predictable for each row.</p>
-<p>Apache Iceberg supports partition evolution which works at scale and maintains the correctness of the table at all times, which, if you remember, was missing from the Hive Table format. Table partitioning can be evolved by adding, removing, renaming, or reordering partition spec fields.</p>
+<p>Data files are stored in manifests with a tuple of partition values that are used in scans to filter out files that cannot contain records that match the scan’s filter predicate. Partition values for a data file must be the same for all records stored in the data file. Manifest file stores data files from any partition as long as the partition spec is the same for all the data files in that manifest, so the <strong>partition abstraction is maintained at each manifest file level</strong>.</p>
+<p>Partitioning can change and the correct partition filters are always derived from column predicates, which makes it <strong>defined and predictable</strong> for each row.</p>
+<p>Apache Iceberg supports partition evolution which works at scale and maintains the <strong>correctness</strong> of the table at all times, which, if you remember, was missing from the Hive Table format. Table partitioning can be evolved by adding, removing, renaming, or reordering partition spec fields.</p>
 <p>Changing a partition spec produces a new spec identified by a unique spec ID that is added to the table&rsquo;s list of partition specs and may be set as the table&rsquo;s default spec.</p>
 <p><strong>Note:</strong> Partition field IDs never change, it only increases even if fields are removed to make sure it&rsquo;s backward compatible.</p>
 <p>
@@ -1177,12 +1220,18 @@ Hive Table format came into the picture to remove the necessity to provide a dat
 
 
 
-<figure class="">
-    <div>
-        <img loading="lazy" alt="" src=" /images/blog-iceberg-part-1/Partition_Evolution_Part1.png">
+
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="Figure 1" src=" /images/blog-iceberg-part-1/Partition_Evolution_Part1.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            Figure 1
+        </figcaption>
     </div>
 </figure><br>
-<em>Fig: At the start, we have a table state with <code>spec-id</code> = 0, pointing to partition spec with only the <code>region</code> as the partition column. This will be used in all the query planning and execution by the engine.</em></p>
+<em>Figure 1: At the start, we have a table state with <code>spec-id</code> = 0, pointing to partition spec with only the <code>region</code> as the partition column. This will be used in all the query planning and execution by the engine.</em></p>
 <p>
 
 
@@ -1194,12 +1243,18 @@ Hive Table format came into the picture to remove the necessity to provide a dat
 
 
 
-<figure class="">
-    <div>
-        <img loading="lazy" alt="" src=" /images/blog-iceberg-part-1/Partition_Evolution_Part2.png">
+
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="Figure 2" src=" /images/blog-iceberg-part-1/Partition_Evolution_Part2.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            Figure 2
+        </figcaption>
     </div>
 </figure>
-<em>Fig: When we do the <code>ALTER TABLE ADD PARTITION</code> operation, it will alter the table partition schema/spec. With Iceberg, the change in partition schema happens at the metadata layer only, no changes to existing data files are done. The new snapshot file <code>Manifest List v2</code> will still point to the old Manifest file <code>Manifest file v1</code></em></p>
+<em>Figure 2: When we do the <code>ALTER TABLE ADD PARTITION</code> operation, it will alter the table partition schema/spec. With Iceberg, the change in partition schema happens at the metadata layer only, no changes to existing data files are done. The new snapshot file <code>Manifest List v2</code> will still point to the old Manifest file <code>Manifest file v1</code></em></p>
 <p>
 
 
@@ -1211,26 +1266,35 @@ Hive Table format came into the picture to remove the necessity to provide a dat
 
 
 
-<figure class="">
-    <div>
-        <img loading="lazy" alt="" src=" /images/blog-iceberg-part-1/Partition_Evolution_Part3.png">
+
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="Figure 3" src=" /images/blog-iceberg-part-1/Partition_Evolution_Part3.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            Figure 3
+        </figcaption>
     </div>
 </figure>
-<em>Fig: And, when we finally write to the table after partition schema evolution, the new manifest file list <code>Manifest List v3</code> and manifest file <code>Manifest file v2</code> will be created with the new partition schema metadata.</em></p>
+<em>Figure 3: And, when we finally write to the table after partition schema evolution, the new manifest file list <code>Manifest List v3</code> and manifest file <code>Manifest file v2</code> will be created with the new partition schema metadata.</em></p>
 <h3 id="delete--update--merge-mode">Delete / Update / Merge Mode</h3>
-<p><strong>Note:</strong> Athena ONLY [24] supports Merge-On-Read (MOR) by default when changing data by using the <code>UPDATE</code>, <code>MERGE INTO</code>, and <code>DELETE FROM</code> statements.</p>
+<p><strong>Note:</strong> Athena ONLY [24] supports <em>Merge-On-Read (MOR)</em> by default when changing data by using the <code>UPDATE</code>, <code>MERGE INTO</code>, and <code>DELETE FROM</code> statements.</p>
 <p>Apache Iceberg supports two ways of handling row-level updates/delete/merge. Each has its own pros and cons, and knowing how it works internally helps in configuring your table at the time of creation, and optimizing for the traffic pattern that you have for different scenarios.</p>
 <h4 id="delete-files">Delete Files</h4>
-<p>There is no way, as of now, that lets you choose a specific Delete File type. It depends on how the DeleteFile Interface is implemented in the engine that is being used.</p>
+<p>There is no way, as of now, that lets you choose a specific Delete File type. It depends on how the <code>DeleteFile</code> Interface is implemented in the engine that is being used.</p>
 <h5 id="positional-delete-files">Positional Delete Files</h5>
 <p>Positional Delete files store the exact position of the deleted records in the dataset. It keeps track of the file path of the data file along with the position of the deleted records in that file.</p>
 <h5 id="equality-delete-files">Equality Delete Files</h5>
 <p>Equality Delete Files stores the value of one or more columns of the deleted records. These column values are stored based on the condition used while deleting these records.</p>
 <p>Let’s say the columns for the deleted records are</p>
-<pre tabindex="0"><code>data=2024-09-01
-region=us-east-1
-</code></pre><p>When we put these column values in the equality delete file, it will work as deleting all the rows with these column values, and that could be 1000 rows as well. So, adding just a single line in an equality delete file could cause many rows to be deleted in the table.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">data</span> <span style="color:#960050;background-color:#1e0010">=</span> <span style="color:#f92672">&#34;2024-09-01&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">region</span> <span style="color:#960050;background-color:#1e0010">=</span> <span style="color:#e6db74">&#34;us-east-1&#34;</span>
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div>
+<p>When we put these column values in the equality delete file, it will work as deleting all the rows with these column values, and that could be 1000 rows as well. So, adding just a single line in an equality delete file could cause many rows to be deleted in the table.</p>
 <h4 id="copy-on-write-cow">Copy-On-Write (COW)</h4>
+<p>In this approach, existing data files are re-written on <code>UPDATE</code>, <code>MERGE INTO</code>, and <code>DELETE FROM</code> statements. It just completely rewrittes the data files and the new snapshot starts pointing to that new data file and doesn&rsquo;t point to the old one.</p>
 <h4 id="merge-on-read-mor">Merge-On-Read (MOR)</h4>
 <p>In this approach, existing data files are not re-written on <code>UPDATE</code>, <code>MERGE INTO</code>, and <code>DELETE FROM</code> statements, but one or more delete files are created containing the rows either deleted/updated/merged.</p>
 <h5 id="delete">DELETE</h5>
@@ -1245,29 +1309,35 @@ region=us-east-1
 
 
 
-<figure class="">
-    <div>
-        <img loading="lazy" alt="" src=" /images/blog-iceberg-part-1/Delete_MOR_Part1.png">
+
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="Figure 1" src=" /images/blog-iceberg-part-1/Delete_MOR_Part1.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            Figure 1
+        </figcaption>
     </div>
 </figure>
-<em>Fig: For a <code>DELETE</code> operation, a new snapshot is created, pointing to a new manifest list <code>Manifest List v2</code>. That manifest list is pointing to a new Manifest file <code>Manifest file v2</code> which ultimately points to a delete file. In the above figure, the format of the delete file is <code>Positional Delete File</code></em></p>
+<em>Figure 1: For a <code>DELETE</code> operation, a new snapshot is created, pointing to a new manifest list <code>Manifest List v2</code>. That manifest list is pointing to a new Manifest file <code>Manifest file v2</code> which ultimately points to a delete file. In the above figure, the format of the delete file is <code>Positional Delete File</code></em></p>
 <p>Below is the <code>Manifest List v2</code>. A new snapshot <code>6348593007041601180</code> was added corresponding to a new delete file <code>c2f70e20-0e4f-4d52-b600-17c264357ff4-m0.avro</code>.</p>
-<pre tabindex="0"><code>{
-  &#34;data&#34;: [
-    {
-      &#34;manifest_path&#34;: &#34;s3://athena-iceberg-test-csbansal/amazon_reviews_partitioned_iceberg/metadata/c2f70e20-0e4f-4d52-b600-17c264357ff4-m0.avro&#34;,
-      …
-      &#34;sequence_number&#34;: 2,
-      &#34;min_sequence_number&#34;: 2,
-      &#34;added_snapshot_id&#34;: 6348593007041601180,
-      &#34;added_data_files_count&#34;: 1,
-      &#34;added_rows_count&#34;: 1,
-      …
-    },
-    {...}
-  ]
-}
-</code></pre><h5 id="update">UPDATE</h5>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;data&#34;</span>: [
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;manifest_path&#34;</span>: <span style="color:#e6db74">&#34;s3://athena-iceberg-test-csbansal/amazon_reviews_partitioned_iceberg/metadata/c2f70e20-0e4f-4d52-b600-17c264357ff4-m0.avro&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#960050;background-color:#1e0010">…</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;sequence_number&#34;</span>: <span style="color:#ae81ff">2</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;min_sequence_number&#34;</span>: <span style="color:#ae81ff">2</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;added_snapshot_id&#34;</span>: <span style="color:#ae81ff">6348593007041601180</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;added_data_files_count&#34;</span>: <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;added_rows_count&#34;</span>: <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#960050;background-color:#1e0010">…</span>
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>    {<span style="color:#960050;background-color:#1e0010">...</span>}
+</span></span><span style="display:flex;"><span>  ]
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div>
+<h5 id="update">UPDATE</h5>
 <p>
 
 
@@ -1279,50 +1349,58 @@ region=us-east-1
 
 
 
-<figure class="">
-    <div>
-        <img loading="lazy" alt="" src=" /images/blog-iceberg-part-1/Update_MOR.png">
+
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="Figure 1" src=" /images/blog-iceberg-part-1/Update_MOR.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            Figure 1
+        </figcaption>
     </div>
 </figure>
-<em>Fig: For an <code>UPDATE</code> operation, a new snapshot is created, pointing to a new manifest list <code>Manifest List v2</code>. That manifest list is pointing to two new Manifest files <code>Manifest file v2</code> and <code>Manifest file v3</code> which ultimately point to a delete file and a data file respectively. In the above figure, the format of the delete file is the <code>Positional Delete File.</code></em></p>
+<em>Figure 1: For an <code>UPDATE</code> operation, a new snapshot is created, pointing to a new manifest list <code>Manifest List v2</code>. That manifest list is pointing to two new Manifest files <code>Manifest file v2</code> and <code>Manifest file v3</code> which ultimately point to a delete file and a data file respectively. In the above figure, the format of the delete file is the <code>Positional Delete File.</code></em></p>
 <p>Below is the <code>Manifest List v2</code>. A new snapshot <code>6348593007041601180</code> was added corresponding to a new data file <code>c2f70e20-0e4f-4d52-b600-17c264357ff4-m0.avro</code> and a new delete file <code>c2f70e20-0e4f-4d52-b600-17c264357ff4-m1.avro</code>. Notice that both these manifest files correspond to the same snapshot, added in the same transaction sequence number.</p>
-<p>&gt; How do we define the order among delete and data files in the same transaction?</p>
+<blockquote>
+<p>How do we define the order among delete and data files in the same transaction?</p>
+</blockquote>
 <p><strong>THUMB RULE.</strong> Always read manifest files in order, i.e. <code>m0</code> and then <code>m1</code>. New data files are always preceded in reads compared to delete files from a single transaction.</p>
-<pre tabindex="0"><code>{
-  &#34;data&#34;: [
-    {
-      &#34;manifest_path&#34;: &#34;s3://athena-iceberg-test-csbansal/amazon_reviews_partitioned_iceberg/metadata/c2f70e20-0e4f-4d52-b600-17c264357ff4-m0.avro&#34;,
-      …
-      &#34;sequence_number&#34;: 2,
-      &#34;min_sequence_number&#34;: 2,
-      &#34;added_snapshot_id&#34;: 6348593007041601180,
-      &#34;added_data_files_count&#34;: 1,
-      &#34;added_rows_count&#34;: 1,
-      …
-    },
-    {...},
-    {
-      &#34;manifest_path&#34;: &#34;s3://athena-iceberg-test-csbansal/amazon_reviews_partitioned_iceberg/metadata/c2f70e20-0e4f-4d52-b600-17c264357ff4-m1.avro&#34;,
-      …
-      &#34;sequence_number&#34;: 2,
-      &#34;min_sequence_number&#34;: 2,
-      &#34;added_snapshot_id&#34;: 6348593007041601180,
-      &#34;added_data_files_count&#34;: 1,
-      &#34;added_rows_count&#34;: 1,
-      …
-    }
-  ]
-}
-</code></pre><h4 id="copy-on-write-vs-merge-on-read">Copy-on-Write vs Merge-on-Read</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;data&#34;</span>: [
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;manifest_path&#34;</span>: <span style="color:#e6db74">&#34;s3://athena-iceberg-test-csbansal/amazon_reviews_partitioned_iceberg/metadata/c2f70e20-0e4f-4d52-b600-17c264357ff4-m0.avro&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#960050;background-color:#1e0010">…</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;sequence_number&#34;</span>: <span style="color:#ae81ff">2</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;min_sequence_number&#34;</span>: <span style="color:#ae81ff">2</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;added_snapshot_id&#34;</span>: <span style="color:#ae81ff">6348593007041601180</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;added_data_files_count&#34;</span>: <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;added_rows_count&#34;</span>: <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#960050;background-color:#1e0010">…</span>
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>    {<span style="color:#960050;background-color:#1e0010">...</span>},
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;manifest_path&#34;</span>: <span style="color:#e6db74">&#34;s3://athena-iceberg-test-csbansal/amazon_reviews_partitioned_iceberg/metadata/c2f70e20-0e4f-4d52-b600-17c264357ff4-m1.avro&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#960050;background-color:#1e0010">…</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;sequence_number&#34;</span>: <span style="color:#ae81ff">2</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;min_sequence_number&#34;</span>: <span style="color:#ae81ff">2</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;added_snapshot_id&#34;</span>: <span style="color:#ae81ff">6348593007041601180</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;added_data_files_count&#34;</span>: <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;added_rows_count&#34;</span>: <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#960050;background-color:#1e0010">…</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  ]
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div>
+<h4 id="copy-on-write-vs-merge-on-read">Copy-on-Write vs Merge-on-Read</h4>
 <p>From [15]</p>
-<hr>
+<blockquote>
 <p>It’s faster to read from a table if the query engine doesn’t have to read lots of files and doesn’t have to reconcile or do any additional work while reading the data.<br>
 It’s faster to write into a table if the query engine has to write less data.</p>
-<hr>
-<p>Read Latency <em>directly proportional</em> to Number of files read<br>
-Read Latency <em>directly proportional</em> to processing data</p>
-<p>Write Latency <em>directly proportional</em> to Number of files touched to write<br>
-Write Latency <em>directly proportional</em> to Size of data written to files</p>
+</blockquote>
+<p>$$ Read Latency \propto Number Of Files Read $$
+$$ Read Latency \propto Processing Data $$</p>
+<p>$$ Write Latency \propto Number Of Files Written $$
+$$ Write Latency \propto Size Of Data Written $$</p>
 <table>
 <thead>
 <tr>
@@ -1363,16 +1441,18 @@ Write Latency <em>directly proportional</em> to Size of data written to files</p
 <h3 id="table-metrics">Table Metrics</h3>
 <p>Column stats are stored manifest files and updated on each transaction. In Hive table format, users had to run the metric calculation job regularly manually, which used to asynchronously update the table statistics. But the stats used to be out-of-date most of the time, causing query planning and execution to be in-efficient and unpredictable.</p>
 <h3 id="hidden-partitioning">Hidden Partitioning</h3>
-<p>As mentioned above, the Hive table format had multiple issues because of strong coupling with the partitioning of the table. Here are some of the issues:</p>
+<p>As mentioned above, the Hive table format had multiple issues because of <strong>strong coupling with the partitioning</strong> of the table. Here are some of the issues:</p>
 <ol>
 <li>A client who was using SQL to access the data lake had to know about the partitions (Hive must be given partition values) or the physical layout of the table to query the data (e.g. we couldn’t just pass the <code>date</code>, we had to pass the exact filter with <code>day</code> or <code>month</code> if partitioning was done on <code>day</code> or <code>month</code>).</li>
-<li>Hive didn’t know the relation between different columns and partition columns to create the partition value from other columns. So, it couldn’t do the validation on the partition value format and would return wrong rows if passed wrong value, instead of failing. It was the users’ responsibility for the correctness of filter values and not of table format.</li>
-<li>Queries in Apache Hive were strongly coupled with the exact table partition schema. It would be very painful if we wanted to update the partitioning of the table. With Apache Iceberg, the user doesn’t have to know about how the table is partitioned and can update the table partitioning without updating all the existing SQL queries.</li>
+<li>Hive <strong>didn’t know the relation between different columns and partition</strong> columns to create the partition value from other columns. So, it <strong>couldn’t do the validation</strong> on the partition value format and would return wrong rows if passed wrong value, instead of failing. It was the users’ responsibility for the correctness of filter values and not of table format.</li>
+<li>Queries in Apache Hive were strongly coupled with the exact table partition schema. It would be very <strong>painful to update the partitioning of the table</strong>. With Apache Iceberg, the user doesn’t have to know about how the table is partitioned and can update the table partitioning without updating all the existing SQL queries.</li>
 </ol>
-<p>Iceberg produces partition values by taking a column value and optionally transforming it. Iceberg is responsible for converting column value into partition value and keeps track of the relationship. Because Iceberg doesn&rsquo;t require user-maintained partition columns, it can hide partitioning. Partition values are produced correctly every time and always used to speed up queries, when possible.</p>
+<p>Iceberg produces partition values by taking a <strong>column value and optionally transforming</strong> it. Iceberg is responsible for converting column value into partition value and keeps track of the relationship. Because Iceberg <strong>doesn&rsquo;t require user-maintained partition columns</strong>, it can hide partitioning. Partition values are produced correctly every time and always used to speed up queries, when possible.</p>
 <h3 id="schema-evolution">Schema Evolution</h3>
 <p>Schemas may be evolved by type promotion or adding, deleting, renaming, or reordering fields in structs (both nested structs and the top-level schema’s struct).</p>
-<p>Adding a new field assigns a new ID for that field and for any nested fields. Renaming an existing field must change the name, but not the field ID, that&rsquo;s why metadata refers to the field ID and not the field name as the field name can change but not the field ID. Deleting a field removes it from the current schema. Field deletion cannot be rolled back unless the field is nullable so that after rollback, the rows without the previously removed column, data for those columns will have a null value. Also, we can roll back if the current snapshot has not changed as no data has been added with the new schema.
+<p>Adding a new field assigns a new ID for that field and for any nested fields. Renaming an existing field must change the name, but not the field ID, that&rsquo;s why metadata refers to the field ID and not the field name as the field name can change but not the field ID. Deleting a field removes it from the current schema.</p>
+<p><strong>Note:</strong> Field deletion cannot be rolled back unless the field is nullable so that after rollback, the rows without the previously removed column, data for those columns will have a null value. Also, we can roll back if the current snapshot has not changed as no data has been added with the new schema.</p>
+<p>
 
 
 
@@ -1384,12 +1464,17 @@ Write Latency <em>directly proportional</em> to Size of data written to files</p
 
 
 
-<figure class="">
-    <div>
-        <img loading="lazy" alt="" src=" /images/blog-iceberg-part-1/Schema_Evolution_Part1.png">
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="Figure 1" src=" /images/blog-iceberg-part-1/Schema_Evolution_Part1.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            Figure 1
+        </figcaption>
     </div>
 </figure></p>
-<p><em>Fig: At the start, we have a table state with <code>current-schema-id</code> = 0, pointing to schema spec with 16 columns. Each snapshot also corresponds to a specific schema spec, which was not the case with the partition spec. For schema spec, diversion happens just after the metadata file level. This will be used in all the query planning and execution by the engine.</em></p>
+<p><em>Figure 1: At the start, we have a table state with <code>current-schema-id</code> = 0, pointing to schema spec with 16 columns. Each snapshot also corresponds to a specific schema spec, which was not the case with the partition spec. For schema spec, diversion happens just after the metadata file level. This will be used in all the query planning and execution by the engine.</em></p>
 <p>
 
 
@@ -1401,12 +1486,18 @@ Write Latency <em>directly proportional</em> to Size of data written to files</p
 
 
 
-<figure class="">
-    <div>
-        <img loading="lazy" alt="" src=" /images/blog-iceberg-part-1/Schema_Evolution_Part2.png">
+
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="Figure 2" src=" /images/blog-iceberg-part-1/Schema_Evolution_Part2.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            Figure 2
+        </figcaption>
     </div>
-</figure><br>
-<em>Fig: When we do the <code>ALTER TABLE ADD COLUMN</code> operation, it will alter the table schema spec. With Iceberg, the change in schema happens at the metadata layer only, no changes to existing data files are done. New metadata file <code>Metadata File v2</code> will still have the same snapshot as previously, pointing to the old Manifest List file <code>Manifest file v1</code></em></p>
+</figure></p>
+<p><em>Figure 2: When we do the <code>ALTER TABLE ADD COLUMN</code> operation, it will alter the table schema spec. With Iceberg, the change in schema happens at the metadata layer only, no changes to existing data files are done. New metadata file <code>Metadata File v2</code> will still have the same snapshot as previously, pointing to the old Manifest List file <code>Manifest file v1</code></em></p>
 <p>
 
 
@@ -1418,14 +1509,20 @@ Write Latency <em>directly proportional</em> to Size of data written to files</p
 
 
 
-<figure class="">
-    <div>
-        <img loading="lazy" alt="" src=" /images/blog-iceberg-part-1/Schema_Evolution_Part3.png">
+
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="Figure 3" src=" /images/blog-iceberg-part-1/Schema_Evolution_Part3.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            Figure 3
+        </figcaption>
     </div>
-</figure><br>
-<em>Fig: And, when we finally write to the table after table schema evolution, the new manifest file list <code>Manifest List v3</code> and manifest file <code>Manifest file v2</code> will be created with the new schema spec metadata.</em></p>
+</figure></p>
+<p><em>Figure 3: And, when we finally write to the table after table schema evolution, the new manifest file list <code>Manifest List v3</code> and manifest file <code>Manifest file v2</code> will be created with the new schema spec metadata.</em></p>
 <h3 id="time-travel">Time-Travel</h3>
-<p>Apache Iceberg supports time travel queries on the table where users can mention the timestamp <code>time</code> and engines can execute the provided query against the table data as it existed at that timestamp <code>time</code>.<br>
+<p>Apache Iceberg supports <strong>time travel queries</strong> on the table where users can mention the timestamp <code>time</code> and engines can execute the provided query against the table data as it existed at that timestamp <code>time</code>.<br>
 This is only possible because the Apache Iceberg table format can store the snapshot history in its metadata files and its data files are always append-only. So, the engines can use the snapshot which represents the table state at a certain timestamp, and execute the query against the data files corresponding to that snapshot.</p>
 <p>
 
@@ -1439,34 +1536,38 @@ This is only possible because the Apache Iceberg table format can store the snap
 
 
 <figure class="">
-    <div>
-        <img loading="lazy" alt="" src=" /images/blog-iceberg-part-1/TimeTravel_Part1.png">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="Figure 1" src=" /images/blog-iceberg-part-1/TimeTravel_Part1.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            Figure 1
+        </figcaption>
     </div>
 </figure><br>
-<em>Fig: When <code>User 1</code> passes a timestamp in its <code>SELECT</code> query, the table state used would correspond to that timestamp, i.e. Snapshot 0 <code>s0,</code> and  <code>User 2</code> will see the latest table state, i.e. Snapshot <code>s1</code>. Data of a particular row corresponding to different snapshots could be different, for customer <code>12345</code>, the rating in <code>s0</code> is <code>1</code> whereas in <code>s1</code> rating is <code>3</code>.</em></p>
+<em>Figure 1: When <code>User 1</code> passes a timestamp in its <code>SELECT</code> query, the table state used would correspond to that timestamp, i.e. Snapshot 0 <code>s0,</code> and  <code>User 2</code> will see the latest table state, i.e. Snapshot <code>s1</code>. Data of a particular row corresponding to different snapshots could be different, for customer <code>12345</code>, the rating in <code>s0</code> is <code>1</code> whereas in <code>s1</code> rating is <code>3</code>.</em></p>
 <h2 id="summary">Summary</h2>
-<p>What we will focus on in the next parts of the series:</p>
+<p>In this first part of the Distributed Table Format Series, we explore the Apache Iceberg table format, a powerful tool for managing large-scale analytic datasets in a distributed environment. The post delves into the internal workings of Iceberg, its relevance in the data analytics landscape, and the benefits it provides. Through practical examples using Amazon Athena, Parquet, Amazon S3, and AWS Glue Data Catalog, we explore why Iceberg is becoming a crucial component in modern data lakes.
+What we will focus on in the next parts of the Iceberg series:</p>
 <ol>
 <li>Query Processing
-<ol>
+<ul>
 <li>Planning</li>
 <li>Execution</li>
-</ol>
+</ul>
 </li>
 <li>Table APIs</li>
 <li>Catalog APIs</li>
 <li>Storage APIs</li>
 <li>Optimization
-<ol>
+<ul>
 <li>Storage
-<ol>
+<ul>
 <li>Compaction</li>
 <li>Orphan file removal</li>
 <li>Snapshot deletion</li>
-</ol>
+</ul>
 </li>
 <li>Query</li>
-</ol>
+</ul>
 </li>
 <li>View Spec</li>
 <li>Stats Spec (Puffin)</li>
@@ -1549,9 +1650,19 @@ This is only possible because the Apache Iceberg table format can store the snap
         <li><a href="#partition-evolution">Partition Evolution</a></li>
         <li><a href="#delete--update--merge-mode">Delete / Update / Merge Mode</a>
           <ul>
-            <li><a href="#delete-files">Delete Files</a></li>
+            <li><a href="#delete-files">Delete Files</a>
+              <ul>
+                <li><a href="#positional-delete-files">Positional Delete Files</a></li>
+                <li><a href="#equality-delete-files">Equality Delete Files</a></li>
+              </ul>
+            </li>
             <li><a href="#copy-on-write-cow">Copy-On-Write (COW)</a></li>
-            <li><a href="#merge-on-read-mor">Merge-On-Read (MOR)</a></li>
+            <li><a href="#merge-on-read-mor">Merge-On-Read (MOR)</a>
+              <ul>
+                <li><a href="#delete">DELETE</a></li>
+                <li><a href="#update">UPDATE</a></li>
+              </ul>
+            </li>
             <li><a href="#copy-on-write-vs-merge-on-read">Copy-on-Write vs Merge-on-Read</a></li>
           </ul>
         </li>

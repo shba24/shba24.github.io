@@ -117,7 +117,7 @@
     
     
 
-<link type="text/css" rel="stylesheet" href="/css/bundle.min.9a4b0e1c19c6ff2e7ce48306bc72bdc17b1683f22d39c455590271a4d36e912a.css">
+<link type="text/css" rel="stylesheet" href="/css/bundle.min.6de10e797df76f9b89a691bb5d1f8f8cbb296c3bbc39528fe90fc9d7e80346e6.css">
 
 
     
@@ -583,8 +583,11 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Election_Case1_Part1.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <p>Let’s say <code>Master 1</code> fails or is not reachable. Then, <code>Sentinel 1/2/3</code> will discover that <code>Master 1</code> is down and agree on its failure. As the <strong>quorum config</strong> is set to 2 only, we only need 2 sentinel nodes to agree on the <code>Master 1</code> being down and mark it as failing.</p>
@@ -600,8 +603,11 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Election_Case1_Part2.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <p>After that, one of the three <code>sentinels</code> will be elected as <strong>leader</strong> by running an <code>election</code> among all reachable <code>sentinels</code>. A <code>sentinel</code> will be elected as <strong>leader</strong> only when the <strong>majority</strong> of the total <code>sentinels</code> in the cluster agree on it. After that, the <code>elected sentinel</code> will flip one of the replicas with the <em>most recent commit</em> (the <code>sentinel</code> tries its best to identify this replica, not always possible) to a new master and update the <strong>sentinel configuration</strong>.</p>
@@ -617,8 +623,11 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Election_Case1_Part3.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <p>And, when the old master (<code>Master 1</code>) comes back online, <code>sentinels</code> sends the old master the new <strong>sentinel configuration</strong>. Then, the old master syncs the data from the new master (<code>Master 2</code>)and marks itself as a replica of the new master.</p>
@@ -634,8 +643,11 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Election_Case1_Part4.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <h4 id="quorum-election---case-ii---network-partition">Quorum Election - Case II - Network Partition</h4>
@@ -652,8 +664,11 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Election_Case2_Part1.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <p>Let’s say we have a network partition where <code>Master 1</code>, <code>Client</code> as well as <code>Sentinel 1</code> are partitioned from the rest of the topology. <code>Sentinel 2 / 3</code> will discover that <code>Master 1</code> is down and agree on its failure. As the <strong>quorum config</strong> is set to 2 only, we only need <em>2 sentinel nodes</em> to agree on the <code>Master 1</code> being down and mark it as failing.</p>
@@ -669,8 +684,11 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Election_Case2_Part2.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <p>As <code>Master 1</code> is missing from <code>Partition 2</code> only, <strong>election</strong> and <strong>failover</strong> will be triggered in only <code>Partition 2</code>. After that, one of the two sentinels (<code>Sentinel 2</code> and <code>Sentinel 3</code>) will be elected as leader by running an <code>election</code> among all reachable <code>sentinels</code>. A <code>sentinel</code> will be elected as <strong>leader</strong> only when the <strong>majority</strong> of the total sentinels in the cluster agree on it, which is 2 in this case, as both <code>Sentinel 2</code> and <code>Sentinel 3</code> will agree on <code>Master 1</code> being down. After that, the <strong>elected sentinel</strong> will flip one of the replicas with the most recent commit (the sentinel tries its best to identify this replica, not always possible) to a new master and update the <strong>sentinel configuration</strong>. However, during this time, the <code>Client</code> might (depending on the configuration) continue to send <code>WRITE</code> traffic to <code>Master 1</code> only, as it is doing the <strong>service discovery</strong> from <code>Sentinel 1</code> only and <code>Sentinel 1</code> only sees <code>Master 1</code>.</p>
@@ -686,8 +704,11 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Election_Case2_Part3.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <p>And, when the <strong>network partition</strong> is finished, <code>sentinels</code> send the old master (<code>Master 1</code>) with the new <strong>sentinel configuration</strong>. Then, the old master (<code>Master 1</code>) syncs the data from the new master (<code>Master 2</code>) and marks itself as a replica of the new master. As the <code>Client</code> now does the <strong>service discovery</strong> from <code>Sentinel 1</code> which sees the new master (<code>Master 2</code>), it will start throwing the traffic to the new master. But, the <code>WRITE</code> operations that went to <code>Master 1</code> while the network was in the partition will forever be lost.</p>
@@ -704,8 +725,11 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Election_Case2_Part4.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <h3 id="redis-cluster">Redis Cluster</h3>
@@ -728,8 +752,11 @@ Hash (Key) = CRC16 (Key) % 16384
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Redis_Cluster_Part1.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <p>Adding a new shard <code>Shard D</code> will look like this, where the <code>hash slots</code> allocated to this new shard are assigned with a subset of each existing shard <code>hash slot</code>. There is also a config where you can choose how many <code>hash slots</code> one wants to transfer from a specific shard.</p>
@@ -745,8 +772,11 @@ Hash (Key) = CRC16 (Key) % 16384
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Redis_Cluster_Part2.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <p>Similarly, for scaling down. If we have to remove <code>Shard B</code>, <code>hash slots</code> from <code>Shard B</code> will be split between <code>Shard A</code> and <code>Shard B</code>.</p>
@@ -762,8 +792,11 @@ Hash (Key) = CRC16 (Key) % 16384
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Redis_Cluster_Part3.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <h2 id="caching-strategy">Caching Strategy</h2>
@@ -788,8 +821,11 @@ Hash (Key) = CRC16 (Key) % 16384
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Replication_Part1.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <p>If the master goes down, one of the replicas will become the new master and do the following</p>
@@ -811,8 +847,11 @@ Offset = x-100
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Replication_Part2.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <p>After the <code>Master 1</code> comes back online, it syncs with the <code>Master 2</code> sending its last state as</p>
@@ -831,8 +870,11 @@ Offset = x
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Replication_Part3.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <p><strong>Note</strong>: <em>We will ignore <code>WRITABLE REPLICAS</code> for this blog, as that is a deprecated feature and only exists for a historical reason and backward compatibility.</em></p>
@@ -860,8 +902,11 @@ Offset = x
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Consistency_Case1_Part1.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <p>Let’s say a <strong>network partition</strong> happens and <code>Partition 2</code> has the <strong>majority</strong> but the old commit <code>C</code>. Here, the client is still seeing the last commit as <code>C+1</code>.</p>
@@ -877,8 +922,11 @@ Offset = x
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Consistency_Case1_Part2.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <p>After the <code>elections</code> conducted by <code>sentinels</code> in <code>Partition 2</code>, <code>Replica 1</code> will be converted to <code>Master 2</code> which only has commit <code>C</code>, this means the state of the system has reverted to commit <code>C</code> and we have lost the commit <code>C+1</code>, making the system <strong>non-durable</strong>.</p>
@@ -894,8 +942,11 @@ Offset = x
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Consistency_Case1_Part3.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <p>And, when the <strong>network partition</strong> is finished, <code>sentinels</code> send the old master (<code>Master 1</code>) with the new <strong>sentinel configuration</strong>. Then, the old master (<code>Master 1</code>) syncs the data from the new master (<code>Master 2</code>) and marks itself as a replica of the new master, completely losing commit <code>C+1</code> from the system.</p>
@@ -911,8 +962,11 @@ Offset = x
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Consistency_Case1_Part4.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <h4 id="redis-cluster-1">Redis Cluster</h4>
@@ -960,8 +1014,11 @@ Offset = x
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Redis_Optimistic_Lock_Part1.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure>
 
@@ -976,8 +1033,11 @@ Offset = x
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Redis_Optimistic_Lock_Part2.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <p>It&rsquo;s a modification of <code>MemoLock</code> on the Redis <a href="https://redis.io/blog/caches-promises-locks/" target="_blank">blog</a>. Modification is done to avoid the <code>Starvation</code> condition in the <code>MemoLock</code> as explained in the blog.</p>
@@ -994,8 +1054,11 @@ Offset = x
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/MemoLock_Issue_Part1.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure>
 
@@ -1010,8 +1073,11 @@ Offset = x
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/MemoLock_Issue_Part2.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <p>At <code>t=0</code>, <code>Client I</code> notifies the channel <code>notif:key</code></p>
@@ -1046,8 +1112,11 @@ This can be easily achieved by adding every new Sentinel with a 30-second delay 
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Sentinel_Scale_Up_Split_Brain_Part1.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <p>Now, let’s say 2 <code>Sentinels</code>, <code>S6</code> and <code>S7</code> want to join the clusters and are brought up at the same time.</p>
@@ -1063,8 +1132,11 @@ This can be easily achieved by adding every new Sentinel with a 30-second delay 
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Sentinel_Scale_Up_Split_Brain_Part2.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <p>What this can cause is a <code>split-brain</code> situation like this, if the <code>network partition</code> happens during the scale-up. Let’s say a network partition happens and two partitions are created, <code>Partition 1</code> and <code>Partition 2</code>.</p>
@@ -1087,8 +1159,11 @@ This can be easily achieved by adding every new Sentinel with a 30-second delay 
 
 
 <figure class="">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="" src=" /images/Sentinel_Scale_Up_Split_Brain_Part3.png">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
     </div>
 </figure></p>
 <p>As a solution to this problem, <code>Redis</code> suggests scaling up <code>sentinels</code> one by one. Make sure to run <code>SENTINEL MASTER</code> after every <code>sentinel</code> addition to make sure all nodes agree on the same number of <code>sentinels</code>.</p>

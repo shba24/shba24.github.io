@@ -16,7 +16,10 @@ and build the img class string as "img-tag1 img-tag2 ..."
 
 {{/* Use the computed classes on the rendered figure */}}
 <figure class="{{ $classes }}">
-    <div>
+    <div style="display:flex; flex-direction: column;">
         <img loading="lazy" alt="{{ .Text }}" src=" {{ $url }}">
+        <figcaption style="font-size: small; font-style: italic;">
+            {{ .Text }}
+        </figcaption>
     </div>
 </figure>
