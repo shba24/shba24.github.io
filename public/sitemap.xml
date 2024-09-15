@@ -2,6 +2,45 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>http://localhost:1313/tags/cache/</loc>
+    <lastmod>2024-09-15T09:36:09-07:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/series/distributed-cache/</loc>
+    <lastmod>2024-09-15T09:36:09-07:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/distributed-cache-series-part-2-memorydb/</loc>
+    <lastmod>2024-09-15T09:36:09-07:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/distributed-systems/</loc>
+    <lastmod>2024-09-15T09:36:09-07:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/election/</loc>
+    <lastmod>2024-09-15T09:36:09-07:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/memorydb/</loc>
+    <lastmod>2024-09-15T09:36:09-07:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/</loc>
+    <lastmod>2024-09-15T09:36:09-07:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/redis/</loc>
+    <lastmod>2024-09-15T09:36:09-07:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/series/</loc>
+    <lastmod>2024-09-15T09:36:09-07:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/</loc>
+    <lastmod>2024-09-15T09:36:09-07:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/split-brain/</loc>
+    <lastmod>2024-09-15T09:36:09-07:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/</loc>
+    <lastmod>2024-09-15T09:36:09-07:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/transaction-log/</loc>
+    <lastmod>2024-09-15T09:36:09-07:00</lastmod>
+  </url><url>
     <loc>http://localhost:1313/tags/apache-hive/</loc>
     <lastmod>2024-09-02T03:59:44-07:00</lastmod>
   </url><url>
@@ -14,19 +53,13 @@
     <loc>http://localhost:1313/tags/data-lake/</loc>
     <lastmod>2024-09-02T03:59:44-07:00</lastmod>
   </url><url>
+    <loc>http://localhost:1313/series/distributed-table-format/</loc>
+    <lastmod>2024-09-02T03:59:44-07:00</lastmod>
+  </url><url>
     <loc>http://localhost:1313/posts/iceberg-table-format-part1/</loc>
     <lastmod>2024-09-02T03:59:44-07:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/</loc>
-    <lastmod>2024-09-02T03:59:44-07:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/</loc>
-    <lastmod>2024-09-02T03:59:44-07:00</lastmod>
-  </url><url>
     <loc>http://localhost:1313/tags/table-format/</loc>
-    <lastmod>2024-09-02T03:59:44-07:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/</loc>
     <lastmod>2024-09-02T03:59:44-07:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/blog/</loc>
@@ -47,25 +80,7 @@
     <loc>http://localhost:1313/references/useful-technical-blogs/</loc>
     <lastmod>2024-08-11T17:33:01-07:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/cache/</loc>
-    <lastmod>2024-08-09T19:36:09-07:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/series/distributed-cache/</loc>
-    <lastmod>2024-08-09T19:36:09-07:00</lastmod>
-  </url><url>
     <loc>http://localhost:1313/posts/distributed-cache-series-part-1-redis/</loc>
-    <lastmod>2024-08-09T19:36:09-07:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/distributed-systems/</loc>
-    <lastmod>2024-08-09T19:36:09-07:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/redis/</loc>
-    <lastmod>2024-08-09T19:36:09-07:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/series/</loc>
-    <lastmod>2024-08-09T19:36:09-07:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/split-brain/</loc>
     <lastmod>2024-08-09T19:36:09-07:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/tags/thundering-herd/</loc>
@@ -79,17 +94,5 @@
   </url><url>
     <loc>http://localhost:1313/about/about/</loc>
     <lastmod>2024-08-03T22:30:36-07:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/series/how-to-use-poison/</loc>
-    <lastmod>2022-11-23T13:43:53-06:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/hugo/</loc>
-    <lastmod>2022-11-23T13:43:53-06:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/posts/testing/</loc>
-    <lastmod>2022-11-23T13:43:53-06:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/introduction/</loc>
-    <lastmod>2022-11-23T13:43:53-06:00</lastmod>
   </url>
 </urlset>

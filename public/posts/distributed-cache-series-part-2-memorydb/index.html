@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+<script defer language="javascript" type="text/javascript" src="/js/bundle.min.aca09aaa374af654a5e3d66b57b1caae1112ca5cdbe6c53730b4773d33c2413e.js"></script>
+
+
+
+
+
+
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+    <link rel="icon" href=/icons/favicon.ico>
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "fd0bbd0149124eeea3afab47dd84a12c"}'></script>
+    
+
+    
+    
+
+
+
+
+
+  
+
+
+
+
+
+  
+  
+  
+
+
+<!-- Open Graph image and Twitter Card metadata -->
+
+<title itemprop="name">Shubham Bansal - Distributed Cache Series - Part II - MemoryDB</title>
+<meta property="og:title" content=Shubham&#32;Bansal&#32;-&#32;Distributed&#32;Cache&#32;Series&#32;-&#32;Part&#32;II&#32;-&#32;MemoryDB />
+<meta name="twitter:title" content=Shubham&#32;Bansal&#32;-&#32;Distributed&#32;Cache&#32;Series&#32;-&#32;Part&#32;II&#32;-&#32;MemoryDB />
+<meta itemprop="name" content=Shubham&#32;Bansal&#32;-&#32;Distributed&#32;Cache&#32;Series&#32;-&#32;Part&#32;II&#32;-&#32;MemoryDB />
+<meta name="application-name" content=Shubham&#32;Bansal&#32;-&#32;Distributed&#32;Cache&#32;Series&#32;-&#32;Part&#32;II&#32;-&#32;MemoryDB />
+<meta property="og:site_name" content="Shubham Bansal Technical Blog" />
+
+
+<meta name="description" content="Second part of Distributed Cache Series, where we are looking inside Amazon MemoryDB and how it works" />
+<meta itemprop="description" content="Second part of Distributed Cache Series, where we are looking inside Amazon MemoryDB and how it works" />
+<meta property="og:description" content="Second part of Distributed Cache Series, where we are looking inside Amazon MemoryDB and how it works" />
+<meta name="twitter:description" content="Second part of Distributed Cache Series, where we are looking inside Amazon MemoryDB and how it works" />
+
+
+<base href="http://localhost:1313/posts/distributed-cache-series-part-2-memorydb/" />
+<link rel="canonical" href="http://localhost:1313/posts/distributed-cache-series-part-2-memorydb/" itemprop="url" />
+<meta name="url" content="http://localhost:1313/posts/distributed-cache-series-part-2-memorydb/" />
+<meta name="twitter:url" content="http://localhost:1313/posts/distributed-cache-series-part-2-memorydb/" />
+<meta property="og:url" content="http://localhost:1313/posts/distributed-cache-series-part-2-memorydb/" />
+
+
+<meta property="og:updated_time" content="2024-09-15T09:36:09-07:00" />
+
+
+<link rel="sitemap" type="application/xml" title="Sitemap" href='http://localhost:1313/sitemap.xml' />
+
+<meta name="robots" content="index,follow" />
+<meta name="googlebot" content="index,follow" />
+
+
+<meta name="twitter:site" content="https://twitter.com/ShubhamBansu" />
+<meta name="twitter:creator" content="https://twitter.com/ShubhamBansu" />
+<meta property="fb:admins" content="" />
+
+
+<meta name="apple-mobile-web-app-title" content="Shubham Bansal Technical Blog" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.131.0">
+
+
+    
+    
+
+<link type="text/css" rel="stylesheet" href="/css/bundle.min.6de10e797df76f9b89a691bb5d1f8f8cbb296c3bbc39528fe90fc9d7e80346e6.css">
+
+
+    
+    <style>
+    body {
+        --sidebar-bg-color: #202020;
+        --sidebar-img-border-color: #515151;
+        --sidebar-p-color: #909090;
+        --sidebar-h1-color: #FFF;
+        --sidebar-a-color: #FFF;
+        --sidebar-socials-color: #FFF;
+        --text-color: #222;
+        --bkg-color: #FAF9F6;
+        --post-title-color: #303030;
+        --list-color: #5a5a5a;
+        --link-color: #268bd2;
+        --date-color: #515151;
+        --table-border-color: #E5E5E5;
+        --table-stripe-color: #F9F9F9;
+        --code-color: #000;
+        --code-background-color: #E5E5E5;
+        --code-block-color: #fff;
+        --code-block-background-color: #272822;
+        --moon-sun-color: #FFF;
+        --moon-sun-background-color: #515151;
+    }
+    body.dark-theme {
+        --text-color: #eee;
+        --bkg-color: #121212;
+        --post-title-color: #DBE2E9;
+        --list-color: #9d9d9d;
+        --link-color: #268bd2;
+        --date-color: #9a9a9a;
+        --table-border-color: #515151;
+        --table-stripe-color: #202020;
+        --code-color: #fff;
+        --code-background-color: #515151;
+        --code-block-color: #fff;
+        --code-block-background-color: #272822;
+    }
+    body {
+        background-color: var(--bkg-color);
+    }
+</style>
+
+</head>
+
+    <body class="dark-theme">
+        <div class="wrapper">
+            <aside class="sidebar">
+    <div class="container sidebar-sticky">
+        <div class="light-dark" align="right">
+    <button class="btn-light-dark" title="Toggle light/dark mode">
+        <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M6 .278a.768.768 0 0 1 .08.858a7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277c.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316a.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71C0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
+        </svg>
+        <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M8 12a4 4 0 1 0 0-8a4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+        </svg>
+    </button>
+</div>
+
+        <div class="sidebar-about">
+    <h1 class="brand">
+        
+            <a href="http://localhost:1313/">
+                <img src="/images/icon.png" alt="brand image">
+            </a>
+        
+        
+            <a href="http://localhost:1313/">
+                <h1>Shubham Bansal</h1>
+            </a>
+        
+    </h1>
+    <p class="lead">
+    Technical Blog by <a href="https://x.com/ShubhamBansu" target="_blank">@ShubhamBansu</a>
+    </p>
+</div>
+
+        <nav>
+    <ul class="sidebar-nav">
+
+        
+        
+        
+        
+            
+
+            
+                
+                
+                    <li class="heading">
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                
+            
+                
+                
+            
+                
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+        
+            
+
+            
+                
+                
+            
+                
+                
+            
+                
+                
+                    <li class="heading">
+                        <a href="/references/">References</a>
+                    </li>
+                    
+                        <li class="sub-heading">
+                            
+                        </li>
+                        
+                            <li class="bullet">
+                                <a href="http://localhost:1313/references/useful-technical-blogs/">Useful Technical Blogs</a>
+                            </li>
+                        
+                    
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+        
+            
+
+            
+                
+                
+            
+                
+                
+                    <li class="heading">
+                        <a href="/posts/">Posts</a>
+                    </li>
+                    
+                        <li class="sub-heading">
+                            Recent
+                        </li>
+                        
+                            <li class="bullet">
+                                <a href="http://localhost:1313/posts/distributed-cache-series-part-2-memorydb/">Distributed Cache Series - Part II - MemoryDB</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="http://localhost:1313/posts/iceberg-table-format-part1/">Distributed Table Format Series - Apache Iceberg - Part 1</a>
+                            </li>
+                        
+                            <li class="bullet">
+                                <a href="http://localhost:1313/posts/distributed-cache-series-part-1-redis/">Distributed Cache Series - Part I - Redis</a>
+                            </li>
+                        
+                    
+                
+            
+                
+                
+            
+            
+                
+                
+                        
+                
+                        
+                
+            
+                
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+                        
+                
+            
+        
+
+    </ul>
+</nav>
+
+        
+    <a target="_blank" class="social" title="GitHub" href="https://github.com/shba24">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="-2 -2 24 24">
+            <path fill="currentColor" d="M18.88 1.099C18.147.366 17.265 0 16.233 0H3.746C2.714 0 1.832.366 1.099 1.099C.366 1.832 0 2.714 0 3.746v12.487c0 1.032.366 1.914 1.099 2.647c.733.733 1.615 1.099 2.647 1.099H6.66c.19 0 .333-.007.429-.02a.504.504 0 0 0 .286-.169c.095-.1.143-.245.143-.435l-.007-.885c-.004-.564-.006-1.01-.006-1.34l-.3.052c-.19.035-.43.05-.721.046a5.555 5.555 0 0 1-.904-.091a2.026 2.026 0 0 1-.872-.39a1.651 1.651 0 0 1-.572-.8l-.13-.3a3.25 3.25 0 0 0-.41-.663c-.186-.243-.375-.407-.566-.494l-.09-.065a.956.956 0 0 1-.17-.156a.723.723 0 0 1-.117-.182c-.026-.061-.004-.111.065-.15c.07-.04.195-.059.378-.059l.26.04c.173.034.388.138.643.311a2.1 2.1 0 0 1 .631.677c.2.355.44.626.722.813c.282.186.566.28.852.28c.286 0 .533-.022.742-.065a2.59 2.59 0 0 0 .585-.196c.078-.58.29-1.028.637-1.34a8.907 8.907 0 0 1-1.333-.234a5.314 5.314 0 0 1-1.223-.507a3.5 3.5 0 0 1-1.047-.872c-.277-.347-.505-.802-.683-1.365c-.177-.564-.266-1.215-.266-1.952c0-1.049.342-1.942 1.027-2.68c-.32-.788-.29-1.673.091-2.652c.252-.079.625-.02 1.119.175c.494.195.856.362 1.086.5c.23.14.414.257.553.352a9.233 9.233 0 0 1 2.497-.338c.859 0 1.691.113 2.498.338l.494-.312a6.997 6.997 0 0 1 1.197-.572c.46-.174.81-.221 1.054-.143c.39.98.424 1.864.103 2.653c.685.737 1.028 1.63 1.028 2.68c0 .737-.089 1.39-.267 1.957c-.177.568-.407 1.023-.689 1.366a3.65 3.65 0 0 1-1.053.865c-.42.234-.828.403-1.223.507a8.9 8.9 0 0 1-1.333.235c.45.39.676 1.005.676 1.846v3.11c0 .147.021.266.065.357a.36.36 0 0 0 .208.189c.096.034.18.056.254.064c.074.01.18.013.318.013h2.914c1.032 0 1.914-.366 2.647-1.099c.732-.732 1.099-1.615 1.099-2.647V3.746c0-1.032-.367-1.914-1.1-2.647z"/>
+        </svg>
+    </a>
+
+
+
+    <a target="_blank" class="social" title="LinkedIn" href="https://www.linkedin.com/in/shba24/">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1.2em" viewBox="0 0 448 512">
+            <path fill="currentColor" d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5c0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7c-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5c67.2 0 79.7 44.3 79.7 101.9V416z"/>
+        </svg>
+    </a>
+
+
+    <a target="_blank" class="social" title="Twitter" href="https://twitter.com/ShubhamBansu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M5.032 14.286c6.037 0 9.34-4.837 9.34-9.032c0-.137 0-.274-.01-.41A6.56 6.56 0 0 0 16 3.2c-.6.256-1.235.425-1.885.5a3.207 3.207 0 0 0 1.443-1.757c-.645.37-1.35.63-2.085.77a3.322 3.322 0 0 0-1.862-.958a3.384 3.384 0 0 0-2.082.334a3.223 3.223 0 0 0-1.442 1.49a3.08 3.08 0 0 0-.208 2.03a9.57 9.57 0 0 1-3.747-.963a9.269 9.269 0 0 1-3.018-2.354a3.086 3.086 0 0 0-.36 2.314c.189.787.68 1.475 1.376 1.924a3.344 3.344 0 0 1-1.49-.398v.04c0 .734.263 1.444.743 2.01a3.3 3.3 0 0 0 1.89 1.102c-.483.128-.99.146-1.482.055a3.19 3.19 0 0 0 1.168 1.577a3.36 3.36 0 0 0 1.9.627A6.732 6.732 0 0 1 0 12.86a9.527 9.527 0 0 0 5.032 1.423"/>
+        </svg>
+    </a>
+
+
+
+
+
+    <a target="_blank" class="social" title="YouTube" href="https://www.youtube.com/@shubhambansal1145">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12.006 19.012h-.02c-.062 0-6.265-.012-7.83-.437a2.5 2.5 0 0 1-1.764-1.765A26.494 26.494 0 0 1 1.986 12a26.646 26.646 0 0 1 .417-4.817A2.564 2.564 0 0 1 4.169 5.4c1.522-.4 7.554-.4 7.81-.4H12c.063 0 6.282.012 7.831.437c.859.233 1.53.904 1.762 1.763c.29 1.594.427 3.211.407 4.831a26.568 26.568 0 0 1-.418 4.811a2.51 2.51 0 0 1-1.767 1.763c-1.52.403-7.553.407-7.809.407Zm-2-10.007l-.005 6l5.212-3l-5.207-3Z"/>
+        </svg>
+    </a>
+
+
+
+
+
+
+
+
+    <a target="_blank" class="social" title="RSS Feed" href="/posts/index.xml">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1.2em" viewBox="0 0 1280.000000 1280.000000">
+            <g transform="translate(0.000000,1280.000000) scale(0.100000,-0.100000)" fill="currentColor">
+                <path d="M2295 11929 c-284 -12 -642 -45 -707 -65 -17 -5 -18 -63 -18 -1039 0 -569 4 -1036 8 -1039 5 -3 74 6 153 19 510 86 1168 95 1789 25 1348 -153 2602 -677 3670 -1531 385 -308 820 -744 1126 -1129 842 -1060 1362 -2313 1514 -3650 70 -621 61 -1279 -25 -1789 -13 -79 -22 -148 -19 -153 3 -4 471 -8 1039 -8 l1035 0 5 23 c51 225 85 942 67 1419 -23 605 -77 1044 -198 1617 -294 1400 -927 2734 -1823 3846 -1043 1295 -2364 2259 -3909 2854 -1158 447 -2451 656 -3707 600z"/>
+                <path d="M2255 7845 c-269 -25 -620 -81 -667 -106 -17 -9 -18 -55 -18 -899 0 -706 3 -890 13 -890 6 0 66 18 132 41 130 44 288 79 467 105 154 21 577 30 749 15 1207 -107 2267 -823 2814 -1902 166 -327 268 -637 330 -1001 38 -227 48 -384 42 -662 -8 -348 -44 -590 -126 -831 -23 -66 -41 -126 -41 -132 0 -10 184 -13 890 -13 844 0 890 1 899 18 27 50 88 452 110 725 14 162 14 624 1 782 -59 703 -233 1323 -545 1945 -481 956 -1313 1788 -2270 2268 -620 310 -1239 483 -1940 542 -165 14 -669 10 -840 -5z"/>
+                <path d="M2519 3815 c-391 -66 -725 -336 -868 -703 -79 -201 -96 -462 -45 -677 83 -344 338 -641 666 -774 116 -47 205 -69 330 -80 412 -39 811 153 1040 500 193 292 240 648 128 981 -135 403 -492 699 -914 757 -100 14 -241 12 -337 -4z"/>
+            </g>
+        </svg>
+    </a>
+
+
+
+        <p class="footnote">
+powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a target="_blank" href="https://github.com/lukeorth/poison">poison</a>
+    <br>
+    &copy; 2024 Shubham Bansal Technical Blog. All rights reserved.
+</p>
+
+  </div>
+</aside>
+
+            <main class="content container">
+                <div class="post">
+  <div class="info">
+  <h1 class="post-title">
+    <a href="http://localhost:1313/posts/distributed-cache-series-part-2-memorydb/">Distributed Cache Series - Part II - MemoryDB</a>
+  </h1>
+
+  <div class="headline">
+    <div>
+      
+      <time datetime=" 2024-09-15T09:36:09-0700" class="post-date">
+        September 15, 2024
+      </time>
+      
+      <span> - </span>
+      <span class="reading-time">
+        
+          
+        
+
+        <span>11 mins read</span>
+      </span>
+    </div>
+
+    
+    <ul class="tags">
+      
+      <li class="tag-cache">
+        <a href="http://localhost:1313/tags/cache">cache</a>
+      </li>
+      
+      <li class="tag-redis">
+        <a href="http://localhost:1313/tags/redis">redis</a>
+      </li>
+      
+      <li class="tag-memorydb">
+        <a href="http://localhost:1313/tags/memorydb">memorydb</a>
+      </li>
+      
+      <li class="tag-split brain">
+        <a href="http://localhost:1313/tags/split-brain">split brain</a>
+      </li>
+      
+      <li class="tag-distributed systems">
+        <a href="http://localhost:1313/tags/distributed-systems">distributed systems</a>
+      </li>
+      
+      <li class="tag-transaction log">
+        <a href="http://localhost:1313/tags/transaction-log">transaction log</a>
+      </li>
+      
+      <li class="tag-election">
+        <a href="http://localhost:1313/tags/election">election</a>
+      </li>
+      
+    </ul>
+    
+  </div>
+
+  
+  
+  <p class="seriesname">
+    Series: <a href="http://localhost:1313/series/distributed-cache">Distributed Cache</a>
+  </p>
+  
+
+  
+</div>
+
+  <h2 id="introduction">Introduction</h2>
+<p>Previously, in <a href="https://shubham-bansal.com/posts/distributed-cache-series-part-1-redis/" target="_blank">Part 1</a> of my <a href="https://shubham-bansal.com/series/distributed-cache/" target="_blank">Distributed Cache Series</a>, I discussed Redis Cache, how it works, its benefits, limitations, and various trade-offs we need to think about before using Redis in production. In this part of the series, we will discuss <a href="https://aws.amazon.com/memorydb/" target="_blank">Amazon MemoryDB</a> and what makes it different from <a href="https://redis.io/" target="_blank">Redis</a>. We will also examine what problem it solves over Redis and how it solves them. Again, we will discuss its benefits, limitations, and various trade-offs it provides.</p>
+<p>Last month I came across <a href="https://brooker.co.za/blog/2024/04/25/memorydb.html" target="_blank">this</a> blog post by Marc Brooker where he discusses the paper <a href="https://www.amazon.science/publications/amazon-memorydb-a-fast-and-durable-memory-first-cloud-database" target="_blank">Amazon MemoryDB: A fast and durable memory-first cloud database</a> by <em>Yacine Taleb</em>, <em>Kevin McGehee</em>, <em>Nan Yan</em>, <em>Shawn Wang</em>, <em>Stefan C. Muller</em>, and <em>Allen Samuels</em>. This paper caught my interest because it addresses a fundamental problem in distributed caching: achieving <strong>strong consistency</strong> and <strong>durability</strong>.</p>
+<p><strong>Note:</strong> <em>Please go through <a href="https://shubham-bansal.com/posts/distributed-cache-series-part-1-redis/" target="_blank">Part 1</a> first, before continuing to read this Part.</em></p>
+<h2 id="redis-limitations">Redis Limitations</h2>
+<p>As discussed in the first part of the series, Redis has various limitations as well as benefits.</p>
+<p>Redis <strong>lacks a durable replication</strong> solution that can prevent data loss when nodes fail or provide <em>scalable, strongly consistent reads</em> (notice here <em>scalability</em>, redis can provide strongly consistent <code>READs</code>with a single instance but with <em>low availability</em> and <em>low scalability)</em>. To compensate for this, users often create complex data pipelines to ingest and durably store data in some persistence database before loading it into Redis. In cases of data loss, a separate process is required to rehydrate the cache, increasing complexity, costs, operational requirements, and reducing availability.</p>
+<p>Redis puts lots of responsibilities on Redis Clients, Redis uses it for the discovery of shards and routing the request to that corresponding shard, making the client complicated. It also makes it <strong>impossible</strong> to have simple <strong>CRUD REST APIs</strong>, which abstracts away the complication of managing routing, sharding, consistency, and durability.</p>
+<p>Redis uses a quorum-based system for both failure detection and the election of a new primary. However, this protocol <strong>doesn’t ensure consistent replica</strong> promotion because replication between the primary and replica nodes is asynchronous. During failover, the replica may not be fully synchronized with the primary, leading to potential data inconsistencies. The quorum-based approach also doesn’t provide a way to tackle the <strong>split-brain</strong> issue.</p>
+<p>Redis offers lightweight persistence through point-in-time snapshots and on-disk transaction logs in the form of an Append-Only File (AOF). Snapshots serialize data to disk, while AOF logs all changes. In its strictest mode, AOF uses fsync() after every update which would synchronously flush the data buffer to the disk, ensuring durability and linearizability but <strong>reducing availability</strong> if the primary node fails. It only uses AOF files to recover a primary node after failure, although it&rsquo;s very much possible that the node is not recoverable and <strong>data is permanently lost</strong> as the AOF files are stored locally only. Snapshot creation is also a very expensive operation that affects the availability of the system.</p>
+<p>For a further and more detailed read on Limitations, you can refer to <a href="https://shubham-bansal.com/posts/distributed-cache-series-part-1-redis/#limitations" target="_blank">this</a>.</p>
+<h2 id="what-is-memorydb">What is MemoryDB?</h2>
+<p><strong>Amazon MemoryDB</strong> is a fully managed, Redis-compatible, in-memory database service providing <em>single-digit millisecond</em> <em>write</em> and <em>microsecond</em> <em>read</em> latencies, <em>strong consistency</em>, <em>durability,</em> and <em>high availability</em>.<br>
+It&rsquo;s a database service designed for <em><strong>11 9s</strong></em> of enterprise-grade durability with fast in-memory performance. It delegates durability to a separate low-latency, durable transaction log service (Amazon Internal), enabling it to scale performance, availability, and durability independently of the in-memory execution engine(redis).</p>
+<h2 id="novel-solution">Novel Solution</h2>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="" src=" /images/blog-memorydb-part2/memorydb_base_arch.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
+    </div>
+</figure></p>
+<p>The novel solution here that MemoryDB has implemented is the usage of a Multi-AZ transaction log (MTL) service (internal service to AWS). In short, what this transaction log service provides is a <em>consensus, total order, and durability</em> solution. The core concept here is that in Redis, control and data plane nodes used to be strongly coupled, but MemoryDB separates them, to scale them independently and decouple the availability and durability of the system. MemoryDB uses it to solve the following problem with Redis.</p>
+<ol>
+<li>Durability</li>
+<li>Leader Election</li>
+<li>Strong Consistency</li>
+<li>Split-Brain</li>
+<li>High Availability</li>
+</ol>
+<p>MemoryDB streams the <code>WRITEs</code>to this MTL service synchronously which persists those <code>WRITEs</code>durably across multiple AZs and is used by other replicas to fetch the data asynchronously.</p>
+<p>As the <code>WRITEs</code>are ordered by the primary before sending to the MTL service, it provides strong consistency. During the primary failover, MemoryDB streams the past <code>WRITEs</code>from the MTL service until it reaches the current consistent state before becoming primary, providing strong consistency across failover.</p>
+<p>For leader election, instead of using a quorum-based approach, MemoryDB uses this MTL service to reach a consensus on the new leader. This also helps MemoryDB completely avoid split-brain situations.</p>
+<p>In addition to everything above, MTL also provides a <strong>separation of concern</strong> where the transaction logs can be used to scale the recovery, and point-in-time snapshot creation, independent of resources available on the primary node. This helps in delivering a system that has a low <strong>Recovery-Time-Objective</strong> (RTO) and doesn’t affect the production system as it used to during snapshot creation for Redis.</p>
+<h3 id="transactional-log-service">Transactional Log Service</h3>
+<p>Marc Brooker on his recent <a href="https://brooker.co.za/blog/2024/04/25/memorydb.html#Bonus_Fencing:~:text=building%20looks%20like.-,Bonus%3A%20Fencing,-Above%2C%20I%20mentioned" target="_blank">blog</a> has explained this Multi-AZ Transactional Log Service and how it uses fencing to provide a more practical API interface for consensus in distributed systems. I wanted to share my perspective on how this service can be valuable, not just for this specific use case, but for a wide range of others as well.</p>
+<p>MTL service provides the total ordering of the events in a distributed system.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="" src=" /images/blog-memorydb-part2/mtl_service_part1.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
+    </div>
+</figure>
+Consider a general case where multiple <code>WRITEs</code> are sent to the MTL service concurrently.</p>
+<p>Using the following APIs</p>
+<pre tabindex="0"><code>API - Set I
+
+write(payload) -&gt; sequence number  
+read() -&gt; (payload, sequence)   
+</code></pre><p>Order I: W1 -&gt; W2 -&gt; W3 -&gt; W4<br>
+Order II: W2 -&gt; W1 -&gt; W4 -&gt; W3</p>
+<p>Both orders of <code>WRITEs</code> are possible along with many others. This makes the final ordering non-deterministic.</p>
+<blockquote>
+<p>Non-deterministic total ordering, in general, real-world practical distributed systems are not very useful.</p>
+</blockquote>
+<p>Distributed systems need <em>deterministic total ordering</em> to make sense of these <code>WRITEs</code>, otherwise, it&rsquo;s just <code>WRITE</code>s overwriting each other causing race conditions. It&rsquo;s very much possible in MemoryDB architecture to have an election where two nodes might try to become a leader, simultaneously.</p>
+<p>Now, we want to make things deterministic with total ordering and maintain system correctness.</p>
+<pre tabindex="0"><code>API - Set II
+
+write(payload, seq1) -&gt; seq2  
+read() -&gt; (payload, sequence number)   
+</code></pre><p>The above set of API interfaces uses what&rsquo;s called <strong>fencing</strong>. These APIs provide us a way to validate that clients know about all the <code>WRITE</code>s that have come before a particular <code>WRITE</code>, before it appends the new payload. This will make sure that only one of the concurrent <code>WRITEs</code> is successful and all others fail because of a mismatch in the last sequence number, so they will have to retry again after doing <code>READ</code> and repeat the above process. But this has one problem, this will require us to do a total of 20 API calls to do 4 <code>WRITEs</code>. It&rsquo;s not really efficient.</p>
+<p>Now, we want to make things efficient with deterministic total ordering and avoid sending two <code>WRITE</code>operations at the same time for a key.</p>
+<pre tabindex="0"><code>API - Set III
+
+take_lease() -&gt; (lease_id, expiry_time)  
+extend_lease(lease_id) -&gt; new_expiry_time  
+write(payload, seq1) -&gt; seq2  
+read() -&gt; (payload, sequence number)  
+</code></pre><p>The above set of API interfaces uses a concept called <a href="https://dl.acm.org/doi/10.1145/74851.74870" target="_blank">leasing</a>. An almost 35-year-old concept where only a leader/primary takes the lease which permits it to send the <code>WRITE</code> operations, any other node can’t execute the <code>WRITE</code> operation (only if it&rsquo;s working as expected. Check <a href="https://en.wikipedia.org/wiki/Byzantine_fault" target="_blank">Byzantine Faults</a>).</p>
+<p>Now, we want to make things work as it is, in the case of Byzantine Faults. We want to make a set of APIs that provides efficient deterministic total ordering in byzantine fault scenarios.</p>
+<pre tabindex="0"><code>API - Set IV
+
+take_lease() -&gt; (lease_id, expiry_time)  
+extend_lease(lease_id) -&gt; new_expiry_time  
+write(payload, seq1, lease_id) -&gt; seq2  
+read() -&gt; (payload, sequence number)  
+</code></pre><p>To make sure we maintain the correctness even during worst-case scenarios where we have malicious nodes or nodes with bugs in them, we need to identify which client actually has the current lease when it&rsquo;s trying to do <code>WRITE</code> operation, for that, your system needs to validate the <code>leaser_id</code> for each <code>WRITE</code> operation.</p>
+<p>Now, there are two ways to go about it. The first is to create a separate leasing service and a separate transactional log service and do an ACID transaction across two when a new lease is taken to make sure the <code>WRITE</code> operation validates against the correct <code>lease_id</code>, or you could just use a transactional log service to provide an interface that works for taking lease.</p>
+<pre tabindex="0"><code>API - Set V
+
+take_lease(new_lease_id, old_lease_id) -&gt; new_lease_id  
+write(payload, seq1, lease_id) -&gt; seq2  
+read() -&gt; (payload, sequence number)  
+</code></pre><p>Here, what we doing is creating a log chain for the <code>lease_id</code> where you can only get the lease after the expiration time and if you have the <code>old_lease_id</code>. Only one node will be able to take a lease at a time changing the current <code>lease_id</code> and invalidating the <code>old_lease_id</code>.</p>
+<h2 id="memorydb-benefits">MemoryDB Benefits</h2>
+<h3 id="consistency">Consistency</h3>
+<p>MemoryDB ensures <em>linearizability</em> by synchronously propagating changes to the MTL service. And, as Redis doesn’t have <a href="https://en.wikipedia.org/wiki/Multiversion_concurrency_control" target="_blank">Multi-Version Concurrency Control</a> (MVCC) support, and instead of implementing one, MemoryDB implemented a <em>tricky solution</em> of blocking the response to the Client until the data is replicated and persisted by the MTL service across all AZs. It also blocks the corresponding dependent response of sequential <code>READs</code>to make sure the <em>linearizability</em> is maintained across <em>read-after-writes</em>.</p>
+<p>An important point to note is that MemoryDB provides <em>strong consistency</em> only when both <code>READs</code>and <code>WRITEs</code>are directed to the primary node. To optimize performance, replication from the MTL service to replica nodes is asynchronous. As a result, reads-after-writes sent to the same replica by a client will appear <em>linearly consistent</em> from that client’s perspective. However, if the replica fails, read requests will be redirected to a new replica, which may be ahead or behind the original replica in terms of data.</p>
+<p>However, the paper does not mention an issue related to linear consistency if/when clients switch between different replicas. Since replication occurs asynchronously and in an uncoordinated manner across replicas, clients might experience inconsistencies. For example, if a client queries replica <code>R1</code> and sees <code>KEY=VALUE1</code> at time <code>t=0</code>, then switches to replica <code>R2</code> and sees <code>KEY=VALUE2</code> at time <code>t=1</code>, and later returns to <code>R1</code> to see <code>KEY=VALUE1</code> again at time <code>t=3</code>, this can result in non-linear behavior in the system.</p>
+<h3 id="leader-election">Leader Election</h3>
+<p>As Redis uses a <em>majority-based quorum</em> for the leader election, it can cause a <em>split-brain</em> issue as mentioned in part 1 of the series. When the majority of the primaries across shards detect a primary failure, they vote to elect one of its replicas as the new primary, using a ranking algorithm to select the most up-to-date replica based on the local view (which might not be true anymore) of each voting node. Here the voting nodes are only primaries across shards.</p>
+<p>MemoryDB uses the MTL service’s specific API interface to do a leader election, maintaining <em>leader singularity</em>, and <em>consistent failover</em> where only nodes with the latest data can fight to become the leader in an election. MTL service’s specific API interface allows MemoryDB to build a <em>leasing algorithm</em>, generally used to avoid <em>split-brain</em> situations where only one leader holds the lease on writes. This also removes the need for a quorum to reach for a leader election, increasing the availability of the service during a leader election as it doesn’t have to wait for the majority.</p>
+<h3 id="recovery">Recovery</h3>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="" src=" /images/blog-memorydb-part2/recovery.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
+    </div>
+</figure></p>
+<p>In MemoryDB, a recovering replica first loads a recent snapshot and then replays subsequent transactions. Unlike Redis, which requires a primary node for data restoration impacting CPU and Memory load on the primary, MemoryDB periodically creates snapshots and stores them durably in S3. This enables MemoryDB to recover committed data without needing a primary node. This process also enables multiple replicas to recover simultaneously, without a centralized scaling bottleneck, which enhances the system&rsquo;s availability during recovery.</p>
+<h3 id="slot-transfer">Slot Transfer</h3>
+<p>In Redis, slot ownership is managed and communicated via the eventually consistent cluster bus, which is prone to several failure modes that can lead to data corruption or loss.<br>
+MemoryDB eliminated the reliance on the gossip protocol-based cluster bus and instead implemented a <em>Two-Phase-Commit</em> (2PC) across two shards. Slot ownership is stored in the transaction log. Since slot transfers span multiple shards and each shard maintains its own transaction log, a single transaction log can&rsquo;t handle the transfer. To atomically commit across the two separate shard logs, MemoryDB uses 2PC.</p>
+<p>One thing that the paper doesn’t talk about is who is coordinating the 2PC between these two shards.</p>
+<h2 id="summary">Summary</h2>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="" src=" /images/blog-memorydb-part2/instance_latency_throughput_graph.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
+    </div>
+</figure></p>
+<p>MemoryDB sees higher throughput for <code>READs</code>as compared to Redis, mostly because MemoryDB Enhanced IO Multiplexing aggregates multiple client connections into a single connection to the engine, improving processing efficiency and delivering higher throughput. Also, the quorum requirement was removed for writes/election/slot transfer from MemoryDB increasing its availability causing higher read throughput.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+<figure class="">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="" src=" /images/blog-memorydb-part2/EnhancedIOMultiplexing_postLaunch_memDB.jpg">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
+    </div>
+</figure></p>
+<p>MemoryDB sees less throughput for <code>WRITEs</code>as compared to Redis as synchronous <code>WRITE</code>to MTL service has also become part of a <code>WRITE</code>operation.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="" src=" /images/blog-memorydb-part2/latency_throughput_correlation.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
+    </div>
+</figure></p>
+<p>READ latency is comparable between MemoryDB and Redis. Although <code>WRITE</code>latency is higher in MemoryDB because of the synchronous <code>WRITE</code>to MTL service.</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="" src=" /images/blog-memorydb-part2/snapshot_latency_redis_correlation.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
+    </div>
+</figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure class=" img-large">
+    <div style="display:flex; flex-direction: column;">
+        <img loading="lazy" alt="" src=" /images/blog-memorydb-part2/snapshot_latency_correlation.png#large">
+        <figcaption style="font-size: small; font-style: italic;">
+            
+        </figcaption>
+    </div>
+</figure>
+MemoryDB doesn’t see any substantial average p100 hit on either latency or throughput during the off-box snapshotting because the off-box solution doesn’t interact with customer production at all. In general, P100 for latency in MemoryDB fluctuates because of the queuing of READ responses during synchronous <code>WRITEs</code>to the MTL service.</p>
+<p>Overall, I think there is an important lesson to learn here.</p>
+<blockquote>
+<p>Leader election, strong consistency, and split-brain scenarios are all interconnected issues that arise in systems lacking consensus mechanisms. To address these problems, a consensus protocol can be integrated into the system. Essentially, adding a consensus mechanism involves incorporating an additional consensus layer into the existing system.</p>
+</blockquote>
+<h2 id="references">References</h2>
+<ol>
+<li>Amazon MemoryDB: A fast and durable memory-first cloud database - <a href="https://www.amazon.science/publications/amazon-memorydb-a-fast-and-durable-memory-first-cloud-database" target="_blank">https://www.amazon.science/publications/amazon-memorydb-a-fast-and-durable-memory-first-cloud-database</a></li>
+<li>Multi-Version Concurrency Control - <a href="https://en.wikipedia.org/wiki/Multiversion_concurrency_control" target="_blank">https://en.wikipedia.org/wiki/Multiversion_concurrency_control</a></li>
+<li>Distributed Cache Series - Part I - Redis - <a href="https://shubham-bansal.com/posts/distributed-cache-series-part-1-redis/" target="_blank">https://shubham-bansal.com/posts/distributed-cache-series-part-1-redis/</a></li>
+<li>Amazon MemoryDB - <a href="https://aws.amazon.com/memorydb/" target="_blank">https://aws.amazon.com/memorydb/</a></li>
+<li>Redis - <a href="https://redis.io/" target="_blank">https://redis.io/</a></li>
+<li>MemoryDB: Speed, Durability, and Composition - <a href="https://brooker.co.za/blog/2024/04/25/memorydb.html" target="_blank">https://brooker.co.za/blog/2024/04/25/memorydb.html</a></li>
+<li>Byzantine Faults - <a href="https://en.wikipedia.org/wiki/Byzantine_fault" target="_blank">https://en.wikipedia.org/wiki/Byzantine_fault</a></li>
+<li>Leases: an efficient fault-tolerant mechanism for distributed file cache consistency - <a href="https://dl.acm.org/doi/10.1145/74851.74870" target="_blank">https://dl.acm.org/doi/10.1145/74851.74870</a></li>
+<li>MemoryDB Enhanced IO Multiplexing - <a href="https://aws.amazon.com/memorydb/features/" target="_blank">https://aws.amazon.com/memorydb/features/</a></li>
+</ol>
+
+  
+  <hr>
+<div class="footer">
+    
+    
+    
+    <p>
+    This is a post in the <b><a href="http://localhost:1313/series/distributed-cache">Distributed Cache</a></b> series.
+        <br>Other posts in this series:
+        <ul class="series">
+            
+            
+            
+            <li>
+                September 15, 2024 -
+                
+                    Distributed Cache Series - Part II - MemoryDB
+                
+            </li>
+            
+            <li>
+                August 9, 2024 -
+                
+                    <a href="/posts/distributed-cache-series-part-1-redis/">Distributed Cache Series - Part I - Redis</a>
+                
+            </li>
+            
+        </ul>
+    </p>
+    
+</div>
+
+  
+</div>
+            </main>
+            
+  
+    <div class="article-toc ">
+    <div class="toc-wrapper">
+      <h4 id="contents"></h4>
+      <nav id="TableOfContents">
+  <ul>
+    <li><a href="#introduction">Introduction</a></li>
+    <li><a href="#redis-limitations">Redis Limitations</a></li>
+    <li><a href="#what-is-memorydb">What is MemoryDB?</a></li>
+    <li><a href="#novel-solution">Novel Solution</a>
+      <ul>
+        <li><a href="#transactional-log-service">Transactional Log Service</a></li>
+      </ul>
+    </li>
+    <li><a href="#memorydb-benefits">MemoryDB Benefits</a>
+      <ul>
+        <li><a href="#consistency">Consistency</a></li>
+        <li><a href="#leader-election">Leader Election</a></li>
+        <li><a href="#recovery">Recovery</a></li>
+        <li><a href="#slot-transfer">Slot Transfer</a></li>
+      </ul>
+    </li>
+    <li><a href="#summary">Summary</a></li>
+    <li><a href="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+
+  
+
+        </div>
+    </body>
+</html>

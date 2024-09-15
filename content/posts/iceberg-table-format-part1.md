@@ -4,6 +4,7 @@ Tags = ["Data Anlytics", "Apache Iceberg", "Table Format", "Data Lake", "Apache 
 menu = "main"
 title = "Distributed Table Format Series - Apache Iceberg - Part 1"
 date = 2024-09-02T03:59:44-07:00
+series = "Distributed Table Format"
 draft = false
 +++
 

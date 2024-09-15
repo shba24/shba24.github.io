@@ -85,7 +85,7 @@
 <meta property="og:url" content="http://localhost:1313/" />
 
 
-<meta property="og:updated_time" content="2024-09-02T03:59:44-07:00" />
+<meta property="og:updated_time" content="2024-09-15T09:36:09-07:00" />
 
 
 <link rel="sitemap" type="application/xml" title="Sitemap" href='http://localhost:1313/sitemap.xml' />
@@ -264,6 +264,8 @@
                 
                         
                 
+                        
+                
             
         
         
@@ -337,6 +339,8 @@
                 
                         
                 
+                        
+                
             
         
         
@@ -357,15 +361,15 @@
                         </li>
                         
                             <li class="bullet">
+                                <a href="http://localhost:1313/posts/distributed-cache-series-part-2-memorydb/">Distributed Cache Series - Part II - MemoryDB</a>
+                            </li>
+                        
+                            <li class="bullet">
                                 <a href="http://localhost:1313/posts/iceberg-table-format-part1/">Distributed Table Format Series - Apache Iceberg - Part 1</a>
                             </li>
                         
                             <li class="bullet">
                                 <a href="http://localhost:1313/posts/distributed-cache-series-part-1-redis/">Distributed Cache Series - Part I - Redis</a>
-                            </li>
-                        
-                            <li class="bullet">
-                                <a href="http://localhost:1313/posts/testing/">Introducing Poison</a>
                             </li>
                         
                     
@@ -383,6 +387,8 @@
                 
             
                 
+                
+                        
                 
                         
                 
@@ -491,6 +497,83 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
     <article class="post">
         <div class="info">
   <h1 class="post-title">
+    <a href="http://localhost:1313/posts/distributed-cache-series-part-2-memorydb/">Distributed Cache Series - Part II - MemoryDB</a>
+  </h1>
+
+  <div class="headline">
+    <div>
+      
+      <time datetime=" 2024-09-15T09:36:09-0700" class="post-date">
+        September 15, 2024
+      </time>
+      
+      <span> - </span>
+      <span class="reading-time">
+        
+          
+        
+
+        <span>11 mins read</span>
+      </span>
+    </div>
+
+    
+    <ul class="tags">
+      
+      <li class="tag-cache">
+        <a href="http://localhost:1313/tags/cache">cache</a>
+      </li>
+      
+      <li class="tag-redis">
+        <a href="http://localhost:1313/tags/redis">redis</a>
+      </li>
+      
+      <li class="tag-memorydb">
+        <a href="http://localhost:1313/tags/memorydb">memorydb</a>
+      </li>
+      
+      <li class="tag-split brain">
+        <a href="http://localhost:1313/tags/split-brain">split brain</a>
+      </li>
+      
+      <li class="tag-distributed systems">
+        <a href="http://localhost:1313/tags/distributed-systems">distributed systems</a>
+      </li>
+      
+      <li class="tag-transaction log">
+        <a href="http://localhost:1313/tags/transaction-log">transaction log</a>
+      </li>
+      
+      <li class="tag-election">
+        <a href="http://localhost:1313/tags/election">election</a>
+      </li>
+      
+    </ul>
+    
+  </div>
+
+  
+  
+  <p class="seriesname">
+    Series: <a href="http://localhost:1313/series/distributed-cache">Distributed Cache</a>
+  </p>
+  
+
+  
+</div>
+
+        
+        Introduction Previously, in Part 1 of my Distributed Cache Series, I discussed Redis Cache, how it works, its benefits, limitations, and various trade-offs we need to think about before using Redis in production. In this part of the series, we will discuss Amazon MemoryDB and what makes it different from Redis. We will also examine what problem it solves over Redis and how it solves them. Again, we will discuss its benefits, limitations, and various trade-offs it provides.
+        
+        <div class="read-more-link">
+            <a href="/posts/distributed-cache-series-part-2-memorydb/">Read More…</a>
+        </div>
+        
+        
+    </article>
+    <article class="post">
+        <div class="info">
+  <h1 class="post-title">
     <a href="http://localhost:1313/posts/iceberg-table-format-part1/">Distributed Table Format Series - Apache Iceberg - Part 1</a>
   </h1>
 
@@ -539,6 +622,10 @@ powered by <a target="_blank" href="https://gohugo.io">Hugo</a> | themed with <a
   </div>
 
   
+  
+  <p class="seriesname">
+    Series: <a href="http://localhost:1313/series/distributed-table-format">Distributed Table Format</a>
+  </p>
   
 
   
@@ -626,66 +713,6 @@ Let’s say the system stores the structured data in a database (Amazon DynamoDB
         
         <div class="read-more-link">
             <a href="/posts/distributed-cache-series-part-1-redis/">Read More…</a>
-        </div>
-        
-        
-    </article>
-    <article class="post">
-        <div class="info">
-  <h1 class="post-title">
-    <a href="http://localhost:1313/posts/testing/">Introducing Poison</a>
-  </h1>
-
-  <div class="headline">
-    <div>
-      
-      <time datetime=" 2022-11-23T13:43:53-0600" class="post-date">
-        November 23, 2022
-      </time>
-      
-      <span> - </span>
-      <span class="reading-time">
-        
-          
-        
-
-        <span>12 mins read</span>
-      </span>
-    </div>
-
-    
-    <ul class="tags">
-      
-      <li class="tag-hugo">
-        <a href="http://localhost:1313/tags/hugo">hugo</a>
-      </li>
-      
-      <li class="tag-introduction">
-        <a href="http://localhost:1313/tags/introduction">introduction</a>
-      </li>
-      
-    </ul>
-    
-  </div>
-
-  
-  
-  <p class="seriesname">
-    Series: <a href="http://localhost:1313/series/how-to-use-poison">How to use poison</a>
-  </p>
-  
-
-  
-</div>
-
-        
-        <p><em>Poison</em> is a <strong>clean</strong>, <strong>professional</strong> Hugo theme designed to <strong>captivate</strong> your readers.</p>
-<p>It&rsquo;s also <strong>tiny</strong> and <strong>privacy conscious</strong>.  No JavaScript frameworks, icon packs, or Google fonts.  No ads or trackers polluting your console window.  <strong>We kept things simple</strong>.  A little vanilla JavaScript, a dash of CSS, and the power of Hugo.</p>
-<p>All the static assets for the site (JS files, CSS, and fonts) are located within the theme&rsquo;s <em>/assets/</em> directory.  <strong>That way you know <em>exactly</em> what&rsquo;s going onto your site</strong>.</p>
-<p>Check out our demo site&rsquo;s analytics <a href="https://plausible.lukeorth.com/poison.lukeorth.com" target="_blank">here</a> to gauge community interest in the theme.</p>
-        
-        <div class="read-more-link">
-            <a href="/posts/testing/">Read More…</a>
         </div>
         
         

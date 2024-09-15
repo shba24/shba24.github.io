@@ -42,39 +42,39 @@ We are **not gonna discuss its security model** and features in this blog as tho
 
 Let’s take a simple case where we have **3 Redis instances**, running **3 sentinels**, **1 master**, and **2 replicas**, with a **quorum** configuration set to *2*.
 
-![](/images/Election_Case1_Part1.png)
+![](/images/blog-redis-part1/Election_Case1_Part1.png)
 
 Let’s say `Master 1` fails or is not reachable. Then, `Sentinel 1/2/3` will discover that `Master 1` is down and agree on its failure. As the **quorum config** is set to 2 only, we only need 2 sentinel nodes to agree on the `Master 1` being down and mark it as failing.
 
-![](/images/Election_Case1_Part2.png)
+![](/images/blog-redis-part1/Election_Case1_Part2.png)
 
 After that, one of the three `sentinels` will be elected as **leader** by running an `election` among all reachable `sentinels`. A `sentinel` will be elected as **leader** only when the **majority** of the total `sentinels` in the cluster agree on it. After that, the `elected sentinel` will flip one of the replicas with the *most recent commit* (the `sentinel` tries its best to identify this replica, not always possible) to a new master and update the **sentinel configuration**.
 
-![](/images/Election_Case1_Part3.png)
+![](/images/blog-redis-part1/Election_Case1_Part3.png)
 
 And, when the old master (`Master 1`) comes back online, `sentinels` sends the old master the new **sentinel configuration**. Then, the old master syncs the data from the new master (`Master 2`)and marks itself as a replica of the new master.
 
-![](/images/Election_Case1_Part4.png)
+![](/images/blog-redis-part1/Election_Case1_Part4.png)
 
 #### Quorum Election - Case II - Network Partition
 
 Let’s take a simple case where we have **3 Redis instances**, running **3 sentinels**, **1 master**, and **2 replicas**, with a **quorum configuration** set to 2.
 
-![](/images/Election_Case2_Part1.png)
+![](/images/blog-redis-part1/Election_Case2_Part1.png)
 
 Let’s say we have a network partition where `Master 1`, `Client` as well as `Sentinel 1` are partitioned from the rest of the topology. `Sentinel 2 / 3` will discover that `Master 1` is down and agree on its failure. As the **quorum config** is set to 2 only, we only need *2 sentinel nodes* to agree on the `Master 1` being down and mark it as failing.
 
-![](/images/Election_Case2_Part2.png)
+![](/images/blog-redis-part1/Election_Case2_Part2.png)
 
 As `Master 1` is missing from `Partition 2` only, **election** and **failover** will be triggered in only `Partition 2`. After that, one of the two sentinels (`Sentinel 2` and `Sentinel 3`) will be elected as leader by running an `election` among all reachable `sentinels`. A `sentinel` will be elected as **leader** only when the **majority** of the total sentinels in the cluster agree on it, which is 2 in this case, as both `Sentinel 2` and `Sentinel 3` will agree on `Master 1` being down. After that, the **elected sentinel** will flip one of the replicas with the most recent commit (the sentinel tries its best to identify this replica, not always possible) to a new master and update the **sentinel configuration**. However, during this time, the `Client` might (depending on the configuration) continue to send `WRITE` traffic to `Master 1` only, as it is doing the **service discovery** from `Sentinel 1` only and `Sentinel 1` only sees `Master 1`.
 
-![](/images/Election_Case2_Part3.png)
+![](/images/blog-redis-part1/Election_Case2_Part3.png)
 
 And, when the **network partition** is finished, `sentinels` send the old master (`Master 1`) with the new **sentinel configuration**. Then, the old master (`Master 1`) syncs the data from the new master (`Master 2`) and marks itself as a replica of the new master. As the `Client` now does the **service discovery** from `Sentinel 1` which sees the new master (`Master 2`), it will start throwing the traffic to the new master. But, the `WRITE` operations that went to `Master 1` while the network was in the partition will forever be lost.
 
 That’s one of the reasons why **Redis doesn’t provide any durability guarantees**.
 
-![](/images/Election_Case2_Part4.png)
+![](/images/blog-redis-part1/Election_Case2_Part4.png)
 
 ### Redis Cluster
 
@@ -94,15 +94,15 @@ Let’s take an example of how it works end to end.
 
 Here is the topology of **three shards** covering the total `hash slot` space. Each key belongs to one of the shards and one of the `hash slot` allocated to that shard.
 
-![](/images/Redis_Cluster_Part1.png)
+![](/images/blog-redis-part1/Redis_Cluster_Part1.png)
 
 Adding a new shard `Shard D` will look like this, where the `hash slots` allocated to this new shard are assigned with a subset of each existing shard `hash slot`. There is also a config where you can choose how many `hash slots` one wants to transfer from a specific shard.
 
-![](/images/Redis_Cluster_Part2.png)
+![](/images/blog-redis-part1/Redis_Cluster_Part2.png)
 
 Similarly, for scaling down. If we have to remove `Shard B`, `hash slots` from `Shard B` will be split between `Shard A` and `Shard B`.
 
-![](/images/Redis_Cluster_Part3.png)
+![](/images/blog-redis-part1/Redis_Cluster_Part3.png)
 
 ## Caching Strategy
 
@@ -130,7 +130,7 @@ Replication ID, offset
 
 As instance starts from scratch as master, the `Secondary ID` is null and the `Main ID` is assigned some pseudo-random string. Offset might be different at different replicas as replication is asynchronous.
 
-![](/images/Replication_Part1.png)
+![](/images/blog-redis-part1/Replication_Part1.png)
 
 If the master goes down, one of the replicas will become the new master and do the following
 
@@ -148,7 +148,7 @@ Offset = x-100
 
 This will tell the `Master 2` node to check if the `Replication ID` is either equal to the `Secondary ID` or `Main ID`, it has to do **partial data sync**, and if it's not equal to either of them, then it sends the **full data sync** to the `Replica 1`. `Replica 1` will also inherit the `Replication ID` and `offset` from the new master.
 
-![](/images/Replication_Part2.png)
+![](/images/blog-redis-part1/Replication_Part2.png)
 
 After the `Master 1` comes back online, it syncs with the `Master 2` sending its last state as
 
@@ -159,7 +159,7 @@ Offset = x
 
 As `M1` is equal to the `Secondary ID` at `Master 2`, it will do **partial data sync** to the old master as well as mark the old master as `Replica 2` and inherit the `Replication ID` and `offset` from the new master.
 
-![](/images/Replication_Part3.png)
+![](/images/blog-redis-part1/Replication_Part3.png)
 
 **Note**: *We will ignore `WRITABLE REPLICAS` for this blog, as that is a deprecated feature and only exists for a historical reason and backward compatibility.*
 
@@ -184,19 +184,19 @@ Few major reasons for the **eventual consistency** here :-
 
 Let’s take an example to explain the issue here. Consider the following setup, `3 masters`, `3 sentinels`. As the **replication is asynchronous**, the `Client` will get the `Ack` for the commit `C+1` before the replication is done.
 
-![](/images/Consistency_Case1_Part1.png)
+![](/images/blog-redis-part1/Consistency_Case1_Part1.png)
 
 Let’s say a **network partition** happens and `Partition 2` has the **majority** but the old commit `C`. Here, the client is still seeing the last commit as `C+1`.
 
-![](/images/Consistency_Case1_Part2.png)
+![](/images/blog-redis-part1/Consistency_Case1_Part2.png)
 
 After the `elections` conducted by `sentinels` in `Partition 2`, `Replica 1` will be converted to `Master 2` which only has commit `C`, this means the state of the system has reverted to commit `C` and we have lost the commit `C+1`, making the system **non-durable**.
 
-![](/images/Consistency_Case1_Part3.png)
+![](/images/blog-redis-part1/Consistency_Case1_Part3.png)
 
 And, when the **network partition** is finished, `sentinels` send the old master (`Master 1`) with the new **sentinel configuration**. Then, the old master (`Master 1`) syncs the data from the new master (`Master 2`) and marks itself as a replica of the new master, completely losing commit `C+1` from the system.
 
-![](/images/Consistency_Case1_Part4.png)
+![](/images/blog-redis-part1/Consistency_Case1_Part4.png)
 
 #### Redis Cluster
 
@@ -263,15 +263,15 @@ As Redis is a **single-threaded service**, multiple requests can do `GET` on a k
 Here is the sequence diagram to show the locking mechanism.
 
 
-![](/images/Redis_Optimistic_Lock_Part1.png)
-![](/images/Redis_Optimistic_Lock_Part2.png)
+![](/images/blog-redis-part1/Redis_Optimistic_Lock_Part1.png)
+![](/images/blog-redis-part1/Redis_Optimistic_Lock_Part2.png)
 
 It's a modification of `MemoLock` on the Redis [blog](https://redis.io/blog/caches-promises-locks/). Modification is done to avoid the `Starvation` condition in the `MemoLock` as explained in the blog.
 
 To avoid confusion, let me explain when the `Starvation` can occur.
 
-![](/images/MemoLock_Issue_Part1.png)
-![](/images/MemoLock_Issue_Part2.png)
+![](/images/blog-redis-part1/MemoLock_Issue_Part1.png)
+![](/images/blog-redis-part1/MemoLock_Issue_Part2.png)
 
 At `t=0`, `Client I` notifies the channel `notif:key`
 
@@ -310,11 +310,11 @@ Let’s take a look at a specific case where the wrong scale-up deployment of `s
 
 We have `Sentinels` all agreed on the total visible sentinels in the cluster to be 5.
 
-![](/images/Sentinel_Scale_Up_Split_Brain_Part1.png)
+![](/images/blog-redis-part1/Sentinel_Scale_Up_Split_Brain_Part1.png)
 
 Now, let’s say 2 `Sentinels`, `S6` and `S7` want to join the clusters and are brought up at the same time.
 
-![](/images/Sentinel_Scale_Up_Split_Brain_Part2.png)
+![](/images/blog-redis-part1/Sentinel_Scale_Up_Split_Brain_Part2.png)
 
 What this can cause is a `split-brain` situation like this, if the `network partition` happens during the scale-up. Let’s say a network partition happens and two partitions are created, `Partition 1` and `Partition 2`.
 
@@ -332,7 +332,7 @@ Similarly, `Partition 2` will see the `total discovered sentinels` to be 5, whic
 
 Now, in a cluster, if two `subclusters` can make their own decision for `Redis`, it will result in a `split-brain` situation.
 
-![](/images/Sentinel_Scale_Up_Split_Brain_Part3.png)
+![](/images/blog-redis-part1/Sentinel_Scale_Up_Split_Brain_Part3.png)
 
 As a solution to this problem, `Redis` suggests scaling up `sentinels` one by one. Make sure to run `SENTINEL MASTER` after every `sentinel` addition to make sure all nodes agree on the same number of `sentinels`.
 

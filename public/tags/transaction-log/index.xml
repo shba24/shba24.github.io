@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Transaction Log on Shubham Bansal Technical Blog</title>
+    <link>http://localhost:1313/tags/transaction-log/</link>
+    <description>Recent content in Transaction Log on Shubham Bansal Technical Blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 15 Sep 2024 09:36:09 -0700</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/transaction-log/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Distributed Cache Series - Part II - MemoryDB</title>
+      <link>http://localhost:1313/posts/distributed-cache-series-part-2-memorydb/</link>
+      <pubDate>Sun, 15 Sep 2024 09:36:09 -0700</pubDate>
+      <guid>http://localhost:1313/posts/distributed-cache-series-part-2-memorydb/</guid>
+      <description>Introduction Previously, in Part 1 of my Distributed Cache Series, I discussed Redis Cache, how it works, its benefits, limitations, and various trade-offs we need to think about before using Redis in production. In this part of the series, we will discuss Amazon MemoryDB and what makes it different from Redis. We will also examine what problem it solves over Redis and how it solves them. Again, we will discuss its benefits, limitations, and various trade-offs it provides.</description>
+    </item>
+  </channel>
+</rss>
