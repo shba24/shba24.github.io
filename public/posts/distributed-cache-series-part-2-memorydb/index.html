@@ -590,9 +590,9 @@ It&rsquo;s a database service designed for <em><strong>11 9s</strong></em> of en
 
 
 
-<figure class=" img-large">
+<figure class=" img-small">
     <div style="display:flex; flex-direction: column;">
-        <img loading="lazy" alt="" src=" /images/blog-memorydb-part2/memorydb_base_arch.png#large">
+        <img loading="lazy" alt="" src=" /images/blog-memorydb-part2/memorydb_base_arch.png#small">
         <figcaption style="font-size: small; font-style: italic;">
             
         </figcaption>
@@ -627,9 +627,9 @@ It&rsquo;s a database service designed for <em><strong>11 9s</strong></em> of en
 
 
 
-<figure class=" img-large">
+<figure class=" img-small">
     <div style="display:flex; flex-direction: column;">
-        <img loading="lazy" alt="" src=" /images/blog-memorydb-part2/mtl_service_part1.png#large">
+        <img loading="lazy" alt="" src=" /images/blog-memorydb-part2/mtl_service_part1.png#small">
         <figcaption style="font-size: small; font-style: italic;">
             
         </figcaption>
@@ -736,7 +736,7 @@ MemoryDB eliminated the reliance on the gossip protocol-based cluster bus and in
         </figcaption>
     </div>
 </figure></p>
-<p>MemoryDB sees higher throughput for <code>READs</code>as compared to Redis, mostly because MemoryDB Enhanced IO Multiplexing aggregates multiple client connections into a single connection to the engine, improving processing efficiency and delivering higher throughput. Also, the quorum requirement was removed for writes/election/slot transfer from MemoryDB increasing its availability causing higher read throughput.</p>
+<p>MemoryDB sees higher throughput for <code>READs</code>as compared to Redis, mostly because MemoryDB <a href="https://aws.amazon.com/memorydb/features/#:~:text=quickly%20build%20applications.-,Ultra%2Dfast%20performance,-MemoryDB%20stores%20your" target="_blank">Enhanced IO Multiplexing</a> aggregates multiple client connections into a single connection to the engine, improving processing efficiency and delivering higher throughput. Also, the quorum requirement was removed for writes/election/slot transfer from MemoryDB increasing its availability causing higher read throughput.</p>
 <p>
 
 
