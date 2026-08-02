@@ -13,10 +13,18 @@ const SKIN = [
   'skinparam defaultFontName sans-serif',
 ].join('\n');
 
-// Rewrite Kroki's baked monochrome palette so the diagram follows the theme:
-// strip the opaque background, make decorative box fills transparent, and map
-// the near-black lines/text to `currentColor` (driven by `.diagram { color }`).
+// Rewrite Kroki's baked monochrome palette so the diagram follows the theme,
+// and strip the root <svg>'s fixed width/height so it scales to the post width
+// (responsive) instead of a fixed pixel size. The viewBox is kept for aspect ratio.
 export function themeSvg(svg) {
+  // Root <svg> only (not child <rect>s): drop width/height/inline-size, force meet.
+  svg = svg.replace(/<svg\b[^>]*>/, (tag) =>
+    tag
+      .replace(/\s(?:width|height)="[^"]*"/g, '')
+      .replace(/\sstyle="[^"]*"/g, '')
+      .replace(/\spreserveAspectRatio="[^"]*"/g, '')
+      .replace(/<svg\b/, '<svg preserveAspectRatio="xMidYMid meet"'),
+  );
   return svg
     .replace(/background:\s*#[0-9A-Fa-f]+;?/gi, '')
     .replace(/#E2E2F0/gi, 'none')
@@ -64,8 +72,10 @@ export default function remarkPlantuml() {
         fs.mkdirSync(CACHE_DIR, { recursive: true });
         fs.writeFileSync(file, svg);
       }
+      // Size category from the fence meta (```plantuml small|big). Default = medium (50%).
+      const size = /\b(small|big)\b/i.exec(node.meta || '')?.[1]?.toLowerCase();
       node.type = 'html';
-      node.value = `<figure class="diagram">${svg}</figure>`;
+      node.value = `<figure class="diagram${size ? ` dia-${size}` : ''}">${svg}</figure>`;
       delete node.lang;
       delete node.meta;
     }
