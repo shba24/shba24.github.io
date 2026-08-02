@@ -6,8 +6,9 @@ import type { EntryItem } from '../../components/EntryList.astro';
 import { slugify } from '../../lib/format';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
+import { filterPosts, includeDrafts } from '../../lib/posts';
 
-const posts = (await getCollection('posts')).filter((p: CollectionEntry<'posts'>) => !p.data.draft && p.data.series);
+const posts = filterPosts(await getCollection('posts'), includeDrafts).filter((p: CollectionEntry<'posts'>) => p.data.series);
 const counts = new Map<string, { series: string; count: number }>();
 for (const p of posts) {
   const name = p.data.series!;

@@ -5,8 +5,9 @@ import EntryList from '../../components/EntryList.astro';
 import type { EntryItem } from '../../components/EntryList.astro';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
+import { filterPosts, includeDrafts } from '../../lib/posts';
 
-const posts = (await getCollection('posts')).filter((p: CollectionEntry<'posts'>) => !p.data.draft);
+const posts = filterPosts(await getCollection('posts'), includeDrafts);
 
 // Group by year, then render years descending with newest-first posts inside each.
 const byYear = new Map<number, CollectionEntry<'posts'>[]>();

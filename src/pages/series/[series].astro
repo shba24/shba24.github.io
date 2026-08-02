@@ -6,9 +6,10 @@ import type { EntryItem } from '../../components/EntryList.astro';
 import { slugify } from '../../lib/format';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
+import { filterPosts, includeDrafts } from '../../lib/posts';
 
 export async function getStaticPaths() {
-  const posts = (await getCollection('posts')).filter((p) => !p.data.draft && p.data.series);
+  const posts = filterPosts(await getCollection('posts'), includeDrafts).filter((p) => p.data.series);
   const map = new Map<string, { series: string; posts: typeof posts }>();
   for (const p of posts) {
     const name = p.data.series!;

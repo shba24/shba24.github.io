@@ -2,11 +2,12 @@ import { OGImageRoute } from 'astro-og-canvas';
 import type { OGImageOptions } from 'astro-og-canvas';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
+import { filterPosts, includeDrafts } from '../../lib/posts';
 import { SITE } from '../../consts';
 
 // One OG card per published post. Keys are bare post ids (e.g. `iceberg-…-part1`);
 // the `.png` in the route comes from this file's name.
-const posts = await getCollection('posts', (p: CollectionEntry<'posts'>) => !p.data.draft);
+const posts = filterPosts(await getCollection('posts'), includeDrafts);
 const pages: Record<string, CollectionEntry<'posts'>['data']> = Object.fromEntries(
   posts.map((p: CollectionEntry<'posts'>) => [p.id, p.data]),
 );
