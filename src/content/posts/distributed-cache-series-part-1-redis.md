@@ -43,6 +43,7 @@ else cache miss
 end
 @enduml
 ```
+*Figure: the **cache-aside** read path — the client reads through the `Cache` and falls back to the `DB` on a miss.*
 
 
 In this blog of our [*Distributed Cache Series*](/series/distributed-cache/), we’ll explore `Redis`, one of the most popular and powerful distributed caching solutions available today. `Redis` isn’t just a simple cache; it's a **versatile in-memory data structure store that offers rich features, including support for various data types, *persistence*, and high availability**. We’ll dive into how `Redis` works, how to leverage it for **optimal caching strategies**, and some best practices to ensure your caching layer scales with your application. We will also discuss various **trade-offs** it brings to the equation and its limitations. And answer the most important question, what problem it can and can’t solve.

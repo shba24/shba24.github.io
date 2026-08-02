@@ -29,7 +29,8 @@ Before we dive into it, I want to provide the motivation behind writing this pos
 
 * **Data Lake -** A Data Lake[18] is a centralized repository that allows you to store all your structured (like databases), semi-structured (like [*Parquet*](https://parquet.apache.org/), [*ORC*](https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=31818911), or [*Avro*](https://avro.apache.org/)), and unstructured data (like emails, documents, and images) at any scale. The important thing to note here, you can store your data as-is, without having to structure it first, and run different types of analytics - from dashboards and visualizations to big data processing, real-time analytics, and machine learning - to guide better decisions.
 
-![Fig: General Data Lake Stack Layers](/images/blog-iceberg-part-1/DataLake_Stack_Part1.png)
+![](/images/blog-iceberg-part-1/DataLake_Stack_Part1.png)
+*Fig: General Data Lake Stack Layers*
 
 * **Data Warehouse -** A Data Warehouse[19] is a specialized type of database designed for the efficient storage, retrieval, and analysis of large volumes of structured data. It serves as a central repository where data from various sources is consolidated, transformed, and made available for complex queries and reporting.
 * **Data Lake vs Data Warehouse -** While a Data Lake stores raw data, a Data Warehouse stores processed, refined data that is typically organized into tables and optimized for querying and reporting. Data Warehouses are structured and schema-based, whereas Data Lakes are more flexible, allowing for the storage of unstructured data.
@@ -40,7 +41,8 @@ Before we dive into it, I want to provide the motivation behind writing this pos
 Before Apache Iceberg came into the picture, the most commonly used table format was the *Hive Table Format* through the Apache Hive[5] SQL engine. Apache Hive[5] was originally built to translate SQL statements into Hadoop MapReduce jobs which are used to perform some operations on table data stored on object storage like HDFS, S3, Azure Blob Storage, and others.
 
 Here is what the structure of the Hive table format used to look like
-![Fig: Represents generic Hive Table format directory structure with multi-layer partitions](/images/blog-iceberg-part-1/HiveTableFormat-Part1.png)
+![](/images/blog-iceberg-part-1/HiveTableFormat-Part1.png)
+*Fig: Represents generic Hive Table format directory structure with multi-layer partitions*
 Hive Table format came into the picture to remove the necessity to provide a data file path (e.g. */usr/hive/warehouse/db/table/data=2024-01-01/country=US/file1*) on which a particular Hive SQL query is used to do the processing. Instead, Apache Hive[5] talks to Apache Hive Metastore[6] to find the specific files corresponding to a table and partition(if specified) and do the MapReduce operation on those files.
 
 ### Benefits
@@ -104,7 +106,8 @@ Apache Iceberg support matrix for different layers in the data lake stack
 3. **Catalog Support:** Hive Metastore, Hadoop, AWS Glue, Nessie, IRC (custom catalogs)  
 4. **Engine Support:** Athena, EMR, Dremio, etc.
 
-![Fig: Generic Apache Iceberg Specification Layout](/images/blog-iceberg-part-1/Iceberg_Base_Table_Spec_Part1.png)
+![](/images/blog-iceberg-part-1/Iceberg_Base_Table_Spec_Part1.png)
+*Fig: Generic Apache Iceberg Specification Layout*
 
 For every transaction in the table, a new metadata file (`metadata file v2`) is created which basically represents the state of the table after the transaction is finished. The major difference the Apache Iceberg Table format brings as compared to the Hive Table format is *tracking of files in a table through metadata files as compared to directories*. This helps majorly with supporting **ACID transactions** on the table, which I will explain later in the post, but in short, this allows writers to create data files, manifest files, and metadata files in place and only adds to the table in an explicit atomic swap commit to the catalog where `db.table` starts pointing to the new metadata files.
 
