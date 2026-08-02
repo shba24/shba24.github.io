@@ -49,3 +49,16 @@ test('copyright footer appears on post and list pages', async ({ page }) => {
     await expect(f).toContainText(String(new Date().getFullYear()));
   }
 });
+
+test('anchor jump lands the heading below the sticky topbar', async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.goto('/posts/iceberg-table-format-part1/');
+  const topbarH = (await page.locator('.topbar').boundingBox())!.height;
+  const link = page.locator('.toc a').nth(4);
+  const href = (await link.getAttribute('href'))!; // "#some-id"
+  await link.click();
+  await page.waitForTimeout(400);
+  const top = await page.locator(`[id="${href.slice(1)}"]`).evaluate((el) => el.getBoundingClientRect().top);
+  expect(top).toBeGreaterThanOrEqual(topbarH - 2);  // not hidden under the bar
+  expect(top).toBeLessThan(topbarH + 90);           // and it actually scrolled there
+});
