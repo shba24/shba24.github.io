@@ -53,12 +53,18 @@ test('copyright footer appears on post and list pages', async ({ page }) => {
 test('anchor jump lands the heading below the sticky topbar', async ({ page }) => {
   await page.setViewportSize({ width: 1600, height: 1000 });
   await page.goto('/posts/iceberg-table-format-part1/');
-  const topbarH = (await page.locator('.topbar').boundingBox())!.height;
-  const link = page.locator('.toc a').nth(4);
-  const href = (await link.getAttribute('href'))!; // "#some-id"
+  const topbarH = Math.round((await page.locator('.topbar').boundingBox())!.height);
+  const links = page.locator('.toc a');
+  const n = await links.count();
+  expect(n).toBeGreaterThan(0);
+  const link = links.nth(Math.floor(n / 2)); // a mid-document heading (stable across posts)
+  const id = (await link.getAttribute('href'))!.slice(1);
+  const target = page.locator(`[id="${id}"]`);
   await link.click();
-  await page.waitForTimeout(400);
-  const top = await page.locator(`[id="${href.slice(1)}"]`).evaluate((el) => el.getBoundingClientRect().top);
-  expect(top).toBeGreaterThanOrEqual(topbarH - 2);  // not hidden under the bar
-  expect(top).toBeLessThan(topbarH + 90);           // and it actually scrolled there
+  // no smooth-scroll here, so the jump is immediate; poll (not a fixed timeout) until it settles
+  await expect.poll(async () =>
+    Math.round(await target.evaluate((el) => el.getBoundingClientRect().top))
+  ).toBeGreaterThanOrEqual(topbarH - 2);   // not hidden under the bar
+  const top = Math.round(await target.evaluate((el) => el.getBoundingClientRect().top));
+  expect(top).toBeLessThan(topbarH + 90);  // landed just below the bar, not far down
 });
