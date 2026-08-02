@@ -1,0 +1,72 @@
+name: Deploy to GitHub Pages
+
+# Production deploy. Triggers ONLY on main (cutover branch) — never on the
+# in-progress astro-rebuild branch (that is covered by astro-ci.yml).
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+# Least-privilege token scoped for GitHub Pages deployment via OIDC.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time; never cancel an in-progress production deploy.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type-check
+        run: pnpm check
+
+      # `pnpm build` also runs Pagefind indexing and OG image generation.
+      - name: Build
+        run: pnpm build
+
+      # SEO gate: fail the deploy if any indexed URL from the parity checklist
+      # is missing from the build output.
+      - name: URL parity gate
+        run: node scripts/check-url-parity.mjs dist
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
