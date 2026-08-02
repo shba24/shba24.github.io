@@ -17,7 +17,7 @@ interface Props {
 const { title, date, author, series, seriesPart, tags, minutes, audioSrc, slug, draft } = Astro.props;
 ---
 <header class="post-head">
-  {import.meta.env.DEV && (draft ? <div class="status-flag sf-draft">Unpublished</div> : <div class="status-flag sf-pub">Published</div>)}
+  {import.meta.env.DEV && (draft ? <div class="status-flag sf-draft">Draft</div> : <div class="status-flag sf-pub">Published</div>)}
   {series && <div class="eyebrow">{series}{seriesPart ? ` · Part ${seriesPart}` : ''}</div>}
   <h1>{title}</h1>
   <div class="byline">

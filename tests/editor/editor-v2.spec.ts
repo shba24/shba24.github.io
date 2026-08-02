@@ -20,7 +20,7 @@ test('a post page shows the dev-only Edit button', async ({ page }) => {
   await expect(page.locator('.edit-link')).toBeVisible();
 });
 
-test('autosave off by default; Save creates Unpublished; Publish/Unpublish toggle (file kept)', async ({ page, request }) => {
+test('autosave off by default; Save creates a Draft; Publish/Unpublish toggle (file kept)', async ({ page, request }) => {
   const title = `E2E ${Date.now()}`;
   const slug = slugify(title);
   const draftState = async () => {
@@ -32,7 +32,7 @@ test('autosave off by default; Save creates Unpublished; Publish/Unpublish toggl
   await page.getByTestId('fm-title').fill(title);
   await page.waitForTimeout(1500);
   expect(await draftState()).toBeNull(); // autosave off -> not persisted
-  // Save creates it as Unpublished (draft:true)
+  // Save creates it as a Draft (draft:true)
   await page.getByTestId('btn-save').click();
   await expect.poll(draftState, { timeout: 12000 }).toBe(true);
   // Publish -> live
@@ -54,7 +54,7 @@ test('autosave toggle is OFF by default and the preference persists across reloa
   await expect(page.getByTestId('autosave-toggle')).toBeChecked(); // persisted via localStorage
 });
 
-test('dev listings badge Unpublished and Published; post header shows the status', async ({ page }) => {
+test('dev listings badge Draft and Published; post header shows the status', async ({ page }) => {
   await page.goto('/posts/');
   const draftRow = page.locator('.entries li', { hasText: 'Fixture Draft' });
   await expect(draftRow.locator('.badge.b-draft')).toBeVisible();

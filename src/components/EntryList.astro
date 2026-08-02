@@ -13,7 +13,7 @@ const { items } = Astro.props;
 ---
 <ul class="entries">{items.map((it: EntryItem) => (
   <li>
-    <a href={it.href}>{it.title}{import.meta.env.DEV ? (it.draft ? <span class="badge b-draft">Unpublished</span> : <span class="badge b-pub">Published</span>) : null}</a>
+    <a href={it.href}>{it.title}{import.meta.env.DEV ? (it.draft ? <span class="badge b-draft">Draft</span> : <span class="badge b-pub">Published</span>) : null}</a>
     {it.date ? <time>{formatDate(it.date)}</time> : it.meta ? <span class="meta">{it.meta}</span> : null}
   </li>
 ))}</ul>

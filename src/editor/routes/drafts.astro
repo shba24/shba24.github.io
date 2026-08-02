@@ -25,11 +25,11 @@ const groups = [...byYear.entries()]
       .map((p): EntryItem => ({ href: `/posts/${p.id}/`, title: p.data.title, date: p.data.date })),
   }));
 ---
-<BaseLayout title="Unpublished — Shubham Bansal">
+<BaseLayout title="Drafts — Shubham Bansal">
   <div class="shell"><LeftRail />
     <main>
-      <h1 class="page-title">Unpublished</h1>
-      {groups.length === 0 && <p class="empty">No unpublished posts.</p>}
+      <h1 class="page-title">Drafts</h1>
+      {groups.length === 0 && <p class="empty">No drafts yet.</p>}
       {groups.map(({ year, items }) => (
         <section class="year-group">
           <h2 class="year">{year}</h2>
