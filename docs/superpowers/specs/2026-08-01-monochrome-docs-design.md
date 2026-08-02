@@ -76,7 +76,7 @@ Post frontmatter (Zod-validated):
 - **Audio:** build-time **Piper** TTS over each post's text → `/audio/<slug>.mp3` static asset → `▶ Listen` player (island) in the centered header. Regenerated only when content changes (hash guard).
 - **OG images:** Satori per post at build.
 - **Feeds/SEO:** RSS + sitemap + `Article` JSON-LD.
-- **Analytics:** keep Cloudflare Web Analytics only; drop the unused GA + Plausible hooks and the redundant CDN highlight.js.
+- **Analytics:** KEEP Cloudflare Web Analytics — it is intentional and stays. Migration MUST **port** the existing Cloudflare beacon (`static.cloudflareinsights.com/beacon.min.js`, `data-cf-beacon` token `fd0bbd0149124eeea3afab47dd84a12c`) into the Astro `BaseLayout` `<head>` (the new site has no analytics yet). Only the never-configured Google Analytics + Plausible hooks from the old Poison theme are dropped as dead code. (The old CDN highlight.js is already gone — Astro uses Expressive Code.)
 
 ## 6. Architecture & data flow
 Static build pipeline: Markdown/MDX → content collections (typed) → Astro file-based routes → HTML/CSS + hydrated islands → **Pagefind** index → **Piper** audio step → deploy artifact.
