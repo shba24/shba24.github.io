@@ -1,0 +1,41 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import LeftRail from '../components/LeftRail.astro';
+import PostHeader from '../components/PostHeader.astro';
+import TreeToc from '../components/TreeToc.astro';
+import Prose from '../components/Prose.astro';
+interface Props {
+  title: string;
+  description?: string;
+  date: Date;
+  author: string;
+  series?: string;
+  seriesPart?: number;
+  tags: string[];
+  minutes: number;
+  headings: import('astro').MarkdownHeading[];
+  hideToc: boolean;
+}
+const p = Astro.props;
+const showToc = !p.hideToc && p.headings?.some((h: import('astro').MarkdownHeading) => h.depth >= 2 && h.depth <= 4);
+---
+<BaseLayout title={p.title} description={p.description}>
+  <div class:list={["layout", { "no-toc": !showToc }]}>
+    <LeftRail />
+    <main>
+      <PostHeader title={p.title} date={p.date} author={p.author} series={p.series}
+        seriesPart={p.seriesPart} tags={p.tags} minutes={p.minutes} />
+      <hr class="rule" />
+      <Prose><slot /></Prose>
+    </main>
+    {showToc && <TreeToc headings={p.headings} />}
+  </div>
+</BaseLayout>
+<style>
+  .layout{max-width:1240px;margin:0 auto;padding:32px 32px 60px;display:grid;
+    grid-template-columns:200px minmax(0,680px) 210px;gap:44px;justify-content:center}
+  .layout.no-toc{grid-template-columns:200px minmax(0,680px)}
+  .rule{border:0;border-top:1px solid var(--border-soft);margin:26px 0 28px}
+  @media(max-width:1080px){.layout{grid-template-columns:200px minmax(0,1fr)}.toc{display:none}}
+  @media(max-width:820px){.layout{grid-template-columns:minmax(0,1fr);padding:22px 20px 46px}.rail{display:none}}
+</style>
