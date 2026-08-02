@@ -39,3 +39,13 @@ test('primary nav lives in the topbar and not the rail', async ({ page }) => {
   }
   await expect(page.locator('.rail nav.nav')).toHaveCount(0); // old rail nav gone
 });
+
+test('copyright footer appears on post and list pages', async ({ page }) => {
+  for (const url of ['/posts/iceberg-table-format-part1/', '/about/']) {
+    await page.goto(url);
+    const f = page.locator('.site-footer');
+    await expect(f).toBeVisible();
+    await expect(f).toContainText('Shubham Bansal');
+    await expect(f).toContainText(String(new Date().getFullYear()));
+  }
+});

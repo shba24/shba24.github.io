@@ -46,6 +46,9 @@ const canonical = Astro.url.href;
   <body>
     <Topbar />
     <slot />
+    <footer class="site-footer">
+      <div class="foot-inner">© {new Date().getFullYear()} Shubham Bansal</div>
+    </footer>
     <script>
       const btn = document.getElementById('theme-toggle');
       btn?.addEventListener('click', () => {
@@ -58,3 +61,7 @@ const canonical = Astro.url.href;
     </script>
   </body>
 </html>
+<style>
+  .site-footer{border-top:1px solid var(--border-soft);margin-top:48px}
+  .foot-inner{max-width:var(--shell);margin:0 auto;padding:22px 32px;text-align:center;color:var(--muted);font-size:13px}
+</style>
