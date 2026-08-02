@@ -9,8 +9,8 @@ test('plantuml diagram renders centered at ~50% post width by default', async ({
   // themed: strokes/text inherit the site color; no raw source leaked as a code block
   expect(await fig.innerHTML()).toContain('currentColor');
   await expect(page.getByText('@startuml')).toHaveCount(0);
-  const fb = await fig.boundingBox();
-  const mb = await page.locator('main').boundingBox();
+  const fb = (await fig.boundingBox())!;
+  const mb = (await page.locator('main').boundingBox())!;
   // DEFAULT (no per-diagram config): ~50% of the content width...
   expect(fb.width).toBeGreaterThan(mb.width * 0.4);
   expect(fb.width).toBeLessThan(mb.width * 0.6);
