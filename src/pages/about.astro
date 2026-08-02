@@ -9,7 +9,7 @@ if (!about) throw new Error("Missing content collection entry: pages/about");
 const { Content } = await render(about);
 ---
 <BaseLayout title={`${about.data.title} — Shubham Bansal`} description={about.data.description}>
-  <div class="layout"><LeftRail />
+  <div class="shell"><LeftRail />
     <main>
       <h1 class="page-title">{about.data.title}</h1>
       <Prose><Content /></Prose>
@@ -17,7 +17,5 @@ const { Content } = await render(about);
   </div>
 </BaseLayout>
 <style>
-  .layout{max-width:var(--shell);margin:0 auto;padding:32px 32px 60px;display:grid;grid-template-columns:var(--rail) minmax(0,var(--content));gap:var(--gap);justify-content:center}
   .page-title{font-size:1.6rem;font-weight:700;margin:0 0 20px}
-  @media(max-width:820px){.layout{grid-template-columns:minmax(0,1fr);padding:22px 20px} :global(.rail){display:none}}
 </style>

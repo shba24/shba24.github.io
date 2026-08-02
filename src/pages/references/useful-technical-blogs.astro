@@ -9,13 +9,11 @@ if (!entry) throw new Error("Missing content collection entry: pages/useful-tech
 const { Content } = await render(entry);
 ---
 <BaseLayout title={`${entry.data.title} — Shubham Bansal`} description={entry.data.description}>
-  <div class="layout"><LeftRail />
+  <div class="shell"><LeftRail />
     <main>
       <Prose><Content /></Prose>
     </main>
   </div>
 </BaseLayout>
 <style>
-  .layout{max-width:var(--shell);margin:0 auto;padding:32px 32px 60px;display:grid;grid-template-columns:var(--rail) minmax(0,var(--content));gap:var(--gap);justify-content:center}
-  @media(max-width:820px){.layout{grid-template-columns:minmax(0,1fr);padding:22px 20px} :global(.rail){display:none}}
 </style>
