@@ -38,7 +38,7 @@ It's a database service designed for ***11 9s*** of enterprise-grade durability 
 
 ## Novel Solution
 
-![](/images/blog-memorydb-part2/memorydb_base_arch.png)
+![](/images/blog-memorydb-part2/memorydb_base_arch.png "medium")
 
 The novel solution here that MemoryDB has implemented is the usage of a Multi-AZ transaction log (MTL) service (internal service to AWS). In short, what this transaction log service provides is a *consensus, total order, and durability* solution. The core concept here is that in Redis, control and data plane nodes used to be strongly coupled, but MemoryDB separates them, to scale them independently and decouple the availability and durability of the system. MemoryDB uses it to solve the following problem with Redis.
 
@@ -62,7 +62,7 @@ Marc Brooker on his recent [blog](https://brooker.co.za/blog/2024/04/25/memorydb
 
 MTL service provides the total ordering of the events in a distributed system.
 
-![](/images/blog-memorydb-part2/mtl_service_part1.png) 
+![](/images/blog-memorydb-part2/mtl_service_part1.png "small") 
 Consider a general case where multiple `WRITEs` are sent to the MTL service concurrently.
 
 Using the following APIs
@@ -167,7 +167,7 @@ One thing that the paper doesn’t talk about is who is coordinating the 2PC bet
 
 MemoryDB sees higher throughput for `READs`as compared to Redis, mostly because MemoryDB [Enhanced IO Multiplexing](https://aws.amazon.com/memorydb/features/#:~:text=quickly%20build%20applications.-,Ultra%2Dfast%20performance,-MemoryDB%20stores%20your) aggregates multiple client connections into a single connection to the engine, improving processing efficiency and delivering higher throughput. Also, the quorum requirement was removed for writes/election/slot transfer from MemoryDB increasing its availability causing higher read throughput.
 
-![](/images/blog-memorydb-part2/EnhancedIOMultiplexing_postLaunch_memDB.jpg)
+![](/images/blog-memorydb-part2/EnhancedIOMultiplexing_postLaunch_memDB.jpg "small")
 
 MemoryDB sees less throughput for `WRITEs`as compared to Redis as synchronous `WRITE`to MTL service has also become part of a `WRITE`operation.
 

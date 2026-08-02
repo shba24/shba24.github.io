@@ -29,7 +29,7 @@ Before we dive into it, I want to provide the motivation behind writing this pos
 
 * **Data Lake -** A Data Lake[18] is a centralized repository that allows you to store all your structured (like databases), semi-structured (like [*Parquet*](https://parquet.apache.org/), [*ORC*](https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=31818911), or [*Avro*](https://avro.apache.org/)), and unstructured data (like emails, documents, and images) at any scale. The important thing to note here, you can store your data as-is, without having to structure it first, and run different types of analytics - from dashboards and visualizations to big data processing, real-time analytics, and machine learning - to guide better decisions.
 
-![](/images/blog-iceberg-part-1/DataLake_Stack_Part1.png)
+![](/images/blog-iceberg-part-1/DataLake_Stack_Part1.png "small")
 *Fig: General Data Lake Stack Layers*
 
 * **Data Warehouse -** A Data Warehouse[19] is a specialized type of database designed for the efficient storage, retrieval, and analysis of large volumes of structured data. It serves as a central repository where data from various sources is consolidated, transformed, and made available for complex queries and reporting.
@@ -41,7 +41,7 @@ Before we dive into it, I want to provide the motivation behind writing this pos
 Before Apache Iceberg came into the picture, the most commonly used table format was the *Hive Table Format* through the Apache Hive[5] SQL engine. Apache Hive[5] was originally built to translate SQL statements into Hadoop MapReduce jobs which are used to perform some operations on table data stored on object storage like HDFS, S3, Azure Blob Storage, and others.
 
 Here is what the structure of the Hive table format used to look like
-![](/images/blog-iceberg-part-1/HiveTableFormat-Part1.png)
+![](/images/blog-iceberg-part-1/HiveTableFormat-Part1.png "medium")
 *Fig: Represents generic Hive Table format directory structure with multi-layer partitions*
 Hive Table format came into the picture to remove the necessity to provide a data file path (e.g. */usr/hive/warehouse/db/table/data=2024-01-01/country=US/file1*) on which a particular Hive SQL query is used to do the processing. Instead, Apache Hive[5] talks to Apache Hive Metastore[6] to find the specific files corresponding to a table and partition(if specified) and do the MapReduce operation on those files.
 
@@ -600,15 +600,12 @@ Adding a new field assigns a new ID for that field and for any nested fields. Re
 **Note:** Field deletion cannot be rolled back unless the field is nullable so that after rollback, the rows without the previously removed column, data for those columns will have a null value. Also, we can roll back if the current snapshot has not changed as no data has been added with the new schema.
 
 ![Figure 1](/images/blog-iceberg-part-1/Schema_Evolution_Part1.png)
-
 *Figure 1: At the start, we have a table state with `current-schema-id` \= 0, pointing to schema spec with 16 columns. Each snapshot also corresponds to a specific schema spec, which was not the case with the partition spec. For schema spec, diversion happens just after the metadata file level. This will be used in all the query planning and execution by the engine.*
 
 ![Figure 2](/images/blog-iceberg-part-1/Schema_Evolution_Part2.png)  
-
 *Figure 2: When we do the `ALTER TABLE ADD COLUMN` operation, it will alter the table schema spec. With Iceberg, the change in schema happens at the metadata layer only, no changes to existing data files are done. New metadata file `Metadata File v2` will still have the same snapshot as previously, pointing to the old Manifest List file `Manifest file v1`*
 
 ![Figure 3](/images/blog-iceberg-part-1/Schema_Evolution_Part3.png)  
-
 *Figure 3: And, when we finally write to the table after table schema evolution, the new manifest file list `Manifest List v3` and manifest file `Manifest file v2` will be created with the new schema spec metadata.*
 
 ### Time-Travel
