@@ -33,6 +33,13 @@ export default function EditorApp() {
   const [body, setBody] = useState('');
   const [status, setStatus] = useState<SaveStatus>('idle');
   const [dialog, setDialog] = useState(false);
+  const [autosaveOn, setAutosaveOn] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('editor.autosave') === '1';
+    } catch {
+      return false;
+    }
+  });
   const dirty = useRef(false);
 
   useEffect(() => {
@@ -74,6 +81,15 @@ export default function EditorApp() {
     setStatus('saving');
     try {
       await savePost(s, formToData(f), body);
+      // For a brand-new post, reflect the slug in the URL so a dev content-reload
+      // returns to this post instead of a blank editor.
+      if (!slug) {
+        try {
+          history.replaceState(null, '', `/editor/?slug=${encodeURIComponent(s)}`);
+        } catch {
+          /* ignore */
+        }
+      }
       setSlug(s);
       dirty.current = false;
       setStatus('saved');
@@ -82,15 +98,16 @@ export default function EditorApp() {
     }
   }
 
-  // Debounced autosave: persists ~1.5s after the last edit (once there's a slug or title).
+  // Debounced autosave (opt-in): when enabled, persist ~1.5s after the doc becomes dirty.
   useEffect(() => {
-    if (!shouldAutosave({ slug: effectiveSlug, title: form.title, dirty: dirty.current })) return;
+    if (!autosaveOn || status !== 'dirty') return;
+    if (!shouldAutosave({ slug: effectiveSlug, title: form.title, dirty: true })) return;
     const t = setTimeout(() => {
       void persist();
     }, 1500);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form, body]);
+  }, [status, autosaveOn, form, body, effectiveSlug]);
 
   function insertImage(img: ImageInsert) {
     const md = `![${img.alt}](${img.url}${img.size ? ` "${img.size}"` : ''})${img.caption ? `\n*${img.caption}*` : ''}`;
@@ -106,6 +123,26 @@ export default function EditorApp() {
         <span data-testid="save-status" style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--faint)' }}>
           {statusLabel[status]}
         </span>
+        <label
+          title="Autosave writes the file as you type. Off by default."
+          style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--muted)', fontFamily: 'var(--mono)' }}
+        >
+          <input
+            type="checkbox"
+            checked={autosaveOn}
+            data-testid="autosave-toggle"
+            onChange={(e) => {
+              const n = e.target.checked;
+              setAutosaveOn(n);
+              try {
+                localStorage.setItem('editor.autosave', n ? '1' : '0');
+              } catch {
+                /* ignore */
+              }
+            }}
+          />
+          autosave
+        </label>
         <span className="grow" />
         {slug && (
           <a href={`/posts/${slug}/`} target="_blank" rel="noreferrer" style={{ ...btn, textDecoration: 'none' }}>
@@ -123,7 +160,7 @@ export default function EditorApp() {
         </button>
       </div>
       <FrontmatterForm form={form} onChange={patchForm} />
-      <Editor value={body} onChange={changeBody} onImage={() => setDialog(true)} slug={effectiveSlug} />
+      <Editor value={body} onChange={changeBody} onImage={() => setDialog(true)} />
       {dialog && <ImageDialog slug={effectiveSlug} onInsert={insertImage} onClose={() => setDialog(false)} />}
     </div>
   );

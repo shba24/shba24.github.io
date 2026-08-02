@@ -30,7 +30,8 @@ const calloutPlugin = (): BytemdPlugin => ({
   remark: (p) => p.use(remarkAlert),
 });
 
-// Render ```plantuml / ```d2 fenced blocks as inline SVG in the preview via Kroki.
+// Render ```plantuml / ```d2 fenced blocks as inline SVG in the preview via Kroki,
+// and pair a following italic-only paragraph as the figure caption (site convention).
 const krokiPlugin = (): BytemdPlugin => ({
   viewerEffect({ markdownBody }) {
     const nodes = markdownBody.querySelectorAll('pre > code.language-plantuml, pre > code.language-d2');
@@ -39,12 +40,24 @@ const krokiPlugin = (): BytemdPlugin => ({
       if (!pre || pre.dataset.kroki) return;
       pre.dataset.kroki = '1';
       const lang: 'plantuml' | 'd2' = code.classList.contains('language-d2') ? 'd2' : 'plantuml';
+      const caption = pre.nextElementSibling; // possible "*caption*" paragraph
       krokiSvg(lang, code.textContent ?? '')
         .then((s) => {
           const fig = document.createElement('figure');
           fig.className = `diagram diagram-${lang}`;
           fig.innerHTML = s;
           pre.replaceWith(fig);
+          if (caption && caption.tagName === 'P') {
+            const kids = Array.from(caption.childNodes).filter(
+              (n) => !(n.nodeType === 3 && !n.textContent?.trim()),
+            );
+            if (kids.length === 1 && kids[0].nodeName === 'EM') {
+              const figcap = document.createElement('figcaption');
+              figcap.innerHTML = (kids[0] as HTMLElement).innerHTML;
+              fig.appendChild(figcap);
+              caption.remove();
+            }
+          }
         })
         .catch(() => {
           pre.dataset.kroki = '';
@@ -78,14 +91,14 @@ export function buildPlugins({ onImage }: { onImage: () => void }): BytemdPlugin
     ),
     block('Code block', svg('<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>'), '```\n\n```'),
     block(
-      'PlantUML diagram',
+      'PlantUML diagram (with caption)',
       svg('<rect x="3" y="4" width="7" height="6" rx="1"/><rect x="14" y="4" width="7" height="6" rx="1"/><rect x="8" y="14" width="8" height="6" rx="1"/>'),
-      '```plantuml\n@startuml\n\n@enduml\n```',
+      '```plantuml\n@startuml\n\n@enduml\n```\n*caption*',
     ),
     block(
-      'D2 diagram',
+      'D2 diagram (with caption)',
       svg('<rect x="3" y="4" width="7" height="6" rx="1"/><rect x="14" y="14" width="7" height="6" rx="1"/><path d="M10 7h4a3 3 0 0 1 3 3v4"/>'),
-      '```d2\n\n```',
+      '```d2\n\n```\n*caption*',
     ),
     image,
   ];
