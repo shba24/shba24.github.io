@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Not found — Shubham Bansal">
+  <main class="notfound">
+    <p class="code">404</p>
+    <h1>Not found</h1>
+    <p class="msg">The page you’re looking for doesn’t exist or has moved.</p>
+    <p><a href="/">← Back home</a></p>
+  </main>
+</BaseLayout>
+<style>
+  .notfound{max-width:640px;margin:0 auto;padding:96px 24px;text-align:center}
+  .notfound .code{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--faint);margin:0 0 10px}
+  .notfound h1{font-size:2rem;font-weight:700;margin:0 0 12px}
+  .notfound .msg{color:var(--muted);margin:0 0 22px}
+  .notfound a{font-weight:500}
+  .notfound a:hover{color:var(--accent)}
+</style>

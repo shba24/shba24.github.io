@@ -1,16 +1,16 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import LeftRail from '../components/LeftRail.astro';
-import { formatDate } from '../lib/format';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import LeftRail from '../../components/LeftRail.astro';
+import { formatDate } from '../../lib/format';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 const posts = (await getCollection('posts')).filter((p: CollectionEntry<'posts'>) => !p.data.draft)
   .sort((a: CollectionEntry<'posts'>, b: CollectionEntry<'posts'>) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
-<BaseLayout title="Shubham Bansal — Technical Blog">
+<BaseLayout title="Posts — Shubham Bansal">
   <div class="layout"><LeftRail />
     <main>
-      <h1 class="page-title">Writing</h1>
+      <h1 class="page-title">Posts</h1>
       <ul class="entries">{posts.map((p: CollectionEntry<'posts'>) => (
         <li><a href={`/posts/${p.id}/`}>{p.data.title}</a><time>{formatDate(p.data.date)}</time></li>
       ))}</ul>
