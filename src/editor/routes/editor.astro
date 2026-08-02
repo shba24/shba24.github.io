@@ -1,10 +1,11 @@
 ---
 export const prerender = false;
+import App from '../ui/App.tsx';
 ---
 <!doctype html>
 <html lang="en" data-theme="dark">
-  <head><meta charset="utf-8" /><title>Blog Editor</title></head>
+  <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>Blog Editor</title></head>
   <body>
-    <div id="editor-root">Loading editor…</div>
+    <App client:only="react" />
   </body>
 </html>
