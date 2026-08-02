@@ -1,0 +1,12 @@
+---
+export const prerender = false;
+import { getCollection } from 'astro:content';
+const drafts = (await getCollection('posts')).filter((p) => p.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8" /><title>Drafts</title></head>
+<body>
+  <h1>Drafts ({drafts.length})</h1>
+  <ul>{drafts.map((d) => <li><a href={`/posts/${d.id}/`}>{d.data.title}</a></li>)}</ul>
+</body></html>

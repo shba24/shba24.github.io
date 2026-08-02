@@ -12,6 +12,7 @@ import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import remarkKroki from './src/lib/remark-kroki.mjs';
 import rehypeFigure from './src/lib/rehype-figure.mjs';
+import blogEditor from './src/integrations/editor.mjs';
 
 export default defineConfig({
   site: 'https://shubham-bansal.com',
@@ -39,6 +40,7 @@ export default defineConfig({
     react(),
     sitemap(),
     pagefind(),
+    blogEditor(),
   ],
   vite: { plugins: [tailwindcss()] },
   markdown: {

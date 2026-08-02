@@ -54,3 +54,6 @@ public/audio/*
 
 # ---- Superpowers SDD scratch ----
 .superpowers/
+
+# ---- Blog editor (dev-only locks) ----
+.editor/
