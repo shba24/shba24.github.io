@@ -561,11 +561,19 @@ From [15]
 > It’s faster to read from a table if the query engine doesn’t have to read lots of files and doesn’t have to reconcile or do any additional work while reading the data.  
 > It’s faster to write into a table if the query engine has to write less data.
 
-$$ Read Latency \propto Number Of Files Read $$
-$$ Read Latency \propto Processing Data $$
+$$
+\begin{aligned}
+\text{Read Latency} &\propto \text{Number Of Files Read} \\
+\text{Read Latency} &\propto \text{Processing Data}
+\end{aligned}
+$$
 
-$$ Write Latency \propto Number Of Files Written $$
-$$ Write Latency \propto Size Of Data Written $$
+$$
+\begin{aligned}
+\text{Write Latency} &\propto \text{Number Of Files Written} \\
+\text{Write Latency} &\propto \text{Size Of Data Written}
+\end{aligned}
+$$
 
 |  | Copy-on-Write | Merge-on-Read |
 | :---: | :---: | :---: |
