@@ -51,11 +51,21 @@ const mustExistFiles = [
 
 // Redirect sources that MUST have emitted a redirect page so old indexed
 // URLs still resolve on GitHub Pages (which has no server-side redirects).
+// The 4 stale /tags/* entries are indexed URLs from old post revisions /
+// the references article's Hugo tags that no live post regenerates; they are
+// preserved via redirects instead of live pages. /sitemap.xml is listed as
+// must-match in the checklist and redirects to /sitemap-index.xml (Astro
+// emits it at dist/sitemap.xml/index.html).
 const redirectSources = [
   '/tags/data-anlytics/',
+  '/tags/distributed-system/',
+  '/tags/blog/',
+  '/tags/database/',
+  '/tags/language/',
   '/page/1/',
   '/posts/page/1/',
   '/about/about/',
+  '/sitemap.xml',
 ];
 
 const pagePath = (url) => join(dist, url, 'index.html');
@@ -99,14 +109,17 @@ for (const url of mustExistFiles) {
 }
 out.push('');
 
-out.push('Redirect sources (must emit a page):');
+out.push('Redirect sources (must emit a redirect page):');
 for (const url of redirectSources) {
   const f = pagePath(url);
-  if (existsSync(f)) {
-    out.push(`  PASS  ${url}${isRedirect(f) ? '  (redirect)' : '  (WARNING: page is not a redirect)'}`);
-  } else {
+  if (!existsSync(f)) {
     out.push(`  FAIL  ${url}  (missing ${f})`);
     failures.push(url);
+  } else if (!isRedirect(f)) {
+    out.push(`  FAIL  ${url}  (page exists but is not a redirect)`);
+    failures.push(url);
+  } else {
+    out.push(`  PASS  ${url}  (redirect)`);
   }
 }
 out.push('');

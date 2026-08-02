@@ -19,6 +19,10 @@ export default defineConfig({
   build: { format: 'directory' },
   redirects: {
     '/tags/data-anlytics/': '/tags/data-analytics/',
+    '/tags/distributed-system/': '/tags/distributed-systems/',
+    '/tags/blog/': '/tags/',
+    '/tags/database/': '/tags/',
+    '/tags/language/': '/tags/',
     '/page/1/': '/',
     '/posts/page/1/': '/posts/',
     '/about/about/': '/about/',

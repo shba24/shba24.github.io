@@ -17,7 +17,9 @@ Authoritative inventory of the **existing indexed URLs** (from Hugo `public/` at
 | `/series/distributed-cache/` | ⏳ (2nd post) | Migration: **slugified** |
 | `/series/distributed-table-format/` | ❌ emits `/series/Distributed Table Format/` | **Slugify** series param + hrefs |
 | `/tags/` | ❌ missing index | Migration: add tags index |
-| `/tags/<slug>/` (apache-hive, apache-iceberg, blog, cache, **data-anlytics**, data-lake, database, distributed-system, distributed-systems, election, language, memorydb, redis, split-brain, table-format, thundering-herd, time-skew, transaction-log) | ❌ emits raw cased/spaced | **Slugify** tag param + hrefs |
+| `/tags/<slug>/` (apache-hive, apache-iceberg, blog†, cache, **data-anlytics**, data-lake, database†, distributed-system†, distributed-systems, election, language†, memorydb, redis, split-brain, table-format, thundering-herd, time-skew, transaction-log) | ❌ emits raw cased/spaced | **Slugify** tag param + hrefs |
+
+† **Stale indexed tags — handled by redirects (not live pages).** Four tags above are indexed URLs left over from old post revisions / the references article's Hugo tags, but no live post regenerates them. They are preserved via Astro `redirects` so the indexed links don't break: `/tags/blog/`, `/tags/database/`, `/tags/language/` → `/tags/` (tags index); `/tags/distributed-system/` → `/tags/distributed-systems/` (the live tag). The parity gate (`scripts/check-url-parity.mjs`) asserts each as an emitted redirect page, so this spec and the gate agree.
 
 ## Feeds / sitemap
 | Old URL | Action |
