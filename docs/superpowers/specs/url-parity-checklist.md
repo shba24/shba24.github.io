@@ -30,14 +30,12 @@ Authoritative inventory of the **existing indexed URLs** (from Hugo `public/` at
 ## Slugify rule (match Hugo `urlize`)
 Lowercase; replace spaces and non-alphanumerics with `-`; collapse repeats. Examples: `Apache Iceberg`→`apache-iceberg`, `Table Format`→`table-format`, `Distributed Table Format`→`distributed-table-format`. Apply to BOTH `getStaticPaths` params AND every `href` (LeftRail, PostHeader tags, series nav, list pages).
 
-## The `data-anlytics` typo — DECISION NEEDED
-Original pilot tag was misspelled "Data Anlytics" → indexed `/tags/data-anlytics/`. Task 9 changed it to "Data Analytics" (→ `/tags/data-analytics/`).
-- **Option A (exact parity, zero redirect):** revert the pilot tag to "Data Anlytics" (keeps the typo visible on the page).
-- **Option B (clean spelling + redirect):** keep "Data Analytics" and add an Astro redirect `/tags/data-anlytics/` → `/tags/data-analytics/`.
+## The `data-anlytics` typo — DECISION: Option B (approved)
+Keep the corrected tag "Data Analytics" (→ `/tags/data-analytics/`) AND add an Astro redirect `/tags/data-anlytics/` → `/tags/data-analytics/` so the old indexed URL still resolves.
 
-## Low-value Hugo artifacts (confirm: match, redirect, or drop)
-- `/page/1/`, `/posts/page/1/` — pagination duplicates of `/` and `/posts/`. Recommend redirect → `/` and `/posts/`.
-- `/about/about/` — Hugo quirk. Recommend redirect → `/about/`.
+## Low-value Hugo artifacts — DECISION: redirect (approved)
+- `/page/1/` → `/` and `/posts/page/1/` → `/posts/` (Astro redirects).
+- `/about/about/` → `/about/` (Astro redirect).
 
 ## Mechanism
 - **Match first** (slugify) so redirects are minimal.
