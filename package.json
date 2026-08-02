@@ -10,7 +10,10 @@
     "build": "node scripts/generate-audio.mjs && astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "setup:audio": "bash scripts/setup-audio.sh",
+    "build:audio": "bash scripts/setup-audio.sh && PATH=$HOME/.local/bin:$PATH pnpm build",
+    "preview:audio": "pnpm build:audio && astro preview"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.0.0",

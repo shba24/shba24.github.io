@@ -46,55 +46,23 @@ jobs:
       - name: Type-check
         run: pnpm check
 
-      # --- Post audio provisioning (Piper TTS + ffmpeg) -------------------
-      # `pnpm build` runs scripts/generate-audio.mjs before `astro build`.
-      # That script reads PIPER_MODEL and expects `piper` + `ffmpeg` on PATH;
-      # if any are missing it logs a skip and exits 0 (graceful degradation).
-      # We provision all three here so the PRODUCTION deploy actually produces
-      # per-post narration MP3s. These steps must run BEFORE the Build step.
-      - name: Install ffmpeg
-        # Best-effort: audio is optional. A transient apt outage must not block
-        # the deploy — generate-audio.mjs gracefully skips when ffmpeg is absent.
-        continue-on-error: true
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
-
-      - name: Cache Piper binary + voice model
-        id: cache-piper
+      # --- Post audio provisioning (ffmpeg + Piper + voice model) ---------
+      # Reproducible on ANY machine: the SAME scripts/setup-audio.sh runs
+      # locally (`pnpm setup:audio` / `preview:audio`) and here. It installs
+      # ffmpeg + the piper-tts CLI, downloads the pinned voice model into
+      # ~/.cache/piper-voices, and (in CI) exports PATH + PIPER_MODEL via
+      # $GITHUB_PATH/$GITHUB_ENV for the Build step. Best-effort: a transient
+      # install/download outage must NOT block the deploy — generate-audio.mjs
+      # skips TTS gracefully and the site without audio is still deployable.
+      - name: Cache voice model
         uses: actions/cache@v4
         with:
-          path: ~/.piper
-          key: piper-2023.11.14-2-en_US-lessac-medium
+          path: ~/.cache/piper-voices
+          key: piper-voices-en_US-lessac-medium-v1.0.0
 
-      - name: Provision Piper + voice model
-        if: steps.cache-piper.outputs.cache-hit != 'true'
-        # Best-effort: audio is optional. A transient GitHub/HuggingFace download
-        # outage must not block the deploy — generate-audio.mjs gracefully skips
-        # when piper/model are absent, and the site without audio is deployable.
+      - name: Provision audio toolchain (ffmpeg + Piper + model)
         continue-on-error: true
-        run: |
-          set -euo pipefail
-          mkdir -p "$HOME/.piper" "$HOME/.piper/models"
-          # Pinned rhasspy/piper release, Linux x86_64. The tarball extracts to
-          # a top-level `piper/` dir, so the binary lands at ~/.piper/piper/piper
-          # (its bundled shared libs use an $ORIGIN rpath — no LD_LIBRARY_PATH).
-          curl -fsSL -o /tmp/piper.tar.gz \
-            https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_x86_64.tar.gz
-          tar -xzf /tmp/piper.tar.gz -C "$HOME/.piper"
-          # Pinned voice model from rhasspy/piper-voices. Piper auto-loads the
-          # sibling `<model>.onnx.json`, so both files keep the model basename.
-          curl -fsSL -o "$HOME/.piper/models/en_US-lessac-medium.onnx" \
-            https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx
-          curl -fsSL -o "$HOME/.piper/models/en_US-lessac-medium.onnx.json" \
-            https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json
-
-      - name: Configure Piper on PATH + PIPER_MODEL
-        run: |
-          set -euo pipefail
-          # Runs on every build (cache hit OR miss) so the tool is always wired
-          # up. Absolute paths only: generate-audio.mjs uses fs.existsSync on
-          # PIPER_MODEL (no ~ expansion) and resolves `piper` from PATH.
-          echo "$HOME/.piper/piper" >> "$GITHUB_PATH"
-          echo "PIPER_MODEL=$HOME/.piper/models/en_US-lessac-medium.onnx" >> "$GITHUB_ENV"
+        run: bash scripts/setup-audio.sh
 
       # Reuse previously synthesized MP3s + the audio manifest when post sources
       # are unchanged, so deploys don't re-run TTS needlessly. generate-audio.mjs

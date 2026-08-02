@@ -23,7 +23,13 @@ const MANIFEST_PATH = path.join(AUDIO_DIR, 'manifest.json');
 
 // The voice model path doubles as the model identifier baked into the hash, so
 // switching voices invalidates cached mp3s.
-const MODEL = process.env.PIPER_MODEL;
+// PIPER_MODEL wins; otherwise fall back to the canonical path that
+// scripts/setup-audio.sh downloads to, so `pnpm build` finds the voice on any
+// machine with no extra env. The voice ID (not the absolute path) keys the
+// cache hash, so CI and local produce identical, portable hashes.
+const MODEL = process.env.PIPER_MODEL
+  || path.join(os.homedir(), '.cache', 'piper-voices', 'en_US-lessac-medium.onnx');
+const VOICE_ID = path.basename(MODEL).replace(/\.onnx$/i, '');
 
 /** Is `bin` an executable on PATH? Returns its full path, or null. */
 function onPath(bin) {
@@ -138,7 +144,7 @@ function main() {
     if (isDraft(md)) continue;
     const slug = path.basename(file, path.extname(file));
     const text = extractText(md);
-    const hash = createHash('sha256').update(`${text}${MODEL || ''}`).digest('hex');
+    const hash = createHash('sha256').update(`${text}${VOICE_ID}`).digest('hex');
     posts.push({ slug, text, hash });
   }
 
