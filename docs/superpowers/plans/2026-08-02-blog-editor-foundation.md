@@ -771,6 +771,7 @@ git commit -m "Editor foundation: production-safety e2e — /editor, /drafts, /a
 **Files:**
 - Create: `playwright.editor.config.ts` (2nd config; `webServer` = `pnpm dev`)
 - Create: `tests/editor/smoke.spec.ts`
+- Modify: `playwright.config.ts` (add `testIgnore` so the built-site run skips the dev-only editor specs)
 - Modify: `package.json` (add `test:e2e:editor` script)
 
 **Interfaces:**
@@ -788,6 +789,25 @@ export default defineConfig({
   testDir: './tests/editor',
   webServer: {
     command: 'pnpm dev',
+    url: 'http://localhost:4321',
+    reuseExistingServer: !process.env.CI,
+  },
+  use: { baseURL: 'http://localhost:4321' },
+});
+```
+
+- [ ] **Step 1b: Keep the default config off the editor specs**
+
+The existing `playwright.config.ts` has `testDir: './tests'`, which would otherwise discover `tests/editor/*.spec.ts` and run these dev-only tests against `pnpm preview` (the built site) during `pnpm test:e2e` and in CI — where they would fail. Add a `testIgnore`:
+
+```ts
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './tests',
+  testIgnore: '**/editor/**',
+  webServer: {
+    command: 'pnpm preview',
     url: 'http://localhost:4321',
     reuseExistingServer: !process.env.CI,
   },
@@ -825,15 +845,17 @@ test('draft renders at its real URL under astro dev', async ({ page }) => {
 });
 ```
 
-- [ ] **Step 4: Run the dev smoke spec**
+- [ ] **Step 4: Run the dev smoke spec (and confirm the split)**
 
+Free port 4321 first (a stray `pnpm preview` lacks the editor and would be reused by `reuseExistingServer`): `lsof -ti:4321 -sTCP:LISTEN | xargs kill 2>/dev/null; sleep 1`
 Run: `pnpm test:e2e:editor`
-Expected: 3 tests PASS (API lists the draft; `/editor` mounts and shows rows; the draft page renders in dev).
+Expected: 3 tests PASS (API lists the draft; `/editor/` mounts and shows rows; the draft page renders in dev).
+Confirm the default (built-site) run excludes these specs: `pnpm exec playwright test --config=playwright.config.ts --list 2>/dev/null | grep -c "editor/smoke"` → `0`.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add playwright.editor.config.ts tests/editor/smoke.spec.ts package.json
+git add playwright.editor.config.ts playwright.config.ts tests/editor/smoke.spec.ts package.json
 git commit -m "Editor foundation: dev-server e2e config + smoke (API, /editor mount, draft renders in dev)"
 ```
 
