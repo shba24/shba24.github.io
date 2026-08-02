@@ -1,0 +1,67 @@
+---
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  /** Current post id, marked as the active item. */
+  slug: string;
+  /** Series name; when unset the navigator renders nothing. */
+  series?: string;
+}
+const { slug, series } = Astro.props;
+
+const items: CollectionEntry<'posts'>[] = series
+  ? (await getCollection('posts'))
+      .filter((p: CollectionEntry<'posts'>) => !p.data.draft && p.data.series === series)
+      .sort(
+        (a: CollectionEntry<'posts'>, b: CollectionEntry<'posts'>) =>
+          (a.data.seriesPart ?? 0) - (b.data.seriesPart ?? 0) ||
+          a.data.date.valueOf() - b.data.date.valueOf(),
+      )
+  : [];
+
+// Render only when there is something to navigate between (≥2 parts). A lone
+// post in a series has no navigation value, so the block stays hidden until a
+// second part exists — keeping single-post pages clean.
+const show = items.length >= 2;
+const label = (p: CollectionEntry<'posts'>): string =>
+  p.data.seriesPart != null ? `Part ${p.data.seriesPart}` : '—';
+---
+{show && (
+  <nav class="series" aria-label={`${series} series`}>
+    <h2 class="eyebrow">Series · {series}</h2>
+    <ol>
+      {items.map((p: CollectionEntry<'posts'>) =>
+        p.id === slug ? (
+          <li class="item current">
+            <span aria-current="true"><span class="n">{label(p)}</span>{p.data.title}</span>
+          </li>
+        ) : (
+          <li class="item">
+            <a href={`/posts/${p.id}/`}><span class="n">{label(p)}</span>{p.data.title}</a>
+          </li>
+        ),
+      )}
+    </ol>
+  </nav>
+)}
+<style>
+  .series {
+    margin-top: 40px; padding: 16px 18px; border: 1px solid var(--border);
+    border-radius: 8px; background: var(--surface);
+  }
+  .eyebrow {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--faint); font-weight: 500; margin: 0 0 12px;
+  }
+  ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+  .item { line-height: 1.4; }
+  .item a, .item span[aria-current] {
+    display: flex; gap: 10px; padding: 6px 8px; border-radius: 6px;
+    color: var(--muted); align-items: baseline;
+  }
+  .item a:hover { color: var(--accent); background: var(--surface-2); }
+  .item.current span[aria-current] { color: var(--text); background: var(--surface-2); font-weight: 600; }
+  .n { font-family: var(--mono); font-size: 10.5px; color: var(--faint); flex: none; min-width: 46px; }
+  .item.current .n { color: var(--muted); }
+</style>

@@ -1,0 +1,58 @@
+---
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  /** Current post id, excluded from results. */
+  slug: string;
+  /** Tags of the current post; candidates are scored by shared-tag count. */
+  tags: string[];
+}
+const { slug, tags } = Astro.props;
+
+type Scored = { post: CollectionEntry<'posts'>; score: number };
+const tagSet = new Set<string>(tags);
+
+const related: CollectionEntry<'posts'>[] = (await getCollection('posts'))
+  .filter((p: CollectionEntry<'posts'>) => !p.data.draft && p.id !== slug)
+  .map((p: CollectionEntry<'posts'>): Scored => ({
+    post: p,
+    score: p.data.tags.filter((t: string) => tagSet.has(t)).length,
+  }))
+  .filter((s: Scored) => s.score > 0)
+  .sort(
+    (a: Scored, b: Scored) =>
+      b.score - a.score || b.post.data.date.valueOf() - a.post.data.date.valueOf(),
+  )
+  .slice(0, 4)
+  .map((s: Scored) => s.post);
+---
+{related.length > 0 && (
+  <section class="related" aria-label="Related posts">
+    <h2 class="eyebrow">Related posts</h2>
+    <div class="grid">
+      {related.map((p: CollectionEntry<'posts'>) => (
+        <a class="card" href={`/posts/${p.id}/`}>
+          <span class="t">{p.data.title}</span>
+          {p.data.description && <span class="d">{p.data.description}</span>}
+        </a>
+      ))}
+    </div>
+  </section>
+)}
+<style>
+  .related { margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--border-soft); }
+  .eyebrow {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--faint); font-weight: 500; margin: 0 0 14px;
+  }
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .card {
+    display: flex; flex-direction: column; gap: 6px; padding: 14px 16px;
+    border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+  }
+  .card:hover { border-color: var(--faint); }
+  .card .t { font-weight: 600; color: var(--text); line-height: 1.3; }
+  .card .d { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+  @media (max-width: 560px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+</style>
