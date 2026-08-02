@@ -1,0 +1,102 @@
+---
+import Search from 'astro-pagefind/components/Search';
+---
+<button
+  id="search-trigger"
+  class="search-trigger"
+  type="button"
+  aria-haspopup="dialog"
+  aria-keyshortcuts="Meta+K Control+K"
+  aria-label="Search"
+>
+  Search <kbd>⌘K</kbd>
+</button>
+
+<dialog id="search-dialog" aria-label="Site search">
+  <Search
+    id="search"
+    className="pagefind-ui"
+    uiOptions={{ showImages: false, excerptLength: 15 }}
+  />
+</dialog>
+
+<style>
+  .search-trigger {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--faint);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 4px 9px;
+    cursor: pointer;
+  }
+  .search-trigger:hover {
+    color: var(--muted);
+    border-color: var(--muted);
+  }
+  .search-trigger kbd {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0 4px;
+  }
+
+  #search-dialog {
+    /* Monochrome: map Pagefind UI theme vars onto the site tokens. */
+    --pagefind-ui-primary: var(--text);
+    --pagefind-ui-text: var(--text);
+    --pagefind-ui-background: var(--surface);
+    --pagefind-ui-border: var(--border);
+    --pagefind-ui-tag: var(--surface-2);
+    --pagefind-ui-font: var(--sans);
+
+    width: min(640px, calc(100vw - 2rem));
+    max-width: 640px;
+    max-height: 80vh;
+    margin: auto;
+    padding: 16px;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: auto;
+  }
+  #search-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(2px);
+  }
+</style>
+
+<script>
+  const dialog = document.getElementById('search-dialog') as HTMLDialogElement | null;
+  const trigger = document.getElementById('search-trigger');
+
+  function openSearch() {
+    if (!dialog || dialog.open) return;
+    dialog.showModal();
+    // Focus the Pagefind search input once the modal is up.
+    requestAnimationFrame(() => {
+      dialog.querySelector<HTMLInputElement>('input[type="text"]')?.focus();
+    });
+  }
+
+  trigger?.addEventListener('click', openSearch);
+
+  document.addEventListener('keydown', (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault();
+      openSearch();
+    }
+  });
+
+  // Esc closes via the dialog's built-in behavior; also close on backdrop click.
+  dialog?.addEventListener('click', (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+</script>

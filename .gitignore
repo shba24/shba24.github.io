@@ -44,5 +44,9 @@ pnpm-debug.log*
 .netlify/
 .wrangler/
 
+# ---- Playwright ----
+test-results/
+playwright-report/
+
 # ---- Superpowers SDD scratch ----
 .superpowers/

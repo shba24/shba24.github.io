@@ -1,10 +1,11 @@
 ---
+import Search from './Search.astro';
 ---
 <header class="topbar">
   <div class="tb">
     <a href="/" class="brand">Shubham Bansal</a>
     <div class="tb-right">
-      <span class="search">Search <kbd>⌘K</kbd></span>
+      <Search />
       <button id="theme-toggle" class="tdot" aria-label="Toggle theme" aria-pressed="true"></button>
     </div>
   </div>
@@ -15,9 +16,6 @@
   .tb{max-width:1240px;margin:0 auto;padding:12px 32px;display:flex;align-items:center;gap:16px}
   .brand{font-weight:700;font-size:15px;letter-spacing:-.01em}
   .tb-right{margin-left:auto;display:flex;align-items:center;gap:14px}
-  .search{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12px;color:var(--faint);
-    border:1px solid var(--border);border-radius:5px;padding:4px 9px}
-  kbd{font-family:var(--mono);font-size:10px;color:var(--muted);border:1px solid var(--border);border-radius:3px;padding:0 4px}
   .tdot{width:15px;height:15px;border-radius:50%;border:1px solid var(--border);cursor:pointer;
     background:conic-gradient(var(--text) 0 50%, transparent 50% 100%)}
 </style>

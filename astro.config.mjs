@@ -3,6 +3,7 @@ import react from '@astrojs/react';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import expressiveCode from 'astro-expressive-code';
+import pagefind from 'astro-pagefind';
 import tailwindcss from '@tailwindcss/vite';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -24,6 +25,7 @@ export default defineConfig({
     mdx(),
     react(),
     sitemap(),
+    pagefind(),
   ],
   vite: { plugins: [tailwindcss()] },
   markdown: {

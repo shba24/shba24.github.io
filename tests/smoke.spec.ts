@@ -24,3 +24,12 @@ test('theme toggle flips data-theme', async ({ page }) => {
   await page.locator('#theme-toggle').click();
   await expect(html).toHaveAttribute('data-theme', 'light');
 });
+
+test('Cmd+K opens the Pagefind search command palette', async ({ page }) => {
+  await page.goto('/');
+  // Dialog is closed on load.
+  await expect(page.locator('#search-dialog[open]')).toHaveCount(0);
+  // ⌘K / Ctrl+K opens the modal dialog.
+  await page.keyboard.press('Meta+k');
+  await expect(page.locator('#search-dialog[open]')).toBeVisible();
+});
