@@ -1,5 +1,5 @@
 {
-  "name": "shubham-tech-blog",
+  "name": "shubham-bansal-blog",
   "type": "module",
   "packageManager": "pnpm@9.12.0",
   "engines": { "node": ">=20.19.0" },

@@ -23,10 +23,11 @@ tree.forEach(walk);
   const links = [...document.querySelectorAll('.toc .lvl')];
   const map = new Map(links.map((l) => [l.getAttribute('data-slug'), l]));
   const obs = new IntersectionObserver((entries) => {
-    for (const e of entries) if (e.isIntersecting) {
-      links.forEach((l) => l.classList.remove('active'));
-      map.get(e.target.id)?.classList.add('active');
-    }
+    const visible = entries.filter((e) => e.isIntersecting);
+    if (!visible.length) return;
+    const top = visible.reduce((a, b) => (a.boundingClientRect.top < b.boundingClientRect.top ? a : b));
+    links.forEach((l) => l.classList.remove('active'));
+    map.get(top.target.id)?.classList.add('active');
   }, { rootMargin: '0px 0px -70% 0px' });
   document.querySelectorAll('article :is(h2,h3,h4)[id]').forEach((h) => obs.observe(h));
 </script>

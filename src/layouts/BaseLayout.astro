@@ -12,18 +12,21 @@ const { title, description = 'Technical blog by Shubham Bansal' } = Astro.props;
     <meta name="description" content={description} />
     <link rel="canonical" href={Astro.url.href} />
     <script is:inline>
-      const t = localStorage.getItem('theme') || 'dark';
-      document.documentElement.dataset.theme = t;
+      try { document.documentElement.dataset.theme = localStorage.getItem('theme') || 'dark'; }
+      catch { document.documentElement.dataset.theme = 'dark'; }
     </script>
   </head>
   <body>
     <Topbar />
     <slot />
     <script>
-      document.getElementById('theme-toggle')?.addEventListener('click', () => {
+      const btn = document.getElementById('theme-toggle');
+      btn?.addEventListener('click', () => {
         const el = document.documentElement;
         const next = el.dataset.theme === 'dark' ? 'light' : 'dark';
-        el.dataset.theme = next; localStorage.setItem('theme', next);
+        el.dataset.theme = next;
+        try { localStorage.setItem('theme', next); } catch {}
+        btn.setAttribute('aria-pressed', String(next === 'dark'));
       });
     </script>
   </body>

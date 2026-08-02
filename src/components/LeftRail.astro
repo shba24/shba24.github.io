@@ -12,7 +12,7 @@ const archive = [...byYear.entries()].sort((a, b) => b[0] - a[0]);
   <nav class="nav"><a href="/about/">About</a><a href="/posts/">Posts</a><a href="/references/">References</a></nav>
   <div class="sec"><h4>Latest</h4>{latest.map((p) => <a href={`/posts/${p.id}/`}>{p.data.title}</a>)}</div>
   <div class="sec"><h4>Recommended</h4>{recommended.map((p) => <a href={`/posts/${p.id}/`}>{p.data.title}</a>)}</div>
-  <div class="sec"><h4>Archive</h4>{archive.map(([y, n]) => <a href={`/posts/?year=${y}`}>{y} — {n} {n === 1 ? 'post' : 'posts'}</a>)}</div>
+  <div class="sec"><h4>Archive</h4>{archive.map(([y, n]) => <a href="/posts/">{y} — {n} {n === 1 ? 'post' : 'posts'}</a>)}</div>
   <div class="foot"><a href="https://github.com/shba24">GitHub</a><a href="/index.xml">RSS</a></div>
 </aside>
 <style>

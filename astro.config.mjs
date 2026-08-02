@@ -18,7 +18,7 @@ export default defineConfig({
   build: { format: 'directory' },
   integrations: [
     expressiveCode({
-      themes: ['github-dark-dimmed'],
+      themes: ['vesper'],
       styleOverrides: { borderRadius: '6px', borderColor: '#23272d', codeBackground: '#0a0b0d' },
     }),
     mdx(),
