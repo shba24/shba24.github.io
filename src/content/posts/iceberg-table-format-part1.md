@@ -29,7 +29,7 @@ Before we dive into it, I want to provide the motivation behind writing this pos
 
 * **Data Lake -** A Data Lake[18] is a centralized repository that allows you to store all your structured (like databases), semi-structured (like [*Parquet*](https://parquet.apache.org/), [*ORC*](https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=31818911), or [*Avro*](https://avro.apache.org/)), and unstructured data (like emails, documents, and images) at any scale. The important thing to note here, you can store your data as-is, without having to structure it first, and run different types of analytics - from dashboards and visualizations to big data processing, real-time analytics, and machine learning - to guide better decisions.
 
-![Fig: General Data Lake Stack Layers](/images/blog-iceberg-part-1/DataLake_Stack_Part1.png#small)
+![Fig: General Data Lake Stack Layers](/images/blog-iceberg-part-1/DataLake_Stack_Part1.png)
 
 * **Data Warehouse -** A Data Warehouse[19] is a specialized type of database designed for the efficient storage, retrieval, and analysis of large volumes of structured data. It serves as a central repository where data from various sources is consolidated, transformed, and made available for complex queries and reporting.
 * **Data Lake vs Data Warehouse -** While a Data Lake stores raw data, a Data Warehouse stores processed, refined data that is typically organized into tables and optimized for querying and reporting. Data Warehouses are structured and schema-based, whereas Data Lakes are more flexible, allowing for the storage of unstructured data.
@@ -40,7 +40,7 @@ Before we dive into it, I want to provide the motivation behind writing this pos
 Before Apache Iceberg came into the picture, the most commonly used table format was the *Hive Table Format* through the Apache Hive[5] SQL engine. Apache Hive[5] was originally built to translate SQL statements into Hadoop MapReduce jobs which are used to perform some operations on table data stored on object storage like HDFS, S3, Azure Blob Storage, and others.
 
 Here is what the structure of the Hive table format used to look like
-![Fig: Represents generic Hive Table format directory structure with multi-layer partitions](/images/blog-iceberg-part-1/HiveTableFormat-Part1.png#large)
+![Fig: Represents generic Hive Table format directory structure with multi-layer partitions](/images/blog-iceberg-part-1/HiveTableFormat-Part1.png)
 Hive Table format came into the picture to remove the necessity to provide a data file path (e.g. */usr/hive/warehouse/db/table/data=2024-01-01/country=US/file1*) on which a particular Hive SQL query is used to do the processing. Instead, Apache Hive[5] talks to Apache Hive Metastore[6] to find the specific files corresponding to a table and partition(if specified) and do the MapReduce operation on those files.
 
 ### Benefits
@@ -104,7 +104,7 @@ Apache Iceberg support matrix for different layers in the data lake stack
 3. **Catalog Support:** Hive Metastore, Hadoop, AWS Glue, Nessie, IRC (custom catalogs)  
 4. **Engine Support:** Athena, EMR, Dremio, etc.
 
-![Fig: Generic Apache Iceberg Specification Layout](/images/blog-iceberg-part-1/Iceberg_Base_Table_Spec_Part1.png#large)
+![Fig: Generic Apache Iceberg Specification Layout](/images/blog-iceberg-part-1/Iceberg_Base_Table_Spec_Part1.png)
 
 For every transaction in the table, a new metadata file (`metadata file v2`) is created which basically represents the state of the table after the transaction is finished. The major difference the Apache Iceberg Table format brings as compared to the Hive Table format is *tracking of files in a table through metadata files as compared to directories*. This helps majorly with supporting **ACID transactions** on the table, which I will explain later in the post, but in short, this allows writers to create data files, manifest files, and metadata files in place and only adds to the table in an explicit atomic swap commit to the catalog where `db.table` starts pointing to the new metadata files.
 
@@ -402,9 +402,9 @@ To provide the ACID transactions support, Apache Iceberg went with **Optimistic 
 
 #### Read - Write Isolation
 
-![Figure 1](/images/blog-iceberg-part-1/Isolation_Read_Write_Part1.png#large)
+![Figure 1](/images/blog-iceberg-part-1/Isolation_Read_Write_Part1.png)
 *Figure 1: `User 1` sees the `db.table` state as `Metadata file v1` and uses the snapshot `s0`*  
-![Figure 2](/images/blog-iceberg-part-1/Isolation_Read_Wrote_Part2.png#large)  
+![Figure 2](/images/blog-iceberg-part-1/Isolation_Read_Wrote_Part2.png)  
 *Figure 2: `User 2` sees the `db.table` state as `Metadata file v2` and tries to commit against the snapshot `s1` which is completely isolated from `s0` used in the `Read` operation above*
 
 Both operations above succeed without conflicting with each other but with a different view of the table, depending on when the operation started.
@@ -418,13 +418,13 @@ Writers create the changes in a *bottom-up manner*, starting with writing a new 
 
 For some operations[[16](https://iceberg.apache.org/spec/#commit-conflict-resolution-and-retry)], there is retry support by re-applying just the metadata changes[2] against the new snapshot metadata and committing, under well-defined conditions. For example, if a file that was rewritten is still present in the new snapshot then the same rewritten file can be used against the new snapshot, without rewriting the whole file again, basically, Apache Iceberg re-uses new rewritten files if it can.
 
-![Figure 1](/images/blog-iceberg-part-1/Write_Write_Isolation_Part1.png#large)  
+![Figure 1](/images/blog-iceberg-part-1/Write_Write_Isolation_Part1.png)  
 *Figure 1: Initially, both users will try to do the `Get` operation to get the current table state which is `Metadata file v2,` and use that to do further write operations against*
 
-![Figure 2](/images/blog-iceberg-part-1/Write_Write_Isolation_Part2.png#large)  
+![Figure 2](/images/blog-iceberg-part-1/Write_Write_Isolation_Part2.png)  
 *Figure 2: In the second stage, both users try to write files in a bottom-up manner in parallel against the `Metadata file v2` creating `Metadata file v3’` and `Metadata file v3’’`* 
 
-![Figure 3](/images/blog-iceberg-part-1/Write_Write_Isolation_Part3.png#large) 
+![Figure 3](/images/blog-iceberg-part-1/Write_Write_Isolation_Part3.png) 
 *Figure 3: In the final stage, during the commit operation of swap (CAS\[23\]) only one user will see success, here that is `User 1` and `User 2` will retry against the latest metadata file, i.e. `Metadata file v3’`* *and might reuse the re-written files*
 
 ### Partition Evolution
@@ -441,13 +441,13 @@ Changing a partition spec produces a new spec identified by a unique spec ID tha
 
 **Note:** Partition field IDs never change, it only increases even if fields are removed to make sure it's backward compatible.
 
-![Figure 1](/images/blog-iceberg-part-1/Partition_Evolution_Part1.png#large)  
+![Figure 1](/images/blog-iceberg-part-1/Partition_Evolution_Part1.png)  
 *Figure 1: At the start, we have a table state with `spec-id` \= 0, pointing to partition spec with only the `region` as the partition column. This will be used in all the query planning and execution by the engine.*
 
-![Figure 2](/images/blog-iceberg-part-1/Partition_Evolution_Part2.png#large) 
+![Figure 2](/images/blog-iceberg-part-1/Partition_Evolution_Part2.png) 
 *Figure 2: When we do the `ALTER TABLE ADD PARTITION` operation, it will alter the table partition schema/spec. With Iceberg, the change in partition schema happens at the metadata layer only, no changes to existing data files are done. The new snapshot file `Manifest List v2` will still point to the old Manifest file `Manifest file v1`*
 
-![Figure 3](/images/blog-iceberg-part-1/Partition_Evolution_Part3.png#large)
+![Figure 3](/images/blog-iceberg-part-1/Partition_Evolution_Part3.png)
 *Figure 3: And, when we finally write to the table after partition schema evolution, the new manifest file list `Manifest List v3` and manifest file `Manifest file v2` will be created with the new partition schema metadata.*
 
 ### Delete / Update / Merge Mode
@@ -489,7 +489,7 @@ In this approach, existing data files are not re-written on `UPDATE`, `MERGE INT
 
 ##### DELETE
 
-![Figure 1](/images/blog-iceberg-part-1/Delete_MOR_Part1.png#large)
+![Figure 1](/images/blog-iceberg-part-1/Delete_MOR_Part1.png)
 *Figure 1: For a `DELETE` operation, a new snapshot is created, pointing to a new manifest list `Manifest List v2`. That manifest list is pointing to a new Manifest file `Manifest file v2` which ultimately points to a delete file. In the above figure, the format of the delete file is `Positional Delete File`*
 
 Below is the `Manifest List v2`. A new snapshot `6348593007041601180` was added corresponding to a new delete file `c2f70e20-0e4f-4d52-b600-17c264357ff4-m0.avro`.
@@ -514,7 +514,7 @@ Below is the `Manifest List v2`. A new snapshot `6348593007041601180` was added 
 
 ##### UPDATE
 
-![Figure 1](/images/blog-iceberg-part-1/Update_MOR.png#large) 
+![Figure 1](/images/blog-iceberg-part-1/Update_MOR.png) 
 *Figure 1: For an `UPDATE` operation, a new snapshot is created, pointing to a new manifest list `Manifest List v2`. That manifest list is pointing to two new Manifest files `Manifest file v2` and `Manifest file v3` which ultimately point to a delete file and a data file respectively. In the above figure, the format of the delete file is the `Positional Delete File.`*
 
 Below is the `Manifest List v2`. A new snapshot `6348593007041601180` was added corresponding to a new data file `c2f70e20-0e4f-4d52-b600-17c264357ff4-m0.avro` and a new delete file `c2f70e20-0e4f-4d52-b600-17c264357ff4-m1.avro`. Notice that both these manifest files correspond to the same snapshot, added in the same transaction sequence number. 
@@ -596,15 +596,15 @@ Adding a new field assigns a new ID for that field and for any nested fields. Re
 
 **Note:** Field deletion cannot be rolled back unless the field is nullable so that after rollback, the rows without the previously removed column, data for those columns will have a null value. Also, we can roll back if the current snapshot has not changed as no data has been added with the new schema.
 
-![Figure 1](/images/blog-iceberg-part-1/Schema_Evolution_Part1.png#large)
+![Figure 1](/images/blog-iceberg-part-1/Schema_Evolution_Part1.png)
 
 *Figure 1: At the start, we have a table state with `current-schema-id` \= 0, pointing to schema spec with 16 columns. Each snapshot also corresponds to a specific schema spec, which was not the case with the partition spec. For schema spec, diversion happens just after the metadata file level. This will be used in all the query planning and execution by the engine.*
 
-![Figure 2](/images/blog-iceberg-part-1/Schema_Evolution_Part2.png#large)  
+![Figure 2](/images/blog-iceberg-part-1/Schema_Evolution_Part2.png)  
 
 *Figure 2: When we do the `ALTER TABLE ADD COLUMN` operation, it will alter the table schema spec. With Iceberg, the change in schema happens at the metadata layer only, no changes to existing data files are done. New metadata file `Metadata File v2` will still have the same snapshot as previously, pointing to the old Manifest List file `Manifest file v1`*
 
-![Figure 3](/images/blog-iceberg-part-1/Schema_Evolution_Part3.png#large)  
+![Figure 3](/images/blog-iceberg-part-1/Schema_Evolution_Part3.png)  
 
 *Figure 3: And, when we finally write to the table after table schema evolution, the new manifest file list `Manifest List v3` and manifest file `Manifest file v2` will be created with the new schema spec metadata.*
 
@@ -613,7 +613,7 @@ Adding a new field assigns a new ID for that field and for any nested fields. Re
 Apache Iceberg supports **time travel queries** on the table where users can mention the timestamp `time` and engines can execute the provided query against the table data as it existed at that timestamp `time`.  
 This is only possible because the Apache Iceberg table format can store the snapshot history in its metadata files and its data files are always append-only. So, the engines can use the snapshot which represents the table state at a certain timestamp, and execute the query against the data files corresponding to that snapshot.
 
-![Figure 1](/images/blog-iceberg-part-1/TimeTravel_Part1.png#large)  
+![Figure 1](/images/blog-iceberg-part-1/TimeTravel_Part1.png)  
 *Figure 1: When `User 1` passes a timestamp in its `SELECT` query, the table state used would correspond to that timestamp, i.e. Snapshot 0 `s0,` and  `User 2` will see the latest table state, i.e. Snapshot `s1`. Data of a particular row corresponding to different snapshots could be different, for customer `12345`, the rating in `s0` is `1` whereas in `s1` rating is `3`.*
 
 ## Summary

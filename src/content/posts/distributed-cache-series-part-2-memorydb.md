@@ -11,11 +11,11 @@ recommended: true
 
 ## Introduction
 
-Previously, in [Part 1](https://shubham-bansal.com/posts/distributed-cache-series-part-1-redis/) of my [Distributed Cache Series](https://shubham-bansal.com/series/distributed-cache/), I discussed Redis Cache, how it works, its benefits, limitations, and various trade-offs we need to think about before using Redis in production. In this part of the series, we will discuss [Amazon MemoryDB](https://aws.amazon.com/memorydb/) and what makes it different from [Redis](https://redis.io/). We will also examine what problem it solves over Redis and how it solves them. Again, we will discuss its benefits, limitations, and various trade-offs it provides.
+Previously, in [Part 1](/posts/distributed-cache-series-part-1-redis/) of my [Distributed Cache Series](/series/distributed-cache/), I discussed Redis Cache, how it works, its benefits, limitations, and various trade-offs we need to think about before using Redis in production. In this part of the series, we will discuss [Amazon MemoryDB](https://aws.amazon.com/memorydb/) and what makes it different from [Redis](https://redis.io/). We will also examine what problem it solves over Redis and how it solves them. Again, we will discuss its benefits, limitations, and various trade-offs it provides.
 
 Last month I came across [this](https://brooker.co.za/blog/2024/04/25/memorydb.html) blog post by Marc Brooker where he discusses the paper [Amazon MemoryDB: A fast and durable memory-first cloud database](https://www.amazon.science/publications/amazon-memorydb-a-fast-and-durable-memory-first-cloud-database) by *Yacine Taleb*, *Kevin McGehee*, *Nan Yan*, *Shawn Wang*, *Stefan C. Muller*, and *Allen Samuels*. This paper caught my interest because it addresses a fundamental problem in distributed caching: achieving **strong consistency** and **durability**.
 
-**Note:** *Please go through [Part 1](https://shubham-bansal.com/posts/distributed-cache-series-part-1-redis/) first, before continuing to read this Part.*
+**Note:** *Please go through [Part 1](/posts/distributed-cache-series-part-1-redis/) first, before continuing to read this Part.*
 
 ## Redis Limitations
 
@@ -29,7 +29,7 @@ Redis uses a quorum-based system for both failure detection and the election of 
 
 Redis offers lightweight persistence through point-in-time snapshots and on-disk transaction logs in the form of an Append-Only File (AOF). Snapshots serialize data to disk, while AOF logs all changes. In its strictest mode, AOF uses fsync() after every update which would synchronously flush the data buffer to the disk, ensuring durability and linearizability but **reducing availability** if the primary node fails. It only uses AOF files to recover a primary node after failure, although it's very much possible that the node is not recoverable and **data is permanently lost** as the AOF files are stored locally only. Snapshot creation is also a very expensive operation that affects the availability of the system.
 
-For a further and more detailed read on Limitations, you can refer to [this](https://shubham-bansal.com/posts/distributed-cache-series-part-1-redis/#limitations).
+For a further and more detailed read on Limitations, you can refer to [this](/posts/distributed-cache-series-part-1-redis/#limitations).
 
 ## What is MemoryDB?
 
@@ -38,7 +38,7 @@ It's a database service designed for ***11 9s*** of enterprise-grade durability 
 
 ## Novel Solution
 
-![](/images/blog-memorydb-part2/memorydb_base_arch.png#small)
+![](/images/blog-memorydb-part2/memorydb_base_arch.png)
 
 The novel solution here that MemoryDB has implemented is the usage of a Multi-AZ transaction log (MTL) service (internal service to AWS). In short, what this transaction log service provides is a *consensus, total order, and durability* solution. The core concept here is that in Redis, control and data plane nodes used to be strongly coupled, but MemoryDB separates them, to scale them independently and decouple the availability and durability of the system. MemoryDB uses it to solve the following problem with Redis.
 
@@ -62,7 +62,7 @@ Marc Brooker on his recent [blog](https://brooker.co.za/blog/2024/04/25/memorydb
 
 MTL service provides the total ordering of the events in a distributed system.
 
-![](/images/blog-memorydb-part2/mtl_service_part1.png#small) 
+![](/images/blog-memorydb-part2/mtl_service_part1.png) 
 Consider a general case where multiple `WRITEs` are sent to the MTL service concurrently.
 
 Using the following APIs
@@ -150,7 +150,7 @@ MemoryDB uses the MTL service’s specific API interface to do a leader election
 
 ### Recovery
 
-![](/images/blog-memorydb-part2/recovery.png#large)
+![](/images/blog-memorydb-part2/recovery.png)
 
 In MemoryDB, a recovering replica first loads a recent snapshot and then replays subsequent transactions. Unlike Redis, which requires a primary node for data restoration impacting CPU and Memory load on the primary, MemoryDB periodically creates snapshots and stores them durably in S3. This enables MemoryDB to recover committed data without needing a primary node. This process also enables multiple replicas to recover simultaneously, without a centralized scaling bottleneck, which enhances the system's availability during recovery.
 
@@ -163,7 +163,7 @@ One thing that the paper doesn’t talk about is who is coordinating the 2PC bet
 
 ## Summary
 
-![](/images/blog-memorydb-part2/instance_latency_throughput_graph.png#large)
+![](/images/blog-memorydb-part2/instance_latency_throughput_graph.png)
 
 MemoryDB sees higher throughput for `READs`as compared to Redis, mostly because MemoryDB [Enhanced IO Multiplexing](https://aws.amazon.com/memorydb/features/#:~:text=quickly%20build%20applications.-,Ultra%2Dfast%20performance,-MemoryDB%20stores%20your) aggregates multiple client connections into a single connection to the engine, improving processing efficiency and delivering higher throughput. Also, the quorum requirement was removed for writes/election/slot transfer from MemoryDB increasing its availability causing higher read throughput.
 
@@ -171,12 +171,12 @@ MemoryDB sees higher throughput for `READs`as compared to Redis, mostly because 
 
 MemoryDB sees less throughput for `WRITEs`as compared to Redis as synchronous `WRITE`to MTL service has also become part of a `WRITE`operation.
 
-![](/images/blog-memorydb-part2/latency_throughput_correlation.png#large)
+![](/images/blog-memorydb-part2/latency_throughput_correlation.png)
 
 READ latency is comparable between MemoryDB and Redis. Although `WRITE`latency is higher in MemoryDB because of the synchronous `WRITE`to MTL service.
 
-![](/images/blog-memorydb-part2/snapshot_latency_redis_correlation.png#large)
-![](/images/blog-memorydb-part2/snapshot_latency_correlation.png#large)
+![](/images/blog-memorydb-part2/snapshot_latency_redis_correlation.png)
+![](/images/blog-memorydb-part2/snapshot_latency_correlation.png)
 MemoryDB doesn’t see any substantial average p100 hit on either latency or throughput during the off-box snapshotting because the off-box solution doesn’t interact with customer production at all. In general, P100 for latency in MemoryDB fluctuates because of the queuing of READ responses during synchronous `WRITEs`to the MTL service.
 
 Overall, I think there is an important lesson to learn here.
@@ -187,7 +187,7 @@ Overall, I think there is an important lesson to learn here.
 
 1. Amazon MemoryDB: A fast and durable memory-first cloud database - [https://www.amazon.science/publications/amazon-memorydb-a-fast-and-durable-memory-first-cloud-database](https://www.amazon.science/publications/amazon-memorydb-a-fast-and-durable-memory-first-cloud-database)  
 2. Multi-Version Concurrency Control - [https://en.wikipedia.org/wiki/Multiversion_concurrency_control](https://en.wikipedia.org/wiki/Multiversion_concurrency_control)  
-3. Distributed Cache Series - Part I - Redis - [https://shubham-bansal.com/posts/distributed-cache-series-part-1-redis/](https://shubham-bansal.com/posts/distributed-cache-series-part-1-redis/)  
+3. Distributed Cache Series - Part I - Redis - [/posts/distributed-cache-series-part-1-redis/](/posts/distributed-cache-series-part-1-redis/)  
 4. Amazon MemoryDB - [https://aws.amazon.com/memorydb/](https://aws.amazon.com/memorydb/)  
 5. Redis - [https://redis.io/](https://redis.io/)  
 6. MemoryDB: Speed, Durability, and Composition - [https://brooker.co.za/blog/2024/04/25/memorydb.html](https://brooker.co.za/blog/2024/04/25/memorydb.html)  
