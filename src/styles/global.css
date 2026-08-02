@@ -7,10 +7,12 @@
 @import "katex/dist/katex.min.css";
 
 :root, [data-theme="dark"] {
+  color-scheme:dark;
   --bg:#0c0d0f; --surface:#141619; --surface-2:#191c20; --text:#eceef1;
   --muted:#9aa0a8; --faint:#5e636b; --border:#23272d; --border-soft:#191c20; --accent:#ffffff;
 }
 [data-theme="light"] {
+  color-scheme:light;
   --bg:#ffffff; --surface:#f6f7f8; --surface-2:#eef0f2; --text:#14161a;
   --muted:#5a6069; --faint:#9aa0a8; --border:#e7e8eb; --border-soft:#eef0f2; --accent:#111318;
 }

@@ -17,6 +17,7 @@ const canonical = Astro.url.href;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
@@ -51,6 +52,7 @@ const canonical = Astro.url.href;
     </footer>
     <script>
       const btn = document.getElementById('theme-toggle');
+      if (btn) btn.setAttribute('aria-pressed', String(document.documentElement.dataset.theme === 'dark'));
       btn?.addEventListener('click', () => {
         const el = document.documentElement;
         const next = el.dataset.theme === 'dark' ? 'light' : 'dark';
