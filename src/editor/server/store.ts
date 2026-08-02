@@ -1,4 +1,4 @@
-import { readFile, writeFile, rename, readdir } from 'node:fs/promises';
+import { readFile, writeFile, rename, readdir, access } from 'node:fs/promises';
 import { join } from 'node:path';
 import { parseFrontmatter, normalizePostData, serializePost, type PostData } from '../lib/frontmatter.ts';
 
@@ -7,8 +7,24 @@ export type PostMeta = { slug: string; title: string; date: string; draft: boole
 export const postsDir = (root: string) => join(root, 'src', 'content', 'posts');
 const postFile = (root: string, slug: string) => join(postsDir(root), `${slug}.md`);
 
+// Resolve the on-disk file for a slug, honoring both .md and .mdx (preferring .md).
+// Falls back to `${slug}.md` when neither exists so the ENOENT message still references .md.
+async function resolveReadFile(root: string, slug: string): Promise<string> {
+  const dir = postsDir(root);
+  for (const ext of ['md', 'mdx']) {
+    const candidate = join(dir, `${slug}.${ext}`);
+    try {
+      await access(candidate);
+      return candidate;
+    } catch {
+      // candidate missing; try next extension
+    }
+  }
+  return join(dir, `${slug}.md`);
+}
+
 export async function readPost(root: string, slug: string): Promise<{ data: PostData; body: string }> {
-  const raw = await readFile(postFile(root, slug), 'utf8');
+  const raw = await readFile(await resolveReadFile(root, slug), 'utf8');
   const { data, body } = parseFrontmatter(raw);
   return { data: normalizePostData(data), body };
 }
