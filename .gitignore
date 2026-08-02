@@ -48,5 +48,9 @@ pnpm-debug.log*
 test-results/
 playwright-report/
 
+# ---- Generated audio (TTS mp3s + manifest; keep the dir) ----
+public/audio/*
+!public/audio/.gitkeep
+
 # ---- Superpowers SDD scratch ----
 .superpowers/
