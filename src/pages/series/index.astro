@@ -7,25 +7,27 @@ import { slugify } from '../../lib/format';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 
-export async function getStaticPaths() {
-  const posts = (await getCollection('posts')).filter((p) => !p.data.draft);
-  const map = new Map<string, { tag: string; posts: typeof posts }>();
-  for (const p of posts) for (const t of p.data.tags) {
-    const slug = slugify(t);
-    if (!map.has(slug)) map.set(slug, { tag: t, posts: [] });
-    map.get(slug)!.posts.push(p);
-  }
-  return [...map.entries()].map(([slug, v]) => ({ params: { tag: slug }, props: { tag: v.tag, posts: v.posts } }));
+const posts = (await getCollection('posts')).filter((p: CollectionEntry<'posts'>) => !p.data.draft && p.data.series);
+const counts = new Map<string, { series: string; count: number }>();
+for (const p of posts) {
+  const name = p.data.series!;
+  const slug = slugify(name);
+  const cur = counts.get(slug);
+  if (cur) cur.count += 1;
+  else counts.set(slug, { series: name, count: 1 });
 }
-
-interface Props { tag: string; posts: CollectionEntry<'posts'>[] }
-const { tag, posts } = Astro.props;
-const items: EntryItem[] = posts.map((p: CollectionEntry<'posts'>) => ({ href: `/posts/${p.id}/`, title: p.data.title, date: p.data.date }));
+const items: EntryItem[] = [...counts.entries()]
+  .sort((a: [string, { series: string; count: number }], b: [string, { series: string; count: number }]) => a[1].series.localeCompare(b[1].series))
+  .map(([slug, v]: [string, { series: string; count: number }]) => ({
+    href: `/series/${slug}/`,
+    title: v.series,
+    meta: `${v.count} ${v.count === 1 ? 'post' : 'posts'}`,
+  }));
 ---
-<BaseLayout title={`Tag: ${tag} — Shubham Bansal`}>
+<BaseLayout title="Series — Shubham Bansal">
   <div class="layout"><LeftRail />
     <main>
-      <h1 class="page-title">Tagged “{tag}”</h1>
+      <h1 class="page-title">Series</h1>
       <EntryList items={items} />
     </main>
   </div>
