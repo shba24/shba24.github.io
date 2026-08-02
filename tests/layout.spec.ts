@@ -68,3 +68,12 @@ test('anchor jump lands the heading below the sticky topbar', async ({ page }) =
   const top = Math.round(await target.evaluate((el) => el.getBoundingClientRect().top));
   expect(top).toBeLessThan(topbarH + 90);  // landed just below the bar, not far down
 });
+
+test('left rail travels with scroll (sticky) on posts, like the TOC', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/posts/distributed-cache-series-part-1-redis/');
+  await page.evaluate(() => window.scrollTo(0, 1400));
+  await expect
+    .poll(async () => Math.round((await page.locator('.col-left').boundingBox())!.y))
+    .toBeLessThan(120); // pinned near the top instead of scrolled off-screen
+});
