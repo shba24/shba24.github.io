@@ -1,12 +1,47 @@
 ---
 export const prerender = false;
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import LeftRail from '../../components/LeftRail.astro';
+import EntryList from '../../components/EntryList.astro';
+import type { EntryItem } from '../../components/EntryList.astro';
 import { getCollection } from 'astro:content';
-const drafts = (await getCollection('posts')).filter((p) => p.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+import type { CollectionEntry } from 'astro:content';
+
+const drafts = (await getCollection('posts')).filter((p: CollectionEntry<'posts'>) => p.data.draft);
+
+const byYear = new Map<number, CollectionEntry<'posts'>[]>();
+for (const p of drafts) {
+  const y = p.data.date.getFullYear();
+  const arr = byYear.get(y);
+  if (arr) arr.push(p);
+  else byYear.set(y, [p]);
+}
+const groups = [...byYear.entries()]
+  .sort((a, b) => b[0] - a[0])
+  .map(([year, ps]) => ({
+    year,
+    items: ps
+      .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+      .map((p): EntryItem => ({ href: `/posts/${p.id}/`, title: p.data.title, date: p.data.date })),
+  }));
 ---
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8" /><title>Drafts</title></head>
-<body>
-  <h1>Drafts ({drafts.length})</h1>
-  <ul>{drafts.map((d) => <li><a href={`/posts/${d.id}/`}>{d.data.title}</a></li>)}</ul>
-</body></html>
+<BaseLayout title="Drafts — Shubham Bansal">
+  <div class="shell"><LeftRail />
+    <main>
+      <h1 class="page-title">Drafts</h1>
+      {groups.length === 0 && <p class="empty">No drafts yet.</p>}
+      {groups.map(({ year, items }) => (
+        <section class="year-group">
+          <h2 class="year">{year}</h2>
+          <EntryList items={items} />
+        </section>
+      ))}
+    </main>
+  </div>
+</BaseLayout>
+<style>
+  .page-title{font-size:1.6rem;font-weight:700;margin:0 0 24px}
+  .year-group{margin:0 0 30px}
+  .year{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:500;margin:0 0 4px}
+  .empty{color:var(--muted)}
+</style>

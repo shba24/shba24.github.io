@@ -27,11 +27,15 @@ const { title, date, author, series, seriesPart, tags, minutes, audioSrc, slug }
     <span class="by-meta">{formatDate(date)} · {minutes} min</span>
   </div>
   {audioSrc && <div class="audio-row"><AudioPlayer client:idle src={audioSrc} /></div>}
+  {import.meta.env.DEV && slug && <div class="edit-row"><a class="edit-link" href={`/editor/?slug=${slug}`}>Edit this post ↗</a></div>}
   <SeriesNav slug={slug ?? ''} series={series} />
   {tags.length > 0 && <div class="tags">{tags.map((t) => <a href={`/tags/${slugify(t)}/`}>#{t}</a>)}</div>}
 </header>
 <style>
   .post-head{text-align:center;margin-bottom:30px}
+  .edit-row{margin-top:14px}
+  .edit-link{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:3px 12px}
+  .edit-link:hover{color:var(--text)}
   .eyebrow{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:14px}
   h1{font-size:2.3rem;line-height:1.12;font-weight:700;letter-spacing:-.022em;margin:0 0 20px}
   .byline{display:inline-flex;align-items:center;gap:11px;justify-content:center}

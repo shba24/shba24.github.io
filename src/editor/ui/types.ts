@@ -14,3 +14,5 @@ export type PostData = {
 export type PostMeta = { slug: string; title: string; date: string; draft: boolean };
 
 export type ViewMode = 'edit' | 'split' | 'preview';
+
+export type ImageInsert = { url: string; alt: string; size: '' | 'small' | 'medium' | 'large'; caption: string };

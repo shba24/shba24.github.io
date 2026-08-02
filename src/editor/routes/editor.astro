@@ -1,11 +1,11 @@
 ---
 export const prerender = false;
-import App from '../ui/App.tsx';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EditorApp from '../ui/EditorApp.tsx';
+import '../ui/editor.css';
 ---
-<!doctype html>
-<html lang="en" data-theme="dark">
-  <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>Blog Editor</title></head>
-  <body>
-    <App client:only="react" />
-  </body>
-</html>
+<BaseLayout title="Editor">
+  <section class="editor-shell">
+    <EditorApp client:only="react" />
+  </section>
+</BaseLayout>

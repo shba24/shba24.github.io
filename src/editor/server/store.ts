@@ -1,14 +1,15 @@
-import { readFile, writeFile, rename, readdir, access } from 'node:fs/promises';
+import { readFile, writeFile, rename, readdir, access, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { parseFrontmatter, normalizePostData, serializePost, type PostData } from '../lib/frontmatter.ts';
+import { dedupeName, safeImageName } from './images.ts';
 
 export type PostMeta = { slug: string; title: string; date: string; draft: boolean };
 
 export const postsDir = (root: string) => join(root, 'src', 'content', 'posts');
+export const imagesDir = (root: string, slug: string) => join(root, 'public', 'images', slug);
 const postFile = (root: string, slug: string) => join(postsDir(root), `${slug}.md`);
 
 // Resolve the on-disk file for a slug, honoring both .md and .mdx (preferring .md).
-// Falls back to `${slug}.md` when neither exists so the ENOENT message still references .md.
 async function resolveReadFile(root: string, slug: string): Promise<string> {
   const dir = postsDir(root);
   for (const ext of ['md', 'mdx']) {
@@ -47,4 +48,15 @@ export async function listPostsMeta(root: string): Promise<PostMeta[]> {
     }),
   );
   return metas.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+}
+
+/** Write an uploaded image under public/images/<slug>/, deduping the name; returns the /images/... URL. */
+export async function saveImage(root: string, slug: string, filename: string, buffer: Buffer): Promise<string> {
+  const dir = imagesDir(root, slug);
+  await mkdir(dir, { recursive: true });
+  const existing = await readdir(dir).catch(() => [] as string[]);
+  const safe = safeImageName(filename);
+  const final = dedupeName(existing, safe);
+  await writeFile(join(dir, final), buffer);
+  return `/images/${slug}/${final}`;
 }
