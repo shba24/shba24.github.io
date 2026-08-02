@@ -12,6 +12,7 @@
     "check": "astro check",
     "test:unit": "node --test 'src/**/*.test.ts'",
     "test:e2e": "playwright test",
+    "test:e2e:editor": "playwright test --config=playwright.editor.config.ts",
     "setup:audio": "bash scripts/setup-audio.sh",
     "build:audio": "bash scripts/setup-audio.sh && PATH=$HOME/.local/bin:$PATH pnpm build",
     "preview:audio": "pnpm build:audio && astro preview"
