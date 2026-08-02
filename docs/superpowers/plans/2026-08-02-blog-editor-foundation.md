@@ -10,13 +10,14 @@
 
 ## Global Constraints
 
-- **Node** `20.19.6` (`.nvmrc`); package manager **pnpm 9.12.0**. This repo is a normal Astro project — build/test **locally** (it is NOT an Amazon brazil package).
+- **Node** `24.18.1` (`.nvmrc`; Node 20 reached end-of-life April 2026); package manager **pnpm 9.12.0**. This repo is a normal Astro project — build/test **locally** on Node 24 (it is NOT an Amazon brazil package).
 - **Dev-only:** the editor, its routes, and `/api/editor` must exist **only** under `astro dev`. `astro build` (what `deploy.yml` runs) must contain none of them.
 - **Write-only:** no git operations anywhere in the editor. File writes only.
 - **Production unchanged:** `draft: true` posts stay excluded from `dist/`. Prove it with a test.
 - **Type-checks:** `pnpm check` (astro check) runs in CI — all new TS must pass with zero errors.
 - **Post conventions (verbatim from spec §3):** posts at `src/content/posts/<slug>.md`; frontmatter schema fields in order `title, date, description, tags, series?, seriesPart?, author, draft, recommended, hideToc`; dates serialized `YYYY-MM-DD`; tags as a flow array `["a","b"]`.
 - **`js-yaml` placement:** `devDependencies`, and it must be **lazy-loaded** (never imported at the top level of `astro.config.mjs` or the integration) so the production build never pulls it in.
+- **Unit tests use `node --test`** (zero new deps) on Node 24, which runs `.ts` via native type-stripping. This requires **explicit `.ts` extensions in relative imports**; `tsconfig.json` already sets `allowImportingTsExtensions: true` + `noEmit: true` (committed in setup) so `astro check` accepts them. Unit files are named `*.test.ts`; Playwright e2e files are `*.spec.ts` — the two runners never overlap.
 - Commit after every task with the message shown in its final step.
 
 ## File Structure
@@ -68,7 +69,7 @@ playwright.editor.config.ts    # 2nd Playwright config: webServer = `pnpm dev`
 
 - [ ] **Step 1: Add the unit-test script and dependency**
 
-Edit `package.json`: add to `scripts`: `"test:unit": "node --test"`. Then install js-yaml:
+Edit `package.json`: add to `scripts`: `"test:unit": "node --test 'src/**/*.test.ts'"` (Node 24 runs `.ts` natively; the glob scopes discovery to unit files under `src/`). Then install js-yaml:
 
 ```bash
 pnpm add -D js-yaml @types/js-yaml
