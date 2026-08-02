@@ -41,18 +41,17 @@ const related: CollectionEntry<'posts'>[] = (await getCollection('posts'))
   </section>
 )}
 <style>
-  .related { margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--border-soft); }
+  .related { margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--border-soft); }
   .eyebrow {
     font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em;
-    text-transform: uppercase; color: var(--faint); font-weight: 500; margin: 0 0 14px;
+    text-transform: uppercase; color: var(--faint); font-weight: 500; margin: 0 0 11px;
   }
-  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .grid { display: flex; flex-direction: column; gap: 8px; }
   .card {
-    display: flex; flex-direction: column; gap: 6px; padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 4px; padding: 10px 12px;
     border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
   }
   .card:hover { border-color: var(--faint); }
-  .card .t { font-weight: 600; color: var(--text); line-height: 1.3; }
-  .card .d { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
-  @media (max-width: 560px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+  .card .t { font-weight: 600; color: var(--text); line-height: 1.3; font-size: 13px; }
+  .card .d { font-size: 11.5px; color: var(--muted); line-height: 1.4; }
 </style>

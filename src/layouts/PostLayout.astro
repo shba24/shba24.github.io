@@ -6,7 +6,6 @@ import TreeToc from '../components/TreeToc.astro';
 import Prose from '../components/Prose.astro';
 import JsonLd from '../components/JsonLd.astro';
 import ZoomImages from '../components/ZoomImages.astro';
-import SeriesNav from '../components/SeriesNav.astro';
 import Related from '../components/Related.astro';
 import Comments from '../components/Comments.tsx';
 import { buildArticleJsonLd } from '../lib/seo';
@@ -41,14 +40,15 @@ const articleJsonLd = buildArticleJsonLd({
 <BaseLayout title={p.title} description={p.description} image={ogImage} ogType="article">
   <JsonLd data={articleJsonLd} />
   <div class:list={["layout", { "no-toc": !showToc }]}>
-    <LeftRail />
+    <div class="col-left">
+      <LeftRail />
+      <Related slug={slug} tags={p.tags} />
+    </div>
     <main>
       <PostHeader title={p.title} date={p.date} author={p.author} series={p.series}
-        seriesPart={p.seriesPart} tags={p.tags} minutes={p.minutes} audioSrc={p.audioSrc} />
+        seriesPart={p.seriesPart} tags={p.tags} minutes={p.minutes} audioSrc={p.audioSrc} slug={slug} />
       <hr class="rule" />
       <Prose><slot /></Prose>
-      <SeriesNav slug={slug} series={p.series} />
-      <Related slug={slug} tags={p.tags} />
       {GISCUS.repoId && <Comments client:visible />}
     </main>
     {showToc && <TreeToc headings={p.headings} />}

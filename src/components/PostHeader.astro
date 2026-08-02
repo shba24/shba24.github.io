@@ -1,6 +1,7 @@
 ---
 import { formatDate, slugify } from '../lib/format';
 import AudioPlayer from './AudioPlayer.tsx';
+import SeriesNav from './SeriesNav.astro';
 interface Props {
   title: string;
   date: Date;
@@ -10,8 +11,9 @@ interface Props {
   tags: string[];
   minutes: number;
   audioSrc?: string;
+  slug?: string;
 }
-const { title, date, author, series, seriesPart, tags, minutes, audioSrc } = Astro.props;
+const { title, date, author, series, seriesPart, tags, minutes, audioSrc, slug } = Astro.props;
 ---
 <header class="post-head">
   {series && <div class="eyebrow">{series}{seriesPart ? ` · Part ${seriesPart}` : ''}</div>}
@@ -25,6 +27,7 @@ const { title, date, author, series, seriesPart, tags, minutes, audioSrc } = Ast
     <span class="by-meta">{formatDate(date)} · {minutes} min</span>
   </div>
   {audioSrc && <AudioPlayer client:idle src={audioSrc} />}
+  <SeriesNav slug={slug ?? ''} series={series} />
   {tags.length > 0 && <div class="tags">{tags.map((t) => <a href={`/tags/${slugify(t)}/`}>#{t}</a>)}</div>}
 </header>
 <style>
