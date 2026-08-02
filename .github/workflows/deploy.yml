@@ -53,6 +53,9 @@ jobs:
       # We provision all three here so the PRODUCTION deploy actually produces
       # per-post narration MP3s. These steps must run BEFORE the Build step.
       - name: Install ffmpeg
+        # Best-effort: audio is optional. A transient apt outage must not block
+        # the deploy — generate-audio.mjs gracefully skips when ffmpeg is absent.
+        continue-on-error: true
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
       - name: Cache Piper binary + voice model
@@ -64,6 +67,10 @@ jobs:
 
       - name: Provision Piper + voice model
         if: steps.cache-piper.outputs.cache-hit != 'true'
+        # Best-effort: audio is optional. A transient GitHub/HuggingFace download
+        # outage must not block the deploy — generate-audio.mjs gracefully skips
+        # when piper/model are absent, and the site without audio is deployable.
+        continue-on-error: true
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.piper" "$HOME/.piper/models"
