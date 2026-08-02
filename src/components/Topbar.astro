@@ -10,7 +10,7 @@ const active = (href: string) => path === href || (href !== '/' && path.startsWi
       <a href="/about/" aria-current={active('/about/') ? 'page' : undefined}>About</a>
       <a href="/posts/" aria-current={active('/posts/') ? 'page' : undefined}>Posts</a>
       <a href="/references/" aria-current={active('/references/') ? 'page' : undefined}>References</a>
-      {import.meta.env.DEV && <a href="/drafts/" aria-current={active('/drafts/') ? 'page' : undefined}>Drafts</a>}
+      {import.meta.env.DEV && <a href="/drafts/" aria-current={active('/drafts/') ? 'page' : undefined}>Unpublished</a>}
       {import.meta.env.DEV && <a href="/editor/" aria-current={active('/editor/') ? 'page' : undefined}>New</a>}
     </nav>
     <div class="tb-right">

@@ -116,29 +116,14 @@ export default function EditorApp() {
     setDialog(false);
   }
 
-  async function softDelete(): Promise<void> {
-    if (!slug) return;
-    if (!window.confirm(`Delete "${form.title || slug}"? It will be marked deleted and hidden from the site — the file is kept, so you can restore it.`)) return;
-    await persist({ deleted: true });
-    window.location.href = '/drafts/';
-  }
-
-  async function restore(): Promise<void> {
-    await persist({ deleted: false });
+  async function unpublish(): Promise<void> {
+    await persist({ draft: true });
   }
 
   return (
     <div data-testid="editor-app">
       <div className="editor-bar">
         <strong style={{ fontSize: 15 }}>{form.title || '(untitled)'}</strong>
-        {form.deleted && (
-          <span
-            data-testid="deleted-flag"
-            style={{ fontFamily: 'var(--mono)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--muted)', border: '1px solid var(--border)', borderRadius: 999, padding: '2px 8px' }}
-          >
-            Deleted
-          </span>
-        )}
         <span data-testid="save-status" style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--faint)' }}>
           {statusLabel[status]}
         </span>
@@ -169,29 +154,24 @@ export default function EditorApp() {
           </a>
         )}
         <button style={btn} data-testid="btn-save" onClick={() => void persist()}>Save</button>
-        <button style={btn} data-testid="btn-save-draft" onClick={() => void persist({ draft: true })}>Save draft</button>
-        <button
-          style={{ ...btn, background: 'var(--accent)', color: 'var(--bg)', borderColor: 'var(--accent)' }}
-          data-testid="btn-publish"
-          onClick={() => void persist({ draft: false })}
-        >
-          Publish
-        </button>
-        {slug &&
-          (form.deleted ? (
-            <button style={btn} data-testid="btn-restore" title="Restore this deleted post" onClick={() => void restore()}>
-              Restore
-            </button>
-          ) : (
-            <button
-              style={{ ...btn, color: 'var(--muted)' }}
-              data-testid="btn-delete"
-              title="Delete this post (marks it deleted; the file is kept)"
-              onClick={() => void softDelete()}
-            >
-              Delete
-            </button>
-          ))}
+        {form.draft ? (
+          <button
+            style={{ ...btn, background: 'var(--accent)', color: 'var(--bg)', borderColor: 'var(--accent)' }}
+            data-testid="btn-publish"
+            onClick={() => void persist({ draft: false })}
+          >
+            Publish
+          </button>
+        ) : (
+          <button
+            style={{ ...btn, color: 'var(--muted)' }}
+            data-testid="btn-unpublish"
+            title="Take this post off the live site (kept on disk)"
+            onClick={() => void unpublish()}
+          >
+            Unpublish
+          </button>
+        )}
       </div>
       <FrontmatterForm form={form} onChange={patchForm} />
       <Editor value={body} onChange={changeBody} onImage={() => setDialog(true)} />

@@ -5,7 +5,7 @@ import type { PostData } from './types.ts';
 
 const base: PostData = {
   title: 'T', date: '2024-05-01', description: 'd', tags: ['A', 'B'],
-  series: 'S', seriesPart: 2, author: 'Shubham Bansal', draft: true, recommended: false, hideToc: false, deleted: false,
+  series: 'S', seriesPart: 2, author: 'Shubham Bansal', draft: true, recommended: false, hideToc: false,
 };
 
 test('dataToForm joins tags and stringifies seriesPart', () => {

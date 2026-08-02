@@ -14,7 +14,6 @@ const posts = defineCollection({
     draft: z.boolean().default(false),
     recommended: z.boolean().default(false),
     hideToc: z.boolean().default(false),
-    deleted: z.boolean().default(false),
   }),
 });
 
