@@ -8,7 +8,9 @@ import JsonLd from '../components/JsonLd.astro';
 import ZoomImages from '../components/ZoomImages.astro';
 import SeriesNav from '../components/SeriesNav.astro';
 import Related from '../components/Related.astro';
+import Comments from '../components/Comments.tsx';
 import { buildArticleJsonLd } from '../lib/seo';
+import { GISCUS } from '../consts';
 interface Props {
   title: string;
   description?: string;
@@ -46,6 +48,7 @@ const articleJsonLd = buildArticleJsonLd({
       <Prose><slot /></Prose>
       <SeriesNav slug={slug} series={p.series} />
       <Related slug={slug} tags={p.tags} />
+      {GISCUS.repoId && <Comments client:visible />}
     </main>
     {showToc && <TreeToc headings={p.headings} />}
   </div>
