@@ -62,7 +62,7 @@ Collections:
 Post frontmatter (Zod-validated):
 `title` (string), `date` (date), `description` (string), `tags` (string[]), `series` (string?), `seriesPart` (number?), `author` (string, default "Shubham Bansal"), `draft` (bool, default false), `recommended` (bool, default false), `hideToc` (bool, default false), `heroImage` (image?, optional and unused by default).
 
-- **Recommended list:** posts with `recommended: true` first; if fewer than N, fill by auto-related (shared tags/series), newest first.
+- **Recommended list:** target **3** items — posts with `recommended: true` first; if fewer than 3, fill by auto-related (shared tags/series), newest first.
 - **Series navigator:** grouped by `series`, ordered by `seriesPart`/date.
 - **Archive:** grouped by year with counts.
 
