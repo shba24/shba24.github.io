@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
 import { readingTime } from '../../lib/format';
+import { hasAudio, audioSrc as audioSrcFor } from '../../lib/audio';
 export async function getStaticPaths() {
   const posts = (await getCollection('posts')).filter((p) => !p.data.draft);
   return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
@@ -9,9 +10,11 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content, headings } = await render(post);
 const minutes = readingTime(post.body ?? '');
+const audioSrc = hasAudio(post.id) ? audioSrcFor(post.id) : undefined;
 ---
 <PostLayout title={post.data.title} description={post.data.description} date={post.data.date}
   author={post.data.author} series={post.data.series} seriesPart={post.data.seriesPart}
-  tags={post.data.tags} minutes={minutes} headings={headings} hideToc={post.data.hideToc} slug={post.id}>
+  tags={post.data.tags} minutes={minutes} headings={headings} hideToc={post.data.hideToc} slug={post.id}
+  audioSrc={audioSrc}>
   <Content />
 </PostLayout>

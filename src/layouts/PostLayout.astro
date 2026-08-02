@@ -23,6 +23,7 @@ interface Props {
   headings: import('astro').MarkdownHeading[];
   hideToc: boolean;
   slug?: string;
+  audioSrc?: string;
 }
 const p = Astro.props;
 const slug = p.slug ?? '';
@@ -43,7 +44,7 @@ const articleJsonLd = buildArticleJsonLd({
     <LeftRail />
     <main>
       <PostHeader title={p.title} date={p.date} author={p.author} series={p.series}
-        seriesPart={p.seriesPart} tags={p.tags} minutes={p.minutes} />
+        seriesPart={p.seriesPart} tags={p.tags} minutes={p.minutes} audioSrc={p.audioSrc} />
       <hr class="rule" />
       <Prose><slot /></Prose>
       <SeriesNav slug={slug} series={p.series} />

@@ -1,5 +1,6 @@
 ---
 import { formatDate, slugify } from '../lib/format';
+import AudioPlayer from './AudioPlayer.tsx';
 interface Props {
   title: string;
   date: Date;
@@ -8,8 +9,9 @@ interface Props {
   seriesPart?: number;
   tags: string[];
   minutes: number;
+  audioSrc?: string;
 }
-const { title, date, author, series, seriesPart, tags, minutes } = Astro.props;
+const { title, date, author, series, seriesPart, tags, minutes, audioSrc } = Astro.props;
 ---
 <header class="post-head">
   {series && <div class="eyebrow">{series}{seriesPart ? ` · Part ${seriesPart}` : ''}</div>}
@@ -22,7 +24,7 @@ const { title, date, author, series, seriesPart, tags, minutes } = Astro.props;
     <span class="by-vsep"></span>
     <span class="by-meta">{formatDate(date)} · {minutes} min</span>
   </div>
-  <div><a class="listen" aria-disabled="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Listen</a></div>
+  {audioSrc && <AudioPlayer client:idle src={audioSrc} />}
   {tags.length > 0 && <div class="tags">{tags.map((t) => <a href={`/tags/${slugify(t)}/`}>#{t}</a>)}</div>}
 </header>
 <style>
@@ -36,8 +38,5 @@ const { title, date, author, series, seriesPart, tags, minutes } = Astro.props;
   .by-name{font-weight:600;font-size:13.5px}.by-role{font-size:11.5px;color:var(--faint)}
   .by-vsep{width:1px;height:24px;background:var(--border)}
   .by-meta{font-family:var(--mono);font-size:12px;color:var(--muted)}
-  .listen{margin:16px auto 0;display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;
-    border:1px solid var(--border);border-radius:999px;padding:5px 13px;color:var(--text)}
-  .listen svg{width:11px;height:11px;fill:var(--text)}
   .tags{margin-top:16px;display:flex;gap:14px;justify-content:center;font-family:var(--mono);font-size:12px;color:var(--muted)}
 </style>
