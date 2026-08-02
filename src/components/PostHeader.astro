@@ -26,7 +26,7 @@ const { title, date, author, series, seriesPart, tags, minutes, audioSrc, slug }
     <span class="by-vsep"></span>
     <span class="by-meta">{formatDate(date)} · {minutes} min</span>
   </div>
-  {audioSrc && <AudioPlayer client:idle src={audioSrc} />}
+  {audioSrc && <div class="audio-row"><AudioPlayer client:idle src={audioSrc} /></div>}
   <SeriesNav slug={slug ?? ''} series={series} />
   {tags.length > 0 && <div class="tags">{tags.map((t) => <a href={`/tags/${slugify(t)}/`}>#{t}</a>)}</div>}
 </header>
@@ -35,6 +35,7 @@ const { title, date, author, series, seriesPart, tags, minutes, audioSrc, slug }
   .eyebrow{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:14px}
   h1{font-size:2.3rem;line-height:1.12;font-weight:700;letter-spacing:-.022em;margin:0 0 20px}
   .byline{display:inline-flex;align-items:center;gap:11px;justify-content:center}
+  .audio-row{display:flex;justify-content:center}
   .avatar{width:34px;height:34px;border-radius:50%;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
   .avatar svg{width:20px;height:20px;fill:var(--faint)}
   .by-t{text-align:left;line-height:1.25}

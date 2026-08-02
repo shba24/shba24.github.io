@@ -56,9 +56,9 @@ const articleJsonLd = buildArticleJsonLd({
   <ZoomImages />
 </BaseLayout>
 <style>
-  .layout{max-width:1440px;margin:0 auto;padding:32px 32px 60px;display:grid;
-    grid-template-columns:200px minmax(0,840px) 210px;gap:44px;justify-content:center}
-  .layout.no-toc{grid-template-columns:200px minmax(0,840px)}
+  .layout{max-width:var(--shell);margin:0 auto;padding:32px 32px 60px;display:grid;
+    grid-template-columns:var(--rail) minmax(0,var(--content)) var(--toc);gap:var(--gap);justify-content:center}
+  .layout.no-toc{grid-template-columns:var(--rail) minmax(0,var(--content))}
   .rule{border:0;border-top:1px solid var(--border-soft);margin:26px 0 28px}
   @media(max-width:1080px){.layout{grid-template-columns:200px minmax(0,1fr)} :global(.toc){display:none}}
   @media(max-width:820px){.layout{grid-template-columns:minmax(0,1fr);padding:22px 20px 46px} :global(.rail){display:none}}

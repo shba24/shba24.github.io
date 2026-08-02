@@ -18,6 +18,15 @@
   --sans:"Public Sans Variable",-apple-system,system-ui,sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
 }
+:root {
+  /* Layout widths — single source of truth for topbar + every page/post.
+     Change --content (or --shell) here and all blogs update together. */
+  --shell:1440px;   /* max outer width (topbar inner + all .layout shells) */
+  --rail:200px;     /* left rail column */
+  --toc:210px;      /* right table-of-contents column */
+  --content:840px;  /* main reading column max width */
+  --gap:44px;       /* grid column gap */
+}
 html{ background:var(--bg); color:var(--text); font-family:var(--sans); }
 body{ margin:0; font-size:16px; line-height:1.68; -webkit-font-smoothing:antialiased; }
 a{ color:inherit; text-decoration:none; }
