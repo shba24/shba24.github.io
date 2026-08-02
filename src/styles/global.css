@@ -48,6 +48,7 @@ a{ color:inherit; text-decoration:none; }
 .prose :where(code):not(pre code){ font-family:var(--mono); font-size:.85em; background:var(--surface-2);
   border:1px solid var(--border-soft); border-radius:4px; padding:.08em .36em; }
 .prose :where(h2,h3,h4) .anchor{ opacity:0; margin-left:.4em; color:var(--faint); }
+.prose :where(h2,h3,h4) .anchor::after{ content:"#"; }
 .prose :where(h2,h3,h4):hover .anchor{ opacity:1; }
 
 /* callouts (remark-github-blockquote-alert) — monochrome */

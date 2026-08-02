@@ -14,6 +14,8 @@ export default defineConfig({
   site: 'https://shubham-bansal.com',
   base: '/',
   output: 'static',
+  trailingSlash: 'always',
+  build: { format: 'directory' },
   integrations: [
     expressiveCode({
       themes: ['github-dark-dimmed'],

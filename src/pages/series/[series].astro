@@ -1,29 +1,32 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import LeftRail from '../../components/LeftRail.astro';
-import { formatDate } from '../../lib/format';
+import { formatDate, slugify } from '../../lib/format';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 
 export async function getStaticPaths() {
-  const posts = (await getCollection('posts')).filter((p: CollectionEntry<'posts'>) => !p.data.draft && p.data.series);
-  const series = [...new Set(
-    posts.map((p: CollectionEntry<'posts'>) => p.data.series).filter((s: string | undefined): s is string => Boolean(s)),
-  )];
-  return series.map((name: string) => ({
-    params: { series: name },
+  const posts = (await getCollection('posts')).filter((p) => !p.data.draft && p.data.series);
+  const map = new Map<string, { series: string; posts: typeof posts }>();
+  for (const p of posts) {
+    const name = p.data.series!;
+    const slug = slugify(name);
+    if (!map.has(slug)) map.set(slug, { series: name, posts: [] });
+    map.get(slug)!.posts.push(p);
+  }
+  return [...map.entries()].map(([slug, v]) => ({
+    params: { series: slug },
     props: {
-      posts: posts
-        .filter((p: CollectionEntry<'posts'>) => p.data.series === name)
-        .sort((a: CollectionEntry<'posts'>, b: CollectionEntry<'posts'>) =>
-          (a.data.seriesPart ?? 0) - (b.data.seriesPart ?? 0) || a.data.date.valueOf() - b.data.date.valueOf()),
+      series: v.series,
+      posts: v.posts.sort(
+        (a, b) => (a.data.seriesPart ?? 0) - (b.data.seriesPart ?? 0) || a.data.date.valueOf() - b.data.date.valueOf(),
+      ),
     },
   }));
 }
 
-interface Props { posts: CollectionEntry<'posts'>[]; }
-const { series } = Astro.params;
-const { posts } = Astro.props;
+interface Props { series: string; posts: CollectionEntry<'posts'>[] }
+const { series, posts } = Astro.props;
 ---
 <BaseLayout title={`Series: ${series} — Shubham Bansal`}>
   <div class="layout"><LeftRail />

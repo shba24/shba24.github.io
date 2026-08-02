@@ -13,7 +13,7 @@ test('post renders header, TOC, and code', async ({ page }) => {
   await page.goto('/posts/iceberg-table-format-part1/');
   await expect(page.locator('h1')).toContainText('Iceberg');
   await expect(page.locator('.toc .toc-h')).toHaveText(/on this page/i);
-  await expect(page.locator('pre')).toHaveCount(1, { timeout: 5000 }).catch(() => {});
+  await expect(page.locator('pre').first()).toBeVisible();
   await expect(page.locator('.byline')).toBeVisible();
 });
 

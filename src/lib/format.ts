@@ -1,7 +1,10 @@
 import type { MarkdownHeading } from 'astro';
 
 export function formatDate(d: Date): string {
-  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  return d.toLocaleDateString('en-US', { timeZone: 'UTC', year: 'numeric', month: 'short', day: 'numeric' });
+}
+export function slugify(s: string): string {
+  return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 export function readingTime(body: string): number {
   const words = body.trim().split(/\s+/).length;

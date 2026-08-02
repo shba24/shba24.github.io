@@ -1,5 +1,5 @@
 ---
-import { formatDate } from '../lib/format';
+import { formatDate, slugify } from '../lib/format';
 interface Props {
   title: string;
   date: Date;
@@ -23,7 +23,7 @@ const { title, date, author, series, seriesPart, tags, minutes } = Astro.props;
     <span class="by-meta">{formatDate(date)} · {minutes} min</span>
   </div>
   <div><a class="listen" aria-disabled="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Listen</a></div>
-  {tags.length > 0 && <div class="tags">{tags.map((t) => <a href={`/tags/${t}/`}>#{t}</a>)}</div>}
+  {tags.length > 0 && <div class="tags">{tags.map((t) => <a href={`/tags/${slugify(t)}/`}>#{t}</a>)}</div>}
 </header>
 <style>
   .post-head{text-align:center;margin-bottom:30px}
