@@ -46,6 +46,60 @@ jobs:
       - name: Type-check
         run: pnpm check
 
+      # --- Post audio provisioning (Piper TTS + ffmpeg) -------------------
+      # `pnpm build` runs scripts/generate-audio.mjs before `astro build`.
+      # That script reads PIPER_MODEL and expects `piper` + `ffmpeg` on PATH;
+      # if any are missing it logs a skip and exits 0 (graceful degradation).
+      # We provision all three here so the PRODUCTION deploy actually produces
+      # per-post narration MP3s. These steps must run BEFORE the Build step.
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Cache Piper binary + voice model
+        id: cache-piper
+        uses: actions/cache@v4
+        with:
+          path: ~/.piper
+          key: piper-2023.11.14-2-en_US-lessac-medium
+
+      - name: Provision Piper + voice model
+        if: steps.cache-piper.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.piper" "$HOME/.piper/models"
+          # Pinned rhasspy/piper release, Linux x86_64. The tarball extracts to
+          # a top-level `piper/` dir, so the binary lands at ~/.piper/piper/piper
+          # (its bundled shared libs use an $ORIGIN rpath — no LD_LIBRARY_PATH).
+          curl -fsSL -o /tmp/piper.tar.gz \
+            https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_x86_64.tar.gz
+          tar -xzf /tmp/piper.tar.gz -C "$HOME/.piper"
+          # Pinned voice model from rhasspy/piper-voices. Piper auto-loads the
+          # sibling `<model>.onnx.json`, so both files keep the model basename.
+          curl -fsSL -o "$HOME/.piper/models/en_US-lessac-medium.onnx" \
+            https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx
+          curl -fsSL -o "$HOME/.piper/models/en_US-lessac-medium.onnx.json" \
+            https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json
+
+      - name: Configure Piper on PATH + PIPER_MODEL
+        run: |
+          set -euo pipefail
+          # Runs on every build (cache hit OR miss) so the tool is always wired
+          # up. Absolute paths only: generate-audio.mjs uses fs.existsSync on
+          # PIPER_MODEL (no ~ expansion) and resolves `piper` from PATH.
+          echo "$HOME/.piper/piper" >> "$GITHUB_PATH"
+          echo "PIPER_MODEL=$HOME/.piper/models/en_US-lessac-medium.onnx" >> "$GITHUB_ENV"
+
+      # Reuse previously synthesized MP3s + the audio manifest when post sources
+      # are unchanged, so deploys don't re-run TTS needlessly. generate-audio.mjs
+      # skips per-post via manifest.json (also stored under public/audio).
+      - name: Cache generated post audio
+        uses: actions/cache@v4
+        with:
+          path: public/audio
+          key: post-audio-${{ hashFiles('src/content/posts/**') }}
+          restore-keys: |
+            post-audio-
+
       # `pnpm build` also runs Pagefind indexing and OG image generation.
       - name: Build
         run: pnpm build
