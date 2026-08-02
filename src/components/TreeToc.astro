@@ -1,0 +1,32 @@
+---
+import { buildTocTree, type TocNode } from '../lib/format';
+interface Props { headings: import('astro').MarkdownHeading[] }
+const { headings } = Astro.props;
+const tree = buildTocTree(headings);
+const flat: TocNode[] = [];
+const walk = (n: TocNode) => { flat.push(n); n.children.forEach(walk); };
+tree.forEach(walk);
+---
+<aside class="toc">
+  <div class="toc-h">On this page</div>
+  {flat.map((n) => <a href={`#${n.slug}`} class={`lvl l${n.depth}`} data-slug={n.slug}>{n.text}</a>)}
+</aside>
+<style>
+  .toc{position:sticky;top:80px;align-self:start;font-size:12.5px}
+  .toc-h{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:11px}
+  .lvl{display:block;color:var(--muted);padding:3px 0 3px 12px;border-left:1px solid var(--border);line-height:1.35}
+  .lvl:hover{color:var(--text)}
+  .l3{padding-left:26px}.l4{padding-left:40px;font-size:12px}
+  .lvl.active{color:var(--accent);border-left-color:var(--accent);font-weight:500}
+</style>
+<script>
+  const links = [...document.querySelectorAll('.toc .lvl')];
+  const map = new Map(links.map((l) => [l.getAttribute('data-slug'), l]));
+  const obs = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) {
+      links.forEach((l) => l.classList.remove('active'));
+      map.get(e.target.id)?.classList.add('active');
+    }
+  }, { rootMargin: '0px 0px -70% 0px' });
+  document.querySelectorAll('article :is(h2,h3,h4)[id]').forEach((h) => obs.observe(h));
+</script>
