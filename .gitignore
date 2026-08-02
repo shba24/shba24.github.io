@@ -1,1 +1,46 @@
+# ---- OS ----
 .DS_Store
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+Desktop.ini
+
+# ---- Editors / IDEs ----
+.idea/
+*.iml
+*.swp
+*.swo
+*~
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# ---- Env / secrets ----
+.env
+.env.*
+!.env.example
+
+# ---- Hugo ----
+/public/
+/resources/_gen/
+/.hugo_build.lock
+hugo_stats.json
+
+# ---- Node / JS tooling (Astro, Tailwind, etc.) ----
+node_modules/
+dist/
+.output/
+.astro/
+.cache/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnp.*
+
+# ---- Deploy tooling ----
+.vercel/
+.netlify/
+.wrangler/
