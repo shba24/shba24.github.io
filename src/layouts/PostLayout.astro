@@ -4,6 +4,8 @@ import LeftRail from '../components/LeftRail.astro';
 import PostHeader from '../components/PostHeader.astro';
 import TreeToc from '../components/TreeToc.astro';
 import Prose from '../components/Prose.astro';
+import JsonLd from '../components/JsonLd.astro';
+import { buildArticleJsonLd } from '../lib/seo';
 interface Props {
   title: string;
   description?: string;
@@ -15,11 +17,21 @@ interface Props {
   minutes: number;
   headings: import('astro').MarkdownHeading[];
   hideToc: boolean;
+  slug?: string;
 }
 const p = Astro.props;
 const showToc = !p.hideToc && p.headings?.some((h: import('astro').MarkdownHeading) => h.depth >= 2 && h.depth <= 4);
+const articleJsonLd = buildArticleJsonLd({
+  title: p.title,
+  description: p.description ?? '',
+  date: p.date,
+  author: p.author,
+  url: new URL(Astro.url.pathname, Astro.site).href,
+  image: new URL(`/og/${p.slug}.png`, Astro.site).href,
+});
 ---
 <BaseLayout title={p.title} description={p.description}>
+  <JsonLd data={articleJsonLd} />
   <div class:list={["layout", { "no-toc": !showToc }]}>
     <LeftRail />
     <main>

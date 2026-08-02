@@ -1,6 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import LeftRail from '../components/LeftRail.astro';
+import JsonLd from '../components/JsonLd.astro';
+import { buildWebsiteJsonLd } from '../lib/seo';
 import { formatDate } from '../lib/format';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
@@ -8,6 +10,7 @@ const posts = (await getCollection('posts')).filter((p: CollectionEntry<'posts'>
   .sort((a: CollectionEntry<'posts'>, b: CollectionEntry<'posts'>) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
 <BaseLayout title="Shubham Bansal — Technical Blog">
+  <JsonLd data={buildWebsiteJsonLd()} />
   <div class="layout"><LeftRail />
     <main>
       <h1 class="page-title">Writing</h1>
