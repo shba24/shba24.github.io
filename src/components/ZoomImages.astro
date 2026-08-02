@@ -1,0 +1,8 @@
+---
+// Attaches medium-zoom to prose images only (not UI chrome). Renders no markup;
+// Astro hoists this module script, so placement in the page is cosmetic.
+---
+<script>
+  import mediumZoom from 'medium-zoom';
+  mediumZoom('.prose img', { background: 'rgba(12,13,15,.92)' });
+</script>

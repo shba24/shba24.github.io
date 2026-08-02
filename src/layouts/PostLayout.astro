@@ -5,6 +5,7 @@ import PostHeader from '../components/PostHeader.astro';
 import TreeToc from '../components/TreeToc.astro';
 import Prose from '../components/Prose.astro';
 import JsonLd from '../components/JsonLd.astro';
+import ZoomImages from '../components/ZoomImages.astro';
 import { buildArticleJsonLd } from '../lib/seo';
 interface Props {
   title: string;
@@ -43,6 +44,7 @@ const articleJsonLd = buildArticleJsonLd({
     </main>
     {showToc && <TreeToc headings={p.headings} />}
   </div>
+  <ZoomImages />
 </BaseLayout>
 <style>
   .layout{max-width:1240px;margin:0 auto;padding:32px 32px 60px;display:grid;
