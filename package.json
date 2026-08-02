@@ -10,6 +10,7 @@
     "build": "node scripts/generate-audio.mjs && astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "test:unit": "node --test 'src/**/*.test.ts'",
     "test:e2e": "playwright test",
     "setup:audio": "bash scripts/setup-audio.sh",
     "build:audio": "bash scripts/setup-audio.sh && PATH=$HOME/.local/bin:$PATH pnpm build",
@@ -44,8 +45,10 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
     "@playwright/test": "^1.48.0",
+    "@types/js-yaml": "^4.0.9",
     "@types/react": "^18.3",
     "@types/react-dom": "^18.3",
+    "js-yaml": "^4.3.1",
     "typescript": "^5.6.0"
   }
 }
