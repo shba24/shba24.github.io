@@ -43,6 +43,10 @@ html{ background:var(--bg); color:var(--text); font-family:var(--sans); scroll-p
 body{ margin:0; font-size:16px; line-height:1.68; -webkit-font-smoothing:antialiased; }
 a{ color:inherit; text-decoration:none; }
 
+/* Diagrams-as-code (PlantUML via Kroki): inline SVG that inherits the theme color. */
+.diagram{ margin:26px 0; text-align:center; color:var(--text); }
+.diagram svg{ max-width:100%; height:auto; }
+
 /* prose */
 .prose{ color:var(--text); max-width:none;
   --tw-prose-body:var(--text);

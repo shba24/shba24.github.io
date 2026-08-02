@@ -10,6 +10,7 @@ import rehypeKatex from 'rehype-katex';
 import { remarkAlert as alert } from 'remark-github-blockquote-alert';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import remarkPlantuml from './src/lib/remark-plantuml.mjs';
 
 export default defineConfig({
   site: 'https://shubham-bansal.com',
@@ -40,7 +41,7 @@ export default defineConfig({
   ],
   vite: { plugins: [tailwindcss()] },
   markdown: {
-    remarkPlugins: [remarkMath, alert],
+    remarkPlugins: [remarkMath, alert, remarkPlantuml],
     rehypePlugins: [
       rehypeKatex,
       rehypeSlug,
