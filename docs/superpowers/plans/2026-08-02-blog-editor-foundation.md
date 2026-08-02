@@ -636,7 +636,7 @@ git commit -m "Editor foundation: dev-only Astro integration (/editor, /drafts, 
 - Modify: `src/editor/routes/editor.astro` (mount `App` as a `client:only="react"` island)
 
 **Interfaces:**
-- Consumes: `GET /api/editor/posts` → `{ posts: { slug, title, date, draft }[] }` (Task 4).
+- Consumes: `GET /api/editor/posts/` (trailing slash — the site sets `trailingSlash: 'always'`) → `{ posts: { slug, title, date, draft }[] }` (Task 4).
 - Produces: a rendered list with `data-testid="post-row"` per post and a `data-testid="editor-app"` root.
 
 - [ ] **Step 1: Implement the minimal app**
@@ -653,7 +653,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/editor/posts')
+    fetch('/api/editor/posts/')
       .then((r) => r.json())
       .then((d: { posts: PostMeta[] }) => setPosts(d.posts))
       .catch((e) => setError(String(e)));
@@ -740,7 +740,7 @@ test('drafts route is absent in production', async ({ request }) => {
 });
 
 test('editor API is absent in production', async ({ request }) => {
-  expect((await request.get('/api/editor/posts')).status()).toBe(404);
+  expect((await request.get('/api/editor/posts/')).status()).toBe(404);
 });
 
 test('draft posts are excluded from the production build', async ({ request }) => {
@@ -807,14 +807,14 @@ Create `tests/editor/smoke.spec.ts`:
 import { test, expect } from '@playwright/test';
 
 test('editor API lists posts including the fixture draft', async ({ request }) => {
-  const res = await request.get('/api/editor/posts');
+  const res = await request.get('/api/editor/posts/');
   expect(res.ok()).toBeTruthy();
   const { posts } = await res.json();
   expect(posts.some((p: { slug: string }) => p.slug === '_fixture-draft')).toBeTruthy();
 });
 
 test('editor app mounts and renders post rows', async ({ page }) => {
-  await page.goto('/editor');
+  await page.goto('/editor/');
   await expect(page.getByTestId('editor-app')).toBeVisible();
   await expect(page.getByTestId('post-row').first()).toBeVisible();
 });
