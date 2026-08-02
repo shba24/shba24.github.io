@@ -9,9 +9,10 @@ export type PostData = {
   draft: boolean;
   recommended: boolean;
   hideToc: boolean;
+  deleted: boolean;
 };
 
-export type PostMeta = { slug: string; title: string; date: string; draft: boolean };
+export type PostMeta = { slug: string; title: string; date: string; draft: boolean; deleted: boolean };
 
 export type ViewMode = 'edit' | 'split' | 'preview';
 

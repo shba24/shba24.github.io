@@ -12,10 +12,12 @@ interface Props {
   minutes: number;
   audioSrc?: string;
   slug?: string;
+  draft?: boolean;
 }
-const { title, date, author, series, seriesPart, tags, minutes, audioSrc, slug } = Astro.props;
+const { title, date, author, series, seriesPart, tags, minutes, audioSrc, slug, draft } = Astro.props;
 ---
 <header class="post-head">
+  {import.meta.env.DEV && (draft ? <div class="status-flag sf-draft">Draft — not published</div> : <div class="status-flag sf-pub">Published</div>)}
   {series && <div class="eyebrow">{series}{seriesPart ? ` · Part ${seriesPart}` : ''}</div>}
   <h1>{title}</h1>
   <div class="byline">
@@ -33,6 +35,9 @@ const { title, date, author, series, seriesPart, tags, minutes, audioSrc, slug }
 </header>
 <style>
   .post-head{text-align:center;margin-bottom:30px}
+  .status-flag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:3px 12px;margin-bottom:14px}
+  .status-flag.sf-draft{color:var(--muted);background:var(--surface-2);border:1px solid var(--border)}
+  .status-flag.sf-pub{color:var(--faint);background:transparent;border:1px solid var(--border-soft)}
   .edit-row{margin-top:14px}
   .edit-link{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:3px 12px}
   .edit-link:hover{color:var(--text)}

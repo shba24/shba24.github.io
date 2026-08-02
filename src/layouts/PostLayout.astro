@@ -23,6 +23,7 @@ interface Props {
   hideToc: boolean;
   slug?: string;
   audioSrc?: string;
+  draft?: boolean;
 }
 const p = Astro.props;
 const slug = p.slug ?? '';
@@ -46,7 +47,7 @@ const articleJsonLd = buildArticleJsonLd({
     </div>
     <main>
       <PostHeader title={p.title} date={p.date} author={p.author} series={p.series}
-        seriesPart={p.seriesPart} tags={p.tags} minutes={p.minutes} audioSrc={p.audioSrc} slug={slug} />
+        seriesPart={p.seriesPart} tags={p.tags} minutes={p.minutes} audioSrc={p.audioSrc} slug={slug} draft={p.draft} />
       <hr class="rule" />
       <Prose><slot /></Prose>
       {GISCUS.repoId && <Comments client:idle />}

@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { parseFrontmatter, normalizePostData, serializePost, type PostData } from '../lib/frontmatter.ts';
 import { dedupeName, safeImageName } from './images.ts';
 
-export type PostMeta = { slug: string; title: string; date: string; draft: boolean };
+export type PostMeta = { slug: string; title: string; date: string; draft: boolean; deleted: boolean };
 
 export const postsDir = (root: string) => join(root, 'src', 'content', 'posts');
 export const imagesDir = (root: string, slug: string) => join(root, 'public', 'images', slug);
@@ -44,7 +44,7 @@ export async function listPostsMeta(root: string): Promise<PostMeta[]> {
     files.map(async (f) => {
       const slug = f.replace(/\.(md|mdx)$/, '');
       const { data } = await readPost(root, slug);
-      return { slug, title: data.title, date: data.date, draft: data.draft };
+      return { slug, title: data.title, date: data.date, draft: data.draft, deleted: data.deleted };
     }),
   );
   return metas.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));

@@ -13,6 +13,7 @@ export type PostData = {
   draft: boolean;
   recommended: boolean;
   hideToc: boolean;
+  deleted: boolean;
 };
 
 const FM = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?\r?\n?/;
@@ -42,6 +43,7 @@ export function normalizePostData(data: Record<string, unknown>): PostData {
     draft: Boolean(data.draft ?? false),
     recommended: Boolean(data.recommended ?? false),
     hideToc: Boolean(data.hideToc ?? false),
+    deleted: Boolean(data.deleted ?? false),
   };
 }
 
@@ -62,6 +64,7 @@ export function serializePost(d: PostData, body: string): string {
   lines.push(`draft: ${d.draft}`);
   if (d.recommended) lines.push(`recommended: true`);
   if (d.hideToc) lines.push(`hideToc: true`);
+  if (d.deleted) lines.push(`deleted: true`);
   lines.push('---', '');
   return `${lines.join('\n')}\n${body}`;
 }

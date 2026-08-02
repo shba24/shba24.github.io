@@ -23,7 +23,7 @@ const groups = [...byYear.entries()]
     year,
     items: ps
       .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-      .map((p): EntryItem => ({ href: `/posts/${p.id}/`, title: p.data.title, date: p.data.date })),
+      .map((p): EntryItem => ({ href: `/posts/${p.id}/`, title: p.data.title, date: p.data.date, draft: p.data.draft })),
   }));
 ---
 <BaseLayout title="Posts — Shubham Bansal">

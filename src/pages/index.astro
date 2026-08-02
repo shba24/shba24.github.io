@@ -10,7 +10,7 @@ import type { CollectionEntry } from 'astro:content';
 import { filterPosts, includeDrafts } from '../lib/posts';
 const posts = filterPosts(await getCollection('posts'), includeDrafts)
   .sort((a: CollectionEntry<'posts'>, b: CollectionEntry<'posts'>) => b.data.date.valueOf() - a.data.date.valueOf());
-const items: EntryItem[] = posts.map((p: CollectionEntry<'posts'>) => ({ href: `/posts/${p.id}/`, title: p.data.title, date: p.data.date }));
+const items: EntryItem[] = posts.map((p: CollectionEntry<'posts'>) => ({ href: `/posts/${p.id}/`, title: p.data.title, date: p.data.date, draft: p.data.draft }));
 ---
 <BaseLayout title="Shubham Bansal — Technical Blog">
   <JsonLd data={buildWebsiteJsonLd()} />

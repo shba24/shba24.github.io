@@ -16,6 +16,6 @@ const audioSrc = hasAudio(post.id) ? audioSrcFor(post.id) : undefined;
 <PostLayout title={post.data.title} description={post.data.description} date={post.data.date}
   author={post.data.author} series={post.data.series} seriesPart={post.data.seriesPart}
   tags={post.data.tags} minutes={minutes} headings={headings} hideToc={post.data.hideToc} slug={post.id}
-  audioSrc={audioSrc}>
+  audioSrc={audioSrc} draft={post.data.draft}>
   <Content />
 </PostLayout>

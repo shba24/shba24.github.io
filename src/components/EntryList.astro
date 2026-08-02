@@ -6,13 +6,14 @@ export interface EntryItem {
   title: string;
   date?: Date;
   meta?: string;
+  draft?: boolean;
 }
 interface Props { items: EntryItem[] }
 const { items } = Astro.props;
 ---
 <ul class="entries">{items.map((it: EntryItem) => (
   <li>
-    <a href={it.href}>{it.title}</a>
+    <a href={it.href}>{it.title}{import.meta.env.DEV ? (it.draft ? <span class="badge b-draft">Draft</span> : <span class="badge b-pub">Published</span>) : null}</a>
     {it.date ? <time>{formatDate(it.date)}</time> : it.meta ? <span class="meta">{it.meta}</span> : null}
   </li>
 ))}</ul>
@@ -20,5 +21,8 @@ const { items } = Astro.props;
   .entries{list-style:none;padding:0;margin:0}
   .entries li{display:flex;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid var(--border-soft)}
   .entries a{font-weight:500}.entries a:hover{color:var(--accent)}
+  .badge{margin-left:8px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:1px 7px;vertical-align:middle}
+  .badge.b-draft{color:var(--muted);background:var(--surface-2);border:1px solid var(--border)}
+  .badge.b-pub{color:var(--faint);background:transparent;border:1px solid var(--border-soft)}
   .entries time,.entries .meta{font-family:var(--mono);font-size:12px;color:var(--faint);flex:none}
 </style>
