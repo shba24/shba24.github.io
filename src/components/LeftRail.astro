@@ -1,0 +1,27 @@
+---
+import { getCollection } from 'astro:content';
+const all = (await getCollection('posts')).filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const latest = all.slice(0, 3);
+const recommended = (all.filter((p) => p.data.recommended).concat(all)).slice(0, 3);
+const byYear = new Map<number, number>();
+for (const p of all) byYear.set(p.data.date.getFullYear(), (byYear.get(p.data.date.getFullYear()) ?? 0) + 1);
+const archive = [...byYear.entries()].sort((a, b) => b[0] - a[0]);
+---
+<aside class="rail">
+  <nav class="nav"><a href="/about/">About</a><a href="/posts/">Posts</a><a href="/references/">References</a></nav>
+  <div class="sec"><h4>Latest</h4>{latest.map((p) => <a href={`/posts/${p.id}/`}>{p.data.title}</a>)}</div>
+  <div class="sec"><h4>Recommended</h4>{recommended.map((p) => <a href={`/posts/${p.id}/`}>{p.data.title}</a>)}</div>
+  <div class="sec"><h4>Archive</h4>{archive.map(([y, n]) => <a href={`/posts/?year=${y}`}>{y} — {n} posts</a>)}</div>
+  <div class="foot"><a href="https://github.com/shba24">GitHub</a><a href="/rss.xml">RSS</a></div>
+</aside>
+<style>
+  .rail{font-size:13px}
+  .nav{display:flex;flex-direction:column;gap:1px;margin-bottom:24px}
+  .nav a{padding:3px 0;font-weight:500;font-size:14px}
+  .sec{margin-bottom:20px;padding-top:15px;border-top:1px solid var(--border-soft)}
+  .sec h4{margin:0 0 9px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:500}
+  .sec a{display:block;color:var(--muted);padding:3px 0;line-height:1.35;font-size:12.5px}
+  .sec a:hover{color:var(--accent)}
+  .foot{margin-top:22px;padding-top:15px;border-top:1px solid var(--border-soft);font-family:var(--mono);font-size:11px;color:var(--faint);display:flex;gap:12px}
+</style>
