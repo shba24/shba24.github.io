@@ -37,7 +37,7 @@ const articleJsonLd = buildArticleJsonLd({
   image: ogImage,
 });
 ---
-<BaseLayout title={p.title} description={p.description} image={ogImage}>
+<BaseLayout title={p.title} description={p.description} image={ogImage} ogType="article">
   <JsonLd data={articleJsonLd} />
   <div class:list={["layout", { "no-toc": !showToc }]}>
     <LeftRail />
