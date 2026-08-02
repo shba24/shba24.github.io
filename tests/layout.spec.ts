@@ -30,3 +30,12 @@ test('content column width equals the --content token (840) @1600', async ({ pag
   const w = (await page.locator('main').boundingBox())!.width;
   expect(Math.round(w)).toBe(840);
 });
+
+test('primary nav lives in the topbar and not the rail', async ({ page }) => {
+  await page.goto('/posts/iceberg-table-format-part1/');
+  const bar = page.locator('.topbar');
+  for (const name of ['About', 'Posts', 'References']) {
+    await expect(bar.getByRole('link', { name, exact: true })).toBeVisible();
+  }
+  await expect(page.locator('.rail nav.nav')).toHaveCount(0); // old rail nav gone
+});
