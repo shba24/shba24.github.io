@@ -17,6 +17,13 @@ export default defineConfig({
   output: 'static',
   trailingSlash: 'always',
   build: { format: 'directory' },
+  redirects: {
+    '/tags/data-anlytics/': '/tags/data-analytics/',
+    '/page/1/': '/',
+    '/posts/page/1/': '/posts/',
+    '/about/about/': '/about/',
+    '/sitemap.xml': '/sitemap-index.xml',
+  },
   integrations: [
     expressiveCode({
       themes: ['vesper'],
