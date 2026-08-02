@@ -21,16 +21,17 @@ interface Props {
 }
 const p = Astro.props;
 const showToc = !p.hideToc && p.headings?.some((h: import('astro').MarkdownHeading) => h.depth >= 2 && h.depth <= 4);
+const ogImage = new URL(`/og/${p.slug}.png`, Astro.site).href;
 const articleJsonLd = buildArticleJsonLd({
   title: p.title,
   description: p.description ?? '',
   date: p.date,
   author: p.author,
   url: new URL(Astro.url.pathname, Astro.site).href,
-  image: new URL(`/og/${p.slug}.png`, Astro.site).href,
+  image: ogImage,
 });
 ---
-<BaseLayout title={p.title} description={p.description}>
+<BaseLayout title={p.title} description={p.description} image={ogImage}>
   <JsonLd data={articleJsonLd} />
   <div class:list={["layout", { "no-toc": !showToc }]}>
     <LeftRail />

@@ -1,7 +1,14 @@
 ---
 import '../styles/global.css';
 import Topbar from '../components/Topbar.astro';
-const { title, description = 'Technical blog by Shubham Bansal' } = Astro.props;
+interface Props {
+  title: string;
+  description?: string;
+  /** Absolute URL of the social preview image (per-post OG card). */
+  image?: string;
+}
+const { title, description = 'Technical blog by Shubham Bansal', image } = Astro.props;
+const canonical = Astro.url.href;
 ---
 <!doctype html>
 <html lang="en">
@@ -10,7 +17,20 @@ const { title, description = 'Technical blog by Shubham Bansal' } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={Astro.url.href} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {image && (
+      <Fragment>
+        <meta property="og:image" content={image} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content={image} />
+      </Fragment>
+    )}
     <script is:inline>
       try { document.documentElement.dataset.theme = localStorage.getItem('theme') || 'dark'; }
       catch { document.documentElement.dataset.theme = 'dark'; }
