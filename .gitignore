@@ -22,7 +22,6 @@ Desktop.ini
 !.env.example
 
 # ---- Hugo ----
-/public/
 /resources/_gen/
 /.hugo_build.lock
 hugo_stats.json
@@ -44,3 +43,6 @@ pnpm-debug.log*
 .vercel/
 .netlify/
 .wrangler/
+
+# ---- Superpowers SDD scratch ----
+.superpowers/
