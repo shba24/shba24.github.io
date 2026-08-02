@@ -23,12 +23,24 @@ const isEm = (n) => isEl(n, 'em');
 const hasClass = (n, cls) => Array.isArray(n?.properties?.className) && n.properties.className.includes(cls);
 
 const figcaption = (children) => ({ type: 'element', tagName: 'figcaption', properties: {}, children });
-const figure = (extraClass, children) => ({
+const figure = (classes, children) => ({
   type: 'element',
   tagName: 'figure',
-  properties: { className: ['fig', extraClass] },
+  properties: { className: classes },
   children,
 });
+
+// Optional size, authored via the image title: ![alt](/img.png "small"|"medium"|"large").
+// Default (no keyword) = natural width capped at the post column.
+const SIZES = new Set(['small', 'medium', 'large']);
+function popSize(img) {
+  const t = (img.properties?.title || '').trim().toLowerCase();
+  if (SIZES.has(t)) {
+    delete img.properties.title;
+    return `fig-${t}`;
+  }
+  return null;
+}
 
 // Minimal inline hast -> HTML (text, code, em, strong, a…) for injecting a
 // caption into the raw <figure class="diagram"> string. No deps.
@@ -63,6 +75,7 @@ function imagesToFigures(p) {
     const node = kids[i];
     if (isImg(node)) {
       flush();
+      const size = popSize(node);
       let j = i + 1;
       while (j < kids.length && (isEl(kids[j], 'br') || isWs(kids[j]))) j++;
       const children = [node];
@@ -70,7 +83,9 @@ function imagesToFigures(p) {
         children.push(figcaption(kids[j].children));
         i = j;
       }
-      out.push(figure('fig-image', children));
+      const classes = ['fig', 'fig-image'];
+      if (size) classes.push(size);
+      out.push(figure(classes, children));
     } else {
       stray.push(node);
     }

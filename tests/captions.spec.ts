@@ -24,3 +24,13 @@ test('diagram caption is rich (from the italic line after the block)', async ({ 
   await expect(cap).toContainText('cache-aside');
   await expect(cap.locator('code').first()).toBeVisible(); // `Cache`/`DB` preserved
 });
+
+test('image size keyword applies a size class and is consumed (not a tooltip)', async ({ page }) => {
+  await page.goto('/posts/iceberg-table-format-part1/');
+  const smallFig = page.locator('figure.fig-image.fig-small').first();
+  await expect(smallFig).toBeVisible();
+  await expect(smallFig.locator('img[title]')).toHaveCount(0); // title keyword removed
+  // a small image renders visibly narrower than a default (full-width) one
+  const smallW = (await smallFig.locator('img').boundingBox())!.width;
+  expect(smallW).toBeLessThan(500);
+});
