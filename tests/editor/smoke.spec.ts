@@ -10,7 +10,7 @@ test('editor API lists posts including the fixture draft', async ({ request }) =
 test('editor app mounts and renders post rows', async ({ page }) => {
   await page.goto('/editor/');
   await expect(page.getByTestId('editor-app')).toBeVisible();
-  await expect(page.getByTestId('post-row').first()).toBeVisible();
+  await expect(page.getByTestId('sb-item').first()).toBeVisible();
 });
 
 test('draft renders at its real URL under astro dev', async ({ page }) => {
