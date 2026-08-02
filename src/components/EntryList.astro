@@ -1,0 +1,24 @@
+---
+import { formatDate } from '../lib/format';
+
+export interface EntryItem {
+  href: string;
+  title: string;
+  date?: Date;
+  meta?: string;
+}
+interface Props { items: EntryItem[] }
+const { items } = Astro.props;
+---
+<ul class="entries">{items.map((it: EntryItem) => (
+  <li>
+    <a href={it.href}>{it.title}</a>
+    {it.date ? <time>{formatDate(it.date)}</time> : it.meta ? <span class="meta">{it.meta}</span> : null}
+  </li>
+))}</ul>
+<style>
+  .entries{list-style:none;padding:0;margin:0}
+  .entries li{display:flex;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid var(--border-soft)}
+  .entries a{font-weight:500}.entries a:hover{color:var(--accent)}
+  .entries time,.entries .meta{font-family:var(--mono);font-size:12px;color:var(--faint);flex:none}
+</style>
