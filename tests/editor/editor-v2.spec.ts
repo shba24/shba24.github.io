@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { unlink } from 'node:fs/promises';
+import { resolve } from 'node:path';
 
 const slugify = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+const postPath = (slug: string) => resolve(process.cwd(), 'src/content/posts', `${slug}.md`);
 
 test('editor mounts inside the site chrome (Topbar + ByteMD)', async ({ page }) => {
   await page.goto('/editor/');
@@ -27,22 +30,28 @@ test('autosave off by default; Save creates a Draft; Publish/Unpublish toggle (f
     const r = await request.get(`/api/editor/post/?slug=${slug}`);
     return r.ok() ? (await r.json()).data.draft : null;
   };
-  await page.goto('/editor/');
-  await expect(page.getByTestId('autosave-toggle')).not.toBeChecked();
-  await page.getByTestId('fm-title').fill(title);
-  await page.waitForTimeout(1500);
-  expect(await draftState()).toBeNull(); // autosave off -> not persisted
-  // Save creates it as a Draft (draft:true)
-  await page.getByTestId('btn-save').click();
-  await expect.poll(draftState, { timeout: 12000 }).toBe(true);
-  // Publish -> live
-  await expect(page.getByTestId('btn-publish')).toBeVisible({ timeout: 12000 });
-  await page.getByTestId('btn-publish').click();
-  await expect.poll(draftState, { timeout: 12000 }).toBe(false);
-  // Unpublish -> off the site again (file kept)
-  await expect(page.getByTestId('btn-unpublish')).toBeVisible({ timeout: 12000 });
-  await page.getByTestId('btn-unpublish').click();
-  await expect.poll(draftState, { timeout: 12000 }).toBe(true);
+  try {
+    await page.goto('/editor/');
+    await expect(page.getByTestId('autosave-toggle')).not.toBeChecked();
+    await page.getByTestId('fm-title').fill(title);
+    await page.waitForTimeout(1500);
+    expect(await draftState()).toBeNull(); // autosave off -> not persisted
+    // Save creates it as a Draft (draft:true)
+    await page.getByTestId('btn-save').click();
+    await expect.poll(draftState, { timeout: 12000 }).toBe(true);
+    // Publish -> live
+    await expect(page.getByTestId('btn-publish')).toBeVisible({ timeout: 12000 });
+    await page.getByTestId('btn-publish').click();
+    await expect.poll(draftState, { timeout: 12000 }).toBe(false);
+    // Unpublish -> off the site again (file kept)
+    await expect(page.getByTestId('btn-unpublish')).toBeVisible({ timeout: 12000 });
+    await page.getByTestId('btn-unpublish').click();
+    await expect.poll(draftState, { timeout: 12000 }).toBe(true);
+  } finally {
+    // This test intentionally writes a real content file; remove it so repeated runs
+    // don't accumulate orphan posts (there is no delete endpoint — delete is deferred).
+    await unlink(postPath(slug)).catch(() => {});
+  }
 });
 
 test('autosave toggle is OFF by default and the preference persists across reloads', async ({ page }) => {

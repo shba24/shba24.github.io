@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getPost, savePost } from './api.ts';
 import { dataToForm, formToData, emptyForm, type FormState } from './form.ts';
 import { slugify } from './slugify.ts';
@@ -65,10 +65,12 @@ export default function EditorApp() {
     setForm((f) => ({ ...f, ...p }));
     touch();
   };
-  const changeBody = (v: string) => {
+  const changeBody = useCallback((v: string) => {
     setBody(v);
-    touch();
-  };
+    dirty.current = true;
+    setStatus('dirty');
+  }, []);
+  const openImageDialog = useCallback(() => setDialog(true), []);
 
   async function persist(next?: Partial<FormState>): Promise<void> {
     const f = next ? { ...form, ...next } : form;
@@ -174,7 +176,7 @@ export default function EditorApp() {
         )}
       </div>
       <FrontmatterForm form={form} onChange={patchForm} />
-      <Editor value={body} onChange={changeBody} onImage={() => setDialog(true)} />
+      <Editor value={body} onChange={changeBody} onImage={openImageDialog} />
       {dialog && <ImageDialog slug={effectiveSlug} onInsert={insertImage} onClose={() => setDialog(false)} />}
     </div>
   );

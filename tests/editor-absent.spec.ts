@@ -12,6 +12,7 @@ test('drafts route is absent in production', async ({ request }) => {
 
 test('editor API is absent in production', async ({ request }) => {
   expect((await request.get('/api/editor/posts/')).status()).toBe(404);
+  expect((await request.post('/api/editor/image/')).status()).toBe(404);
 });
 
 test('draft posts are excluded from the production build', async ({ request }) => {

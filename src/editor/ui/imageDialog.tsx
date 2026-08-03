@@ -95,7 +95,7 @@ export default function ImageDialog({
         </select>
         <label style={label}>Caption (optional)</label>
         <input style={input} value={caption} onChange={(e) => setCaption(e.target.value)} />
-        {err && <p style={{ color: 'crimson', fontSize: 13 }}>{err}</p>}
+        {err && <p style={{ color: 'var(--accent)', fontSize: 13 }}>{err}</p>}
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 14 }}>
           <button style={btn} onClick={onClose}>Cancel</button>
           <button style={{ ...btn, background: 'var(--accent)', color: 'var(--bg)', borderColor: 'var(--accent)' }} disabled={busy} onClick={() => void confirm()}>
