@@ -42,7 +42,7 @@ const canonical = Astro.url.href;
       try { document.documentElement.dataset.theme = localStorage.getItem('theme') || 'dark'; }
       catch { document.documentElement.dataset.theme = 'dark'; }
     </script>
-    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "fd0bbd0149124eeea3afab47dd84a12c"}'></script>
+    <!-- Cloudflare Web Analytics --><script is:inline type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "fd0bbd0149124eeea3afab47dd84a12c"}'></script><!-- End Cloudflare Web Analytics -->
   </head>
   <body>
     <Topbar />
