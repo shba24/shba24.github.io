@@ -41,6 +41,9 @@ export default function EditorApp() {
     }
   });
   const dirty = useRef(false);
+  // Mirror of `body` kept in sync so the stable changeBody callback can detect and ignore
+  // no-op onChange echoes (ByteMD fires onChange once on mount with the initial value).
+  const bodyRef = useRef('');
 
   useEffect(() => {
     const s = initialSlug();
@@ -48,6 +51,7 @@ export default function EditorApp() {
     getPost(s)
       .then(({ data, body: b }) => {
         setForm(dataToForm(data));
+        bodyRef.current = b;
         setBody(b);
         setSlug(s);
         setStatus('saved');
@@ -66,6 +70,8 @@ export default function EditorApp() {
     touch();
   };
   const changeBody = useCallback((v: string) => {
+    if (v === bodyRef.current) return; // ignore ByteMD's initial onChange echo / no-op updates
+    bodyRef.current = v;
     setBody(v);
     dirty.current = true;
     setStatus('dirty');
@@ -113,7 +119,9 @@ export default function EditorApp() {
 
   function insertImage(img: ImageInsert) {
     const md = `![${img.alt}](${img.url}${img.size ? ` "${img.size}"` : ''})${img.caption ? `\n*${img.caption}*` : ''}`;
-    setBody((b) => (b ? `${b}\n\n${md}\n` : `${md}\n`));
+    const next = bodyRef.current ? `${bodyRef.current}\n\n${md}\n` : `${md}\n`;
+    bodyRef.current = next;
+    setBody(next);
     touch();
     setDialog(false);
   }

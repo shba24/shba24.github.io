@@ -1,6 +1,7 @@
 ---
 import { formatDate, slugify } from '../lib/format';
 import AudioPlayer from './AudioPlayer.tsx';
+import PublishToggle from './PublishToggle.tsx';
 import SeriesNav from './SeriesNav.astro';
 interface Props {
   title: string;
@@ -29,7 +30,12 @@ const { title, date, author, series, seriesPart, tags, minutes, audioSrc, slug, 
     <span class="by-meta">{formatDate(date)} · {minutes} min</span>
   </div>
   {audioSrc && <div class="audio-row"><AudioPlayer client:idle src={audioSrc} /></div>}
-  {import.meta.env.DEV && slug && <div class="edit-row"><a class="edit-link" href={`/editor/?slug=${slug}`}>Edit this post ↗</a></div>}
+  {import.meta.env.DEV && slug && (
+    <div class="edit-row">
+      <a class="edit-link" href={`/editor/?slug=${slug}`}>Edit this post ↗</a>
+      <PublishToggle client:idle slug={slug} draft={draft ?? false} title={title} />
+    </div>
+  )}
   <SeriesNav slug={slug ?? ''} series={series} />
   {tags.length > 0 && <div class="tags">{tags.map((t) => <a href={`/tags/${slugify(t)}/`}>#{t}</a>)}</div>}
 </header>
@@ -38,7 +44,7 @@ const { title, date, author, series, seriesPart, tags, minutes, audioSrc, slug, 
   .status-flag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:3px 12px;margin-bottom:14px}
   .status-flag.sf-draft{color:var(--muted);background:var(--surface-2);border:1px solid var(--border)}
   .status-flag.sf-pub{color:var(--faint);background:transparent;border:1px solid var(--border-soft)}
-  .edit-row{margin-top:14px}
+  .edit-row{margin-top:14px;display:flex;gap:10px;justify-content:center;align-items:center}
   .edit-link{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:3px 12px}
   .edit-link:hover{color:var(--text)}
   .eyebrow{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:14px}

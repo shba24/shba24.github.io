@@ -1,9 +1,13 @@
 import type { BytemdPlugin } from 'bytemd';
 import gfm from '@bytemd/plugin-gfm';
-import highlight from '@bytemd/plugin-highlight';
 import math from '@bytemd/plugin-math';
 import { remarkAlert } from 'remark-github-blockquote-alert';
 import { krokiSvg } from './kroki.ts';
+
+// Lazy singleton for Shiki. Dynamically imported so it stays out of the editor's initial
+// bundle (and it is dev-only code anyway — the editor is never built for production).
+let shikiModule: Promise<typeof import('shiki')> | null = null;
+const getShiki = () => (shikiModule ??= import('shiki'));
 
 const svg = (inner: string) =>
   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
@@ -28,6 +32,39 @@ const block = (title: string, icon: string, text: string): BytemdPlugin => ({
 // GitHub-style callouts in the preview (same remark plugin the site build uses).
 const calloutPlugin = (): BytemdPlugin => ({
   remark: (p) => p.use(remarkAlert),
+});
+
+// Highlight fenced code with the SAME Shiki engine + `vesper` theme the site's
+// astro-expressive-code uses, so preview token colors match the published page. This
+// matches colors/background only — not Expressive Code's frame chrome (title bar, copy
+// button, line markers), which is a build-time layer that can't run in a client preview.
+const LANG_CLASS = /(?:^|\s)language-([\w-]+)/;
+const KROKI_LANGS = new Set(['plantuml', 'd2']); // owned by the kroki plugin below
+const shikiHighlight = (): BytemdPlugin => ({
+  viewerEffect({ markdownBody }) {
+    const blocks = markdownBody.querySelectorAll('pre > code[class*="language-"]');
+    blocks.forEach((code) => {
+      const pre = code.parentElement as HTMLElement | null;
+      if (!pre || pre.dataset.shiki) return;
+      const lang = LANG_CLASS.exec(code.className)?.[1] ?? 'text';
+      if (KROKI_LANGS.has(lang)) return; // let the kroki plugin render these as SVG
+      pre.dataset.shiki = '1';
+      const source = code.textContent ?? '';
+      getShiki()
+        .then(({ codeToHtml, bundledLanguages }) =>
+          codeToHtml(source, { lang: lang in bundledLanguages ? lang : 'text', theme: 'vesper' }),
+        )
+        .then((html) => {
+          const tpl = document.createElement('template');
+          tpl.innerHTML = html.trim();
+          const next = tpl.content.firstElementChild; // <pre class="shiki vesper">…</pre>
+          if (next) pre.replaceWith(next);
+        })
+        .catch(() => {
+          pre.dataset.shiki = ''; // clear the guard so a later re-render can retry
+        });
+    });
+  },
 });
 
 // Render ```plantuml / ```d2 fenced blocks as inline SVG in the preview via Kroki,
@@ -66,7 +103,7 @@ const krokiPlugin = (): BytemdPlugin => ({
   },
 });
 
-/** Full plugin set: preview fidelity (gfm/highlight/math/callouts/kroki) + custom toolbar buttons. */
+/** Full plugin set: preview fidelity (gfm/shiki/math/callouts/kroki) + custom toolbar buttons. */
 export function buildPlugins({ onImage }: { onImage: () => void }): BytemdPlugin[] {
   const image: BytemdPlugin = {
     actions: [
@@ -79,7 +116,7 @@ export function buildPlugins({ onImage }: { onImage: () => void }): BytemdPlugin
   };
   return [
     gfm(),
-    highlight(),
+    shikiHighlight(),
     math(),
     calloutPlugin(),
     krokiPlugin(),

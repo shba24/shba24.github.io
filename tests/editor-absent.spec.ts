@@ -18,3 +18,9 @@ test('editor API is absent in production', async ({ request }) => {
 test('draft posts are excluded from the production build', async ({ request }) => {
   expect((await request.get('/posts/_fixture-draft/')).status()).toBe(404);
 });
+
+test('dev-only publish toggle is absent from built post pages', async ({ request }) => {
+  const r = await request.get('/posts/iceberg-table-format-part1/');
+  expect(r.status()).toBe(200);
+  expect(await r.text()).not.toContain('publish-toggle');
+});
