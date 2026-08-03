@@ -139,3 +139,22 @@ test('autosave ON persists edits without clicking Save', async ({ page, request 
     await unlink(postPath(slug)).catch(() => {});
   }
 });
+
+test('fullscreen editor covers the sticky Topbar (exit-fullscreen button not hidden)', async ({ page }) => {
+  await page.goto('/editor/');
+  const bytemd = page.locator('.bytemd');
+  await expect(bytemd).toBeVisible();
+  // ByteMD toggles fullscreen by adding `.bytemd-fullscreen` (position:fixed, inset:0). Our
+  // CSS must lift it above the site's sticky Topbar (z-index:5); otherwise the Topbar overlaps
+  // the toolbar and hides the exit button. Assert that at the Topbar's location the topmost
+  // element is now inside .bytemd.
+  await bytemd.evaluate((el) => el.classList.add('bytemd-fullscreen'));
+  const topbarCovered = await page.evaluate(() => {
+    const tb = document.querySelector('.topbar');
+    if (!tb) return false;
+    const r = tb.getBoundingClientRect();
+    const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return !!hit?.closest('.bytemd');
+  });
+  expect(topbarCovered).toBe(true);
+});

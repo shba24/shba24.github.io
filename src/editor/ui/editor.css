@@ -10,6 +10,10 @@
 
 /* Editor frame */
 .bmd-wrap, .bmd-wrap .bytemd { height: calc(100vh - 320px); min-height: 440px; }
+/* Fullscreen must cover the site's sticky Topbar (z-index:5). ByteMD's own
+   .bytemd-fullscreen rule sets position:fixed but no z-index, so without this the
+   Topbar overlaps the toolbar and hides the exit-fullscreen button. */
+.bytemd-fullscreen.bytemd { z-index: 100; }
 .bytemd {
   border: 1px solid var(--border);
   border-radius: 8px;
