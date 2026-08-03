@@ -51,10 +51,23 @@
   line-height: 1.68;
   padding: 18px 22px;
 }
+/* Headings + block spacing mirror the site's `.prose` scale (src/styles/global.css). The
+   preview only loads ByteMD's UI CSS — no github-markdown base — so Tailwind's Preflight
+   would otherwise flatten headings to body text and strip list markers. */
 .bytemd-preview .markdown-body h1,
 .bytemd-preview .markdown-body h2,
 .bytemd-preview .markdown-body h3,
 .bytemd-preview .markdown-body h4 { color: var(--text); border: 0; letter-spacing: -.015em; }
+.bytemd-preview .markdown-body h1 { font-size: 1.7rem; font-weight: 700; margin: 1.6em 0 .5em; }
+.bytemd-preview .markdown-body h2 { font-size: 1.4rem; font-weight: 700; margin: 2em 0 .5em; }
+.bytemd-preview .markdown-body h3 { font-size: 1.12rem; font-weight: 600; margin: 1.5em 0 .4em; }
+.bytemd-preview .markdown-body h4 { font-size: .98rem; font-weight: 600; color: var(--muted); margin: 1.3em 0 .3em; }
+.bytemd-preview .markdown-body p { margin: 1.15em 0; }
+.bytemd-preview .markdown-body ul,
+.bytemd-preview .markdown-body ol { margin: 1.1em 0; padding-left: 1.5em; }
+.bytemd-preview .markdown-body ul { list-style: disc; }
+.bytemd-preview .markdown-body ol { list-style: decimal; }
+.bytemd-preview .markdown-body li { margin: .3em 0; }
 .bytemd-preview .markdown-body a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--faint); }
 .bytemd-preview .markdown-body a:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .bytemd-preview .markdown-body :not(pre) > code {
